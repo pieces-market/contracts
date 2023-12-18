@@ -132,7 +132,7 @@ When funds from the asset buyout reach the vault, each piece holder can claim th
   </table>
 
 
-## Smart contract implementation - TODO
+## Smart contracts implementation - TODO
 
 ### Auction
 
@@ -215,10 +215,6 @@ We plan to run a [bug bounty program on Immunefi](https://immunefi.com) to rewar
 The engineering guidelines we follow to promote project quality can be found in [`GUIDELINES.md`](./GUIDELINES.md).
 
 Pieces.market contracts are made available under the GPLv3 License, which disclaims all warranties in relation to the project and which limits the liability of those that contribute and maintain the project. As set out further in the Terms, you acknowledge that you are solely responsible for any use of Pieces.market contracts and you assume all risks associated with any such use.
-
-## Contribute
-
-Pieces.market contracts exists thanks to its contributors. There are many ways you can participate and help build high quality software. Check out the [contribution guide](CONTRIBUTING.md)!
 
 ## License
 
