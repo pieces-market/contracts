@@ -199,37 +199,108 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 ```
 
 
-#### contructor(address payable _broker, address payable _platform, address _nft, uint256 _nftTokenId, uint256 _price, uint256 _fee, uint256 _total, uint256 _openTs, uint256 _closeTs)
+```solidity
+contructor(address payable _broker, address payable _platform, address _nft, uint256 _nftTokenId, uint256 _price, uint256 _fee, uint256 _total, uint256 _openTs, uint256 _closeTs)
+```
 
-Takes two numbers and returns the sum.
+Auction constructor.
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `api_key` | `string` | **Required**. Your API key |
+| `_broker` | `address payable` | **Required**. Broker blockchain address. |
+| `_platform` | `address payable` | **Required**. Platform blockchain address.|
+| `_nft` | `address` | **Required**. MVP uses ERC-721 token to simulate physical assets. In the pieces.market model, physical luxury assets (watches, cars, yachts, etc.) undergo fractionalization.  |
+| `_nftTokenId` | `uint256` | **Required**.  MVP uses ERC-721 token number.|
+| `_price` | `uint256` | **Required**.  One piece price in Wei (10^-18 ETH), total auction (NFT) value is: (_price + _fee ) * _total).|
+| `_fee` | `uint256` | **Required**.  One piece platform fee in Wei.|
+| `_total` | `uint256` | **Required**. Total number of pNFTs available on Auction. |
+| `_openTs` | `uint256` | **Required**. Auction open time, pieces can be bought from this time (EPOCH Timestamp format) |
+| `_closeTs` | `uint256` | **Required**. Auction close time, if not all pieces will be sold, Auction will fail (EPOCH Timestamp format) |
 
 
-Errors detected during execution are:
+```solidity
+function open() public nonReentrant
+```
+
+Auction opening function. 
+
+In MVP transfers NFT into Auction vault, changes Auction status to Open.
+
+No parameters.
+
+```solidity
+function buy(uint256 no) public payable nonReentrant
+```
+
+Auction function for buying pieces (pNFTs), mints new pNFTs.
+
+After all available pieces are burn, transfers auction balance to Broker, changes Auction status to Closed.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `no` | `uint256` | **Required**. Number of pieces |
+| `msg.value` | `uint` | **Required**. msg.value is a member of the msg (message) object when sending (state transitioning) transactions on the Ethereum network. <br/> msg.value contains the amount of wei (ether / 1e18) sent in the transaction.|
+
+
+```solidity
+function deposit() public payable nonReentrant
+```
+
+Auction function for making deposit for  proposal / offer to buyout asset.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `msg.value` | `uint` | **Required**. Contains proposal value. <br />msg.value is a member of the msg (message) object when sending (state transitioning) transactions on the Ethereum network. <br/> msg.value contains the amount of wei (ether / 1e18) sent in the transaction.|
+
+
+```solidity
+function offer(address _offerer, uint256 _offerValue) public nonReentrant
+```
+
+Auction function executing offer from ultimate owner (buyout proposer).
+Run by execute() proposal function after Governance voting succeeded.
+It changes Auction ststus to Finished, make revenue distribution for crypto-investors available to be claimed.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `_offerer` | `address` | **Required**. New owner blockchain address. |
+| `_offerValue` | `uint256` | **Required**. New owner offer value.|
+
+
+```solidity
+function claim() public nonReentrant
+```
+
+Allows crypto-investors claim their revenue. Burn their pieces (pNFTs), transfers their revenue.
+
+
+
+## Error handling
+
+### Errors detected during execution are:
 
 | Error code | Description                |
 | :--------  | :------------------------- |
-| `W1`       | TODO |
-| `W2`       | TODO |
-| `W3`       | TODO |
-| `W4`       | TODO |
-| `W5`       | TODO |
-| `W6`       | TODO |
-| `W7`       | TODO |
-| `W8`       | TODO |
-| `W9`       | TODO |
-| `W10`       | TODO |
-| `W11`       | TODO |
-| `W12`       | TODO |
-| `W13`       | TODO |
+| `W1`       | Broker is not the owner of the NFT. |
+| `W2`       | Auction already Opened. |
+| `W3`       | Pieces are not available for sales yet. Please wait until Auction open time. |
+| `W4`       | All pieces are sold. Not enough available. |
+| `W5`       | Not enough pieces available. |
+| `W6`       | Transfer doesn't equal price * quantity |
+| `W7`       | Reserved for next version of implementation. Offer cannot be less than 50% of total prize. |
+| `W8`       | Cannot buy pieces, Auction is not Open. |
+| `W9`       | Cannot buy pieces, Auction is already Closed. |
+| `W10`       | All pieces are sold. Zero available. |
+| `W11`       | To place deposit Auction must be in Closed status. |
+| `W12`       | To execute proposal Auction must be in Closed status. |
+| `W13`       | Cannot execute proposal as its value is different than deposited value. |
 
 
 
 ### Buyout Governor
 
+Smart contract is written in Solidity.
+We use OpenZeppelin contracts library for secure contracts.
 
 ```solidity
   
@@ -271,8 +342,8 @@ Errors detected during execution are:
 | :-------- | :------- | :------------------------- |
 | `Governor Votes Quorum Fraction` | `50` | > 50% quorum required for all proposals |
 | `Voting Delay` | `0` | Voting starts right after deploying proposal |
-| `Voting Perios` | `7200` | 24h on Moonbase Alpha chain |
-| `Proposal Threshole` | `0` | If proposal succedded, it can be executed right away |
+| `Voting Period` | `7200` | 24h on Moonbase Alpha chain |
+| `Proposal Threshole` | `0` | If proposal succeeded, it can be executed right away |
 
 > [!WARNING]
 > Smart contracts are a nascent technology and carry a high level of technical risk and uncertainty. Although Pieces market is performing internal security audits, using Our Contracts is not a substitute for a security audit.
@@ -318,4 +389,4 @@ Your use of this Project is governed by the terms found at [Terms](https://www.p
 
 ## Changelog
 
-The changelog for recent versions can be found at [Changelog](https://www.pieces.market/changelog)
+The changelog for recent versions can be found at [here](https://www.pieces.market/changelog)
