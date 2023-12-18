@@ -136,9 +136,69 @@ When funds from the asset buyout reach the vault, each piece holder can claim th
 
 ### Auction
 
-```http
-  GET /api/items
+* Smart contract is written in Solidity.
+* We use OpenZeppelin contracts library for secure contracts.
+
+```solidity
+pragma solidity ^0.8.21;
+
+/**
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC-721] Non-Fungible Token Standard, including
+ * the Metadata extension, but not including the Enumerable extension, which is available separately as
+ * {ERC721Enumerable}.
+ */
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+
+/**
+ * @dev This implements an optional extension of {ERC721} defined in the ERC that adds enumerability
+ * of all the token ids in the contract as well as all token ids owned by each account.
+ */
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+
+/**
+ * @dev Extension of ERC-721 to support voting and delegation as implemented by {Votes}, where each individual NFT counts
+ * as 1 vote unit.
+ *
+ * Tokens do not count as votes until they are delegated, because votes must be tracked which incurs an additional cost
+ * on every transfer. Token holders can either delegate to a trusted representative who will decide how to make use of
+ * the votes in governance decisions, or they can delegate to themselves to be their own representative.
+ */
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Votes.sol";
+
+/**
+ * @dev String operations.
+ */
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+/**
+ * @title ERC-721 token receiver interface
+ * @dev Interface for any contract that wants to support safeTransfers
+ * from ERC-721 asset contracts.
+ */
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
+/**
+ * @dev Contract module that helps prevent reentrant calls to a function.
+ *
+ * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier
+ * available, which can be applied to functions to make sure there are no nested
+ * (reentrant) calls to them.
+ *
+ * Note that because there is a single `nonReentrant` guard, functions marked as
+ * `nonReentrant` may not call one another. This can be worked around by making
+ * those functions `private`, and then adding `external` `nonReentrant` entry
+ * points to them.
+ *
+ * TIP: If you would like to learn more about reentrancy and alternative ways
+ * to protect against it, check out our blog post
+ * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
+ */
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+  
 ```
+
+
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
@@ -151,8 +211,39 @@ Takes two numbers and returns the sum.
 
 ### Buyout Governor
 
-```http
-  GET /api/items
+
+```solidity
+  
+  pragma solidity ^0.8.21;
+
+/**
+ * @dev Core of the governance system, designed to be extended through various modules.
+ *
+ * This contract is abstract and requires several functions to be implemented in various modules:
+ *
+ * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
+ * - A voting module must implement {_getVotes}
+ * - Additionally, {votingPeriod} must also be implemented
+*/
+  import "@openzeppelin/contracts/governance/Governor.sol";
+  
+/**
+* @dev Extension of {Governor} for simple, 3 options, vote counting.
+*/
+  import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
+  
+/**
+ * @dev Extension of {Governor} for voting weight extraction from an {ERC20Votes} token, or since v4.5 an {ERC721Votes}
+ * token.
+ */
+  import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
+  
+/**
+ * @dev Extension of {Governor} for voting weight extraction from an {ERC20Votes} token and a quorum expressed as a
+ * fraction of the total supply.
+ */
+  import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+
 ```
 
 | Parameter | Type     | Description                |
@@ -164,20 +255,7 @@ Takes two numbers and returns the sum.
 
 Takes two numbers and returns the sum.
 
-### Usage
 
-Once installed, you can use the contracts in the library by importing them:
-
-```solidity
-pragma solidity ^0.8.20;
-
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
-contract MyCollectible is ERC721 {
-    constructor() ERC721("MyCollectible", "MCO") {
-    }
-}
-```
 
 
 > [!WARNING]
@@ -218,8 +296,12 @@ Pieces.market contracts are made available under the GPLv3 License, which discla
 
 ## License
 
-Pieces.market contracts is released under the [GPLv3](LICENSE).
+Pieces.market contracts is released under the [GPLv3](https://choosealicense.com/licenses/gpl-3.0/).
 
 ## Legal
 
-Your use of this Project is governed by the terms found at www.pieces.market/terms (the "Terms").
+Your use of this Project is governed by the terms found at [Terms](https://www.pieces.market/terms)
+
+## Changelog
+
+The changelog for recent versions can be found at [Changelog](https://www.pieces.market/changelog)
