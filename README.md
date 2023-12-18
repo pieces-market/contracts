@@ -199,15 +199,34 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 ```
 
 
+#### contructor(address payable _broker, address payable _platform, address _nft, uint256 _nftTokenId, uint256 _price, uint256 _fee, uint256 _total, uint256 _openTs, uint256 _closeTs)
+
+Takes two numbers and returns the sum.
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `api_key` | `string` | **Required**. Your API key |
 
 
-#### add(num1, num2)
+Errors detected during execution are:
 
-Takes two numbers and returns the sum.
+| Error code | Description                |
+| :--------  | :------------------------- |
+| `W1`       | TODO |
+| `W2`       | TODO |
+| `W3`       | TODO |
+| `W4`       | TODO |
+| `W5`       | TODO |
+| `W6`       | TODO |
+| `W7`       | TODO |
+| `W8`       | TODO |
+| `W9`       | TODO |
+| `W10`       | TODO |
+| `W11`       | TODO |
+| `W12`       | TODO |
+| `W13`       | TODO |
+
+
 
 ### Buyout Governor
 
@@ -246,17 +265,14 @@ Takes two numbers and returns the sum.
 
 ```
 
-| Parameter | Type     | Description                |
+#### Governor configuration is static
+
+| Parameter | Value     | Description                |
 | :-------- | :------- | :------------------------- |
-| `api_key` | `string` | **Required**. Your API key |
-
-
-#### add(num1, num2)
-
-Takes two numbers and returns the sum.
-
-
-
+| `Governor Votes Quorum Fraction` | `50` | > 50% quorum required for all proposals |
+| `Voting Delay` | `0` | Voting starts right after deploying proposal |
+| `Voting Perios` | `7200` | 24h on Moonbase Alpha chain |
+| `Proposal Threshole` | `0` | If proposal succedded, it can be executed right away |
 
 > [!WARNING]
 > Smart contracts are a nascent technology and carry a high level of technical risk and uncertainty. Although Pieces market is performing internal security audits, using Our Contracts is not a substitute for a security audit.
@@ -289,8 +305,6 @@ We address security through risk management in various areas such as engineering
 The security policy is detailed in [`SECURITY.md`](./SECURITY.md) as well, and specifies how you can report security vulnerabilities, which versions will receive security patches, and how to stay informed about them. 
 
 We plan to run a [bug bounty program on Immunefi](https://immunefi.com) to reward the responsible disclosure of vulnerabilities.
-
-The engineering guidelines we follow to promote project quality can be found in [`GUIDELINES.md`](./GUIDELINES.md).
 
 Pieces.market contracts are made available under the GPLv3 License, which disclaims all warranties in relation to the project and which limits the liability of those that contribute and maintain the project. As set out further in the Terms, you acknowledge that you are solely responsible for any use of Pieces.market contracts and you assume all risks associated with any such use.
 

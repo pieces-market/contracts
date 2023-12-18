@@ -22,5 +22,6 @@ Note as well that the Solidity language itself only guarantees security updates 
 
 ## Legal
 
-Smart contracts are a nascent technology and carry a high level of technical risk and uncertainty. OpenZeppelin Contracts is made available under the MIT License, which disclaims all warranties in relation to the project and which limits the liability of those that contribute and maintain the project, including OpenZeppelin. 
+Smart contracts are a nascent technology and carry a high level of technical risk and uncertainty. 
+Pieces.market contracts are made available under the GPLv3 License, which disclaims all warranties in relation to the project and which limits the liability of those that contribute and maintain the project. 
 
