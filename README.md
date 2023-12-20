@@ -1,10 +1,10 @@
-# <img src="logo.png" alt="Pieces.market">
+# <img src="logo_alt.png" alt="pieces.market">
 
 [![Legal](https://img.shields.io/badge/docs-%F0%9F%93%84-yellow)](https://todo)
 [![Discord](https://img.shields.io/badge/forum-%F0%9F%92%AC-yellow)](https://todo)
 [![GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://choosealicense.com/licenses/gpl-3.0/)
 
-## Pieces market contracts
+## pieces.market contracts
 
 **Repository for secure smart contract development.** Build on a solid foundation of community-vetted code.
 
