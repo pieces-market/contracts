@@ -30,7 +30,7 @@ On pieces.market, users can effortlessly invest in physical luxury assets throug
 
 ## Overview
 
-Current implementation (MVP) is dedicated to allow to fractionalize NFT ERC721, break down high-value NFT into thousands of pNFTs (pieces), making them accessible to crypto-investors. However all current mechanisms are prepared for the ultimate process of fractionalization of physical luxury assets.
+Current implementation (MVP) is dedicated to allow to fractionalize NFT ERC721, break down high-value NFT into thousands of pNFTs (pieces), making them accessible to crypto-investors. However all mechanisms are prepared for the ultimate process of fractionalization of physical luxury assets.
  
 ### Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/auction.sol)
 
