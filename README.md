@@ -1,17 +1,20 @@
 # <img src="logo_alt.png" alt="pieces.market">
 
-[![Legal](https://img.shields.io/badge/docs-%F0%9F%93%84-yellow)](https://todo)
-[![Discord](https://img.shields.io/badge/forum-%F0%9F%92%AC-yellow)](https://todo)
+![Website](https://img.shields.io/badge/Our_Website-grey?label=WWW&labelColor=purple&color=grey&link=https%3A%2F%2Fwww.pieces.market)
+![MVP](https://img.shields.io/badge/Demo_Platform-grey?label=MVP&labelColor=green&color=grey&link=https%3A%2F%2Fwww.test.pieces.market)
+![X](https://img.shields.io/badge/X-grey?logo=x&labelColor=black&color=grey&link=https%3A%2F%2Ftwitter.com%2Fpieces_market)
+![Medium](https://img.shields.io/badge/Medium-grey?logo=medium&labelColor=black&color=grey&link=https%3A%2F%2Fmedium.com%2F%40piecesmarket)
+![Static Badge](https://img.shields.io/badge/LinkedIn-grey?logo=linkedin&labelColor=blue&color=grey&link=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fpieces-market%2F)
 [![GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://choosealicense.com/licenses/gpl-3.0/)
 
-## pieces.market contracts
+## pieces.market MVP
 
 **Repository for secure smart contract development.** Build on a solid foundation of community-vetted code.
 
  * Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/auction.sol)
  * Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/buyout_gov.sol)
 
-This repository contains the smart contracts used by [Pieces market](https://pieces.market) platform.
+This repository contains the smart contracts used by [pieces.market](https://pieces.market) platform.
    
 > [!IMPORTANT]
 > Pieces.market contracts are not backward compatible, it's unsafe to assume that newer version have the same functions or state variables.
@@ -23,9 +26,11 @@ Revolution in access to the luxury market.
 
 Many luxury investments are great value stores, some may even be recession-proof. They have been in investors’ crosshairs for the last few years, driving prices up and creating handsome returns. However, due to high entry price, luxury market is still reserved just for the wealthiest. We believe that with assets sovereignty and digitalization coming to Web3, investing in high-class luxury assets should be easy and available for everyone.
 
+On pieces.market, users can effortlessly invest in physical luxury assets through the well-known methods of the web3 world, with the process fully compliant with the European Parliament's MICA regulations concerning crypto-assets.
+
 ## Overview
 
-Current implementation (MVP) is dedicated to allow to fractionalize NFT ERC721, break down high-value NFT into thousands of pNFTs (pieces), making them accessible to crypto-investors.
+Current implementation (MVP) is dedicated to allow to fractionalize NFT ERC721, break down high-value NFT into thousands of pNFTs (pieces), making them accessible to crypto-investors. However all current mechanisms are prepared for the ultimate process of fractionalization of physical luxury assets.
  
 ### Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/auction.sol)
 
@@ -42,6 +47,7 @@ Auction.sol is solidity smart contract responsible for:
 Buyout Governor is solidity smart contract responsible for governing proposals to buyout asset from cyprto investors.
 
 ### Demo - MVP
+ <img src="demo.png" alt="demo">
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
 It requires:
@@ -49,7 +55,7 @@ It requires:
  * Moonbase Alpha account with DEV tokens
  * Moonbase Alpha DEV tokens [DEV currency faucet](https://apps.moonbeam.network/moonbase-alpha/faucet/)
 
-### [Pieces market MVP site](https://test.pieces.market)
+### [Visit pieces.market demo platform](https://test.pieces.market)
 
 
 ### Project Nomenclature
