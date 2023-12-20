@@ -355,18 +355,6 @@ We use OpenZeppelin contracts library for secure contracts.
 > Smart contracts are a nascent technology and carry a high level of technical risk and uncertainty. Although Pieces market is performing internal security audits, using Our Contracts is not a substitute for a security audit.
 
 
-
-## FAQ - TODO
-
-#### Question 1
-
-Answer 1
-
-#### Question 2
-
-Answer 2
-
-
 ## Authors
 
 - [@adamromanski](https://www.github.com/vendimpl)
