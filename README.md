@@ -1,4 +1,4 @@
-# <img src="logo_alt.png" alt="pieces.market">
+# <img src="logo2.png" alt="pieces.market">
 
 ![Website](https://img.shields.io/badge/Our_Website-grey?label=WWW&labelColor=purple&color=grey&link=https%3A%2F%2Fwww.pieces.market)
 ![MVP](https://img.shields.io/badge/Demo_Platform-grey?label=MVP&labelColor=green&color=grey&link=https%3A%2F%2Fwww.test.pieces.market)
