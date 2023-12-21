@@ -47,7 +47,7 @@ Auction.sol is solidity smart contract responsible for:
 Buyout Governor is solidity smart contract responsible for governing proposals to buyout asset from cyprto investors.
 
 ### Demo - MVP
- <img src="demo.png" alt="demo">
+ <img src="demo_platform.png" alt="demo">
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
 It requires:
