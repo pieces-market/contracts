@@ -95,7 +95,7 @@ To better understand auction life-cycle we strongly advise to understand followi
 
 ## Auction life-cycle
 
-# <img src="auction_life_cycle.png" alt="Auction life cycle">
+# <img src="auction_life_cycle.jpeg" alt="Auction life cycle">
 
 ### General workflow
  
