@@ -51,9 +51,8 @@ Buyout Governor is solidity smart contract responsible for governing proposals t
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
 It requires:
- * [MetaMask wallet](https://metamask.io)
- * Moonbase Alpha account with DEV tokens
- * Moonbase Alpha DEV tokens [DEV currency faucet](https://apps.moonbeam.network/moonbase-alpha/faucet/)
+ * [MetaMask wallet](https://metamask.io) connected to [Moonbase Alpha]([https://metamask.io](https://docs.moonbeam.network/builders/get-started/networks/moonbase/#)
+ * DEV tokens [(Faucet)](https://apps.moonbeam.network/moonbase-alpha/faucet/)
 
 ### [Visit pieces.market demo platform](https://test.pieces.market)
 
