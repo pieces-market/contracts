@@ -363,7 +363,7 @@ We use OpenZeppelin contracts library for secure contracts.
 
 ## Security
 
-This project is maintained by [Pieces.market](https://pieces.market) with the goal of providing a secure and reliable smart contracts for assets fractionalization. 
+This project is maintained by [pieces.market](https://pieces.market) with the goal of providing a secure and reliable smart contracts for assets fractionalization. 
 
 We address security through risk management in various areas such as engineering and open source best practices, scoping and API design, multi-layered review processes, and incident response preparedness.
 
