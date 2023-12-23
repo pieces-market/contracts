@@ -47,7 +47,7 @@ Auction.sol is solidity smart contract responsible for:
 Buyout Governor is solidity smart contract responsible for governing proposals to buyout asset from cyprto investors.
 
 ### Demo - MVP
- <img src="demo.png" alt="demo">
+ <img src="demoplatform.png" alt="demo">
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
 It requires:
@@ -118,7 +118,7 @@ A user interested in owning the entire asset can make a buyout offer. To do this
 
 If the votes in favor do not constitute an absolute majority during the decision time, the offer is rejected, and the deposit is returned to the offeror.
 
-If an absolute majority votes in favor at the end of the voting period, the offer is accepted, the asset goes to the new owner, and the funds go to a vault for revenue redistribution.
+If an absolute majority votes in favor at the end of the voting period, the offer is accepted, the asset goes to the ultimate owner, and the funds go to a vault for revenue redistribution.
 
 #### Revenue Redistribution
 When funds from the asset buyout reach the vault, each piece holder can claim their proportional share of the revenue (tokens in the vault / total number of pieces * number of pieces held by the user) by burning their pieces. After all pieces are burned, the auction becomes archived.
@@ -131,7 +131,7 @@ When funds from the asset buyout reach the vault, each piece holder can claim th
   <tr><td>1</td><td>WIP</td><td>Auction first status, Broker fills out all auction fields. Auction is not yet on blockchain, it's configuration is saved on Pieces.market server.
   </td></tr>
   <tr><td>2</td><td>Open</td><td>Auction is deployed to blockchain, investors can start buying pieces (pNFT)</td></tr>
-  <tr><td>3</td><td>Closed</td><td>Auction is closed, all possible pieces were bought (and burn). During this status potenitial new owners can place offers (Governance). Each offer lasts for 24h, the quorum is > 50%.</td></tr>
+  <tr><td>3</td><td>Closed</td><td>Auction is closed, all possible pieces were bought (and burn). During this status potential new owners can place offers (Governance). Each offer lasts for 24h, the quorum is > 50%.</td></tr>
   <tr><td>4</td><td>Failed</td><td>Auction is failed, during given time period, not all pieces were sold. Investors can refund their invested tokens by burning ther pieces.</td></tr>
   <tr><td>5</td><td>Finished</td><td>Auction is finished, new ultimate owner gets the assets. Pieces crypto-investors can claim their revenue.</td></tr>
   <tr><td>6</td><td>Archived</td><td>Auction is archived, revenue distribution is finished, all pieces were burn.</td></tr>
@@ -349,7 +349,7 @@ We use OpenZeppelin contracts library for secure contracts.
 | `Governor Votes Quorum Fraction` | `50` | > 50% quorum required for all proposals |
 | `Voting Delay` | `0` | Voting starts right after deploying proposal |
 | `Voting Period` | `7200` | 24h on Moonbase Alpha chain |
-| `Proposal Threshole` | `0` | If proposal succeeded, it can be executed right away |
+| `Proposal Threshold` | `0` | If proposal succeeded, it can be executed right away |
 
 > [!WARNING]
 > Smart contracts are a nascent technology and carry a high level of technical risk and uncertainty. Although Pieces market is performing internal security audits, using Our Contracts is not a substitute for a security audit.
