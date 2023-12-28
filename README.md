@@ -11,8 +11,8 @@
 
 **Repository for secure smart contract development.** Build on a solid foundation of community-vetted code.
 
- * Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/auction.sol)
- * Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/buyout_gov.sol)
+ * Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/blob/main/auction.sol)
+ * Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/blob/main/buyout_gov.sol)
 
 This repository contains the smart contracts used by [pieces.market](https://pieces.market) platform.
    
