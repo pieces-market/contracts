@@ -26,7 +26,7 @@ Revolution in access to the luxury market.
 
 Many luxury investments are great value stores, some may even be recession-proof. They have been in investors’ crosshairs for the last few years, driving prices up and creating handsome returns. However, due to high entry price, luxury market is still reserved just for the wealthiest. We believe that with assets sovereignty and digitalization coming to Web3, investing in high-class luxury assets should be easy and available for everyone.
 
-On pieces.market, users can effortlessly invest in physical luxury assets through the well-known methods of the web3 world, with the process fully compliant with the European Parliament's MICA regulations concerning crypto-assets.
+On pieces.market, users can effortlessly invest in physical luxury assets through the well-known methods of the web3 world, with the process fully compliant with the EU MICA regulations concerning crypto-assets.
 
 ## Overview
 
