@@ -1,4 +1,4 @@
-# <img src="logo2.png" alt="pieces.market">
+# <img src="/img/logo2.png" alt="pieces.market">
 
 ![Website](https://img.shields.io/badge/Our_Website-grey?label=WWW&labelColor=purple&color=grey&link=https%3A%2F%2Fwww.pieces.market)
 ![MVP](https://img.shields.io/badge/Demo_Platform-grey?label=MVP&labelColor=green&color=grey&link=https%3A%2F%2Fwww.test.pieces.market)
@@ -11,8 +11,8 @@
 
 **Repository for secure smart contract development.** Build on a solid foundation of community-vetted code.
 
- * Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/blob/main/auction.sol)
- * Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/blob/main/buyout_gov.sol)
+ * Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/blob/main/sol/auction.sol)
+ * Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/blob/main/sol/buyout_gov.sol)
 
 This repository contains the smart contracts used by [pieces.market](https://pieces.market) platform.
    
@@ -32,7 +32,7 @@ On pieces.market, users can effortlessly invest in physical luxury assets throug
 
 Current implementation (MVP) is dedicated to allow to fractionalize NFT ERC721, break down high-value NFT into thousands of pNFTs (pieces), making them accessible to crypto-investors. However all mechanisms are prepared for the ultimate process of fractionalization of physical luxury assets.
  
-### Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/auction.sol)
+### Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/blob/main/sol/auction.sol)
 
 TODO:
 Auction.sol is solidity smart contract responsible for:
@@ -42,12 +42,12 @@ Auction.sol is solidity smart contract responsible for:
 - allow lock deposit and execute buyout NFT proposal
 - revenue redistribution
 
-### Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/buyout_gov.sol)
+### Buyout Governor [`buyout_gov.sol`](https://github.com/pieces-market/contracts/blob/main/sol/buyout_gov.sol)
 
 Buyout Governor is solidity smart contract responsible for governing proposals to buyout asset from cyprto investors.
 
 ### Demo - MVP
- <img src="demoplatform.png" alt="demo">
+ <img src="/img/demoplatform.png" alt="demo">
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
 It requires:
@@ -94,7 +94,7 @@ To better understand auction life-cycle we strongly advise to understand followi
 
 ## Auction life-cycle
 
-# <img src="auction_life_cycle.jpeg" alt="Auction life cycle">
+# <img src="/img/auction_life_cycle.jpeg" alt="Auction life cycle">
 
 ### General workflow
  
