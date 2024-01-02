@@ -34,7 +34,6 @@ Current implementation (MVP) is dedicated to allow to fractionalize NFT ERC721, 
  
 ### Asset Auction [`auction.sol`](https://github.com/pieces-market/contracts/blob/main/sol/auction.sol)
 
-TODO:
 Auction.sol is solidity smart contract responsible for:
 - auction configuration by asset Broker
 - burning new fractionalized pNFTs (pieces)
@@ -137,7 +136,7 @@ When funds from the asset buyout reach the vault, each piece holder can claim th
   </table>
 
 
-## Smart contracts implementation - TODO
+## Smart contracts implementation
 
 ### Auction
 
