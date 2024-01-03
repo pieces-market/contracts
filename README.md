@@ -290,7 +290,7 @@ Allows crypto-investors claim their revenue. Burn their pieces (pNFTs), transfer
 | `W3`       | Pieces are not available for sales yet. Please wait until Auction open time. |
 | `W4`       | All pieces are sold. Not enough available. |
 | `W5`       | Not enough pieces available. |
-| `W6`       | Transfer doesn't equal price * quantity |
+| `W6`       | Transfer value doesn't equal price * quantity |
 | `W7`       | Reserved for next version of implementation. Offer cannot be less than 50% of total prize. |
 | `W8`       | Cannot buy pieces, Auction is not Open. |
 | `W9`       | Cannot buy pieces, Auction is already Closed. |
