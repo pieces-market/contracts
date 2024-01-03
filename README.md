@@ -1,7 +1,7 @@
 # <img src="/img/logo2.png" alt="pieces.market">
 
 ![Website](https://img.shields.io/badge/Our_Website-grey?label=WWW&labelColor=purple&color=grey&link=https%3A%2F%2Fwww.pieces.market)
-![MVP](https://img.shields.io/badge/Demo_Platform-grey?label=MVP&labelColor=green&color=grey&link=https%3A%2F%2Fwww.test.pieces.market)
+![MVP](https://img.shields.io/badge/Demo_Platform-grey?label=MVP&labelColor=green&color=grey&link=https%3A%2F%2Ftest.pieces.market)
 ![X](https://img.shields.io/badge/X-grey?logo=x&labelColor=black&color=grey&link=https%3A%2F%2Ftwitter.com%2Fpieces_market)
 ![Medium](https://img.shields.io/badge/Medium-grey?logo=medium&labelColor=black&color=grey&link=https%3A%2F%2Fmedium.com%2F%40piecesmarket)
 ![Static Badge](https://img.shields.io/badge/LinkedIn-grey?logo=linkedin&labelColor=blue&color=grey&link=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fpieces-market%2F)
