@@ -45,18 +45,21 @@ Auction.sol is solidity smart contract responsible for:
 
 Buyout Governor is solidity smart contract responsible for governing proposals to buyout asset from cyprto investors.
 
-### Demo - MVP
+## Demo - MVP
  <img src="/img/demoplatform.png" alt="demo">
+The platform allows users to buy pieces, vote in governance and claim their revenue by burning tokens. Additionally, administrator and broker accounts can create auctions and their smart contracts.
+
+### Check how it works in the [demo video](https://www.youtube.com/watch?v=9lN5P0zCl34).
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
-It requires:
- * [MetaMask wallet](https://metamask.io) connected to [Moonbase Alpha](https://docs.moonbeam.network/builders/get-started/networks/moonbase/#)
- * DEV tokens [(Faucet)](https://apps.moonbeam.network/moonbase-alpha/faucet/)
+1. Install [MetaMask wallet](https://metamask.io) 
+2. Connect your MetaMask to [Moonbase Alpha](https://docs.moonbeam.network/builders/get-started/networks/moonbase/#)
+3. Get DEV tokens [(Faucet)](https://apps.moonbeam.network/moonbase-alpha/faucet/)
+4. Visit [test.pieces.market](https://test.pieces.market) 
 
-### [Visit pieces.market demo platform](https://test.pieces.market)
 
 
-### Project Nomenclature
+## Project Nomenclature
 
 To better understand auction life-cycle we strongly advise to understand following concepts first:
 
@@ -95,7 +98,7 @@ To better understand auction life-cycle we strongly advise to understand followi
 
 # <img src="/img/auction_life_cycle.jpeg" alt="Auction life cycle">
 
-### General workflow
+## General workflow
  
 #### Auction Preparation and Scheduling
 
