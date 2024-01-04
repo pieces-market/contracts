@@ -49,7 +49,7 @@ Buyout Governor is solidity smart contract responsible for governing proposals t
  <img src="/img/demoplatform.png" alt="demo">
 The platform allows users to buy pieces, vote in governance and claim their revenue by burning tokens. Additionally, administrator and broker accounts can create auctions and their smart contracts.
 
-### Check how it works in the [demo video](https://www.youtube.com/watch?v=9lN5P0zCl34).
+### Check how it works in the [demo video](https://www.youtube.com/watch?v=l8Lcu7OAPME).
 
 To better understand the usage scenarios, please don't hesitate to visit Our test environment.
 1. Install [MetaMask wallet](https://metamask.io) 
