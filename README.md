@@ -55,7 +55,7 @@ To better understand the usage scenarios, please don't hesitate to visit Our tes
 1. Install [MetaMask wallet](https://metamask.io) 
 2. Connect your MetaMask to [Moonbase Alpha](https://docs.moonbeam.network/builders/get-started/networks/moonbase/#)
 3. Get DEV tokens [(Faucet)](https://apps.moonbeam.network/moonbase-alpha/faucet/)
-4. Visit [test.pieces.market](https://test.pieces.market) 
+4. Visit [test.pieces.market](https://test.pieces.market) (desktop only)
 
 
 
