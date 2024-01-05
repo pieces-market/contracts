@@ -129,13 +129,13 @@ When funds from the asset buyout reach the vault, each piece holder can claim th
 ### Auction statuses
 <table>
   <tr><td>#</td><td>Auction status</td><td>Description</td></tr>
-  <tr><td>1</td><td>WIP</td><td>Auction first status, Broker fills out all auction fields. Auction is not yet on blockchain, it's configuration is saved on Pieces.market server.
+  <tr><td>1</td><td>**WIP**</td><td>Auction first status, Broker fills out all auction fields. Auction is not yet on blockchain, it's configuration is saved on Pieces.market server.
   </td></tr>
-  <tr><td>2</td><td>Open</td><td>Auction is deployed to blockchain, investors can start buying pieces (pNFT)</td></tr>
-  <tr><td>3</td><td>Closed</td><td>Auction is closed, all possible pieces were bought (and burn). During this status potential new owners can place offers (Governance). Each offer lasts for 24h, the quorum is > 50%.</td></tr>
-  <tr><td>4</td><td>Failed</td><td>Auction is failed, during given time period, not all pieces were sold. Investors can refund their invested tokens by burning ther pieces.</td></tr>
-  <tr><td>5</td><td>Finished</td><td>Auction is finished, new ultimate owner gets the assets. Pieces crypto-investors can claim their revenue.</td></tr>
-  <tr><td>6</td><td>Archived</td><td>Auction is archived, revenue distribution is finished, all pieces were burn.</td></tr>
+  <tr><td>2</td><td>**Open**</td><td>Auction is deployed to blockchain, investors can start buying pieces (pNFT)</td></tr>
+  <tr><td>3</td><td>**Closed**</td><td>Auction is closed, all possible pieces were bought (and burn). During this status potential new owners can place offers (Governance). Each offer lasts for 24h, the quorum is > 50%.</td></tr>
+  <tr><td>4</td><td>**Failed**</td><td>Auction is failed, during given time period, not all pieces were sold. Investors can refund their invested tokens by burning ther pieces.</td></tr>
+  <tr><td>5</td><td>**Finished**</td><td>Auction is finished, new ultimate owner gets the assets. Pieces crypto-investors can claim their revenue.</td></tr>
+  <tr><td>6</td><td>**Archived**</td><td>Auction is archived, revenue distribution is finished, all pieces were burn.</td></tr>
   </table>
 
 
