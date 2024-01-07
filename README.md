@@ -246,7 +246,7 @@ After all available pieces are burn, transfers auction balance to Broker, change
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `no` | `uint256` | **Required**. Number of pieces |
-| `msg.value` | `uint` | **Required**. msg.value is a member of the msg (message) object when sending (state transitioning) transactions on the Ethereum network. <br/> msg.value contains the amount of wei (ether / 1e18) sent in the transaction.|
+| `msg.value` | `uint` | **Required**. msg.value is a member of the msg (message) object when sending (state transitioning) transactions on the Ethereum network. <br/> msg.value contains the amount of wei (ether / 1e18) sent in the transaction. It must be set to "number of pieces * piece price".|
 
 
 ```solidity
