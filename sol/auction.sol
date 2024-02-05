@@ -102,6 +102,12 @@ contract Auction is ERC721,ERC721Enumerable,ERC721Votes,IERC721Receiver, Reentra
     }
 
     function buy(uint256 no) public payable nonReentrant {
+	    if(status==2 && available > 0 && closeTs <= block.timestamp){
+            //Auction failed, not all sold before close time
+            status = 4;
+            emit statusUpdate(msg.sender, "status_update:4");
+        }
+		
         //must be ready to Open
         require(openTs <= block.timestamp, "W3");
         //must be Open
@@ -150,11 +156,6 @@ contract Auction is ERC721,ERC721Enumerable,ERC721Votes,IERC721Receiver, Reentra
         else if(status==2 && available==0){
             //TODO: make custom require, document
             revert("Not able to buy auction");
-        }
-        else if(status==2 && available > 0 && closeTs <= block.timestamp){
-            //Auction failed, not all sold before close time
-            status = 4;
-            emit statusUpdate(msg.sender, "status_update:4");
         }
     }
 
