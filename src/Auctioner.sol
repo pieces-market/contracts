@@ -7,12 +7,11 @@ contract Auctioner is Ownable {
     /// @dev Libraries
 
     /// @dev Errors
-    error Auctioner__AuctionUninitialized();
+    error Auctioner__AuctionDoesNotExist();
     error Auctioner__AuctionNotOpened();
-    error Auctioner__InsufficientFractions();
-    error Auctioner__NotEnoughETH();
+    error Auctioner__InsufficientPieces();
+    error Auctioner__NotEnoughFunds();
     error Auctioner__TransferFailed();
-    error Auctioner__AuctionDoesNotExists();
 
     /// @dev Variables
     uint public s_totalAuctions;
@@ -50,9 +49,9 @@ contract Auctioner is Ownable {
     event Buyout();
     event Claim();
     event Refund();
-    event Vote(); // check if event is available in gov
-    event TransferToBroker();
-    event StateChange(uint indexed auction, AuctionState indexed state);
+    event Vote(); // Check if event is available in gov
+    event TransferToBroker(address indexed wallet, uint256 indexed amount);
+    event StateChange(uint256 indexed auction, AuctionState indexed state);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -69,17 +68,14 @@ contract Auctioner is Ownable {
     // Datę rozpoczęcia aukcji
     // Datę zamknięcia aukcji (domyślnie 7 dni po dacie rozpoczęcia)
     // Adres portfela, na który trafić mają pieniądze ze sprzedaży aktywa w ramach aukcji.
-    function createAuction() external onlyOwner {
+    function create() external onlyOwner {
         // Na podstawie czasu kiedy aukcja ma sie rozpoczac wywolujemy funkcje 'open' (instant start) lub 'schedule' (delayed start)
         //
         // emit Create();
     }
 
-    // Function used for instant open of Auction
-    function openAuction() internal {}
-
-    // Function used for delayed open of Auction
-    function scheduleAuction() internal {}
+    // Function used for delayed auction start
+    function delayedAuction() internal {}
 
     // Function that allows buying pieces
     function buy() external {
