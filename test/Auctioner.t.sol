@@ -10,4 +10,8 @@ contract AuctionerTest is Test {
     function setUp() public {
         auctioner = new Auctioner();
     }
+
+    function test_setup() public view {
+        assertNotEq(address(auctioner), address(0));
+    }
 }
