@@ -26,7 +26,18 @@ NFT - pNFT (mint)
 
 ### Auction Structure
 
--   **`auctionState:`** Represents the current state of the auction
+-   **`address asset:`** Address of NFT related to auctioned asset
+-   **`string uri:`** URI for visual representation of the asset linked with NFT
+-   **`uint256 price:`** Single piece of asset price
+-   **`uint256 pieces:`** Total number of pieces available for sale
+-   **`uint256 available:`** Number of pieces still available for sale
+-   **`uint256 max:`** Maximum number of pieces one user can buy
+-   **`uint256 openTs:`** Timestamp when the auction opens
+-   **`uint256 closeTs:`** Timestamp when the auction ends
+-   **`address[] assetOwners:`** Array of addresses of the asset owners
+-   **`mapping(address => uint256) ownerToFunds:`** Mapping of asset owner addresses to their respective transferred funds amount
+-   **`address recipient:`** Wallet address where funds from asset sale will be transferred
+-   **`auctionState:`** Current state of the auction
 
 ### Error Handling
 
@@ -39,6 +50,7 @@ NFT - pNFT (mint)
 ### Events
 
 -   **`Create:`** Emitted when a new auction is created.
+-   **`Plan:`** Emitted when auction is created with open timestamp in future.
 -   **`Purchase:`** Emitted when pieces of an auction are bought.
 -   **`Buyout:`** Emitted when a buyout offer is made for an auction.
 -   **`Claim:`** Emitted when revenue is claimed from an auction.
