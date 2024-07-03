@@ -37,6 +37,17 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @dev Structs
     struct Auction {
+        address asset;
+        string uri; // ??? -> we can get it from NFT
+        uint256 price;
+        uint256 pieces;
+        uint256 available;
+        uint256 max;
+        uint256 openTs;
+        uint256 closeTs;
+        address[] assetOwners; // we can get it from NFT
+        mapping(address => uint) ownerToFunds; // we can get it from NFT
+        address recipient;
         AuctionState auctionState;
     }
 
@@ -61,7 +72,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @param name Asset name, which is also NFT contract name
     /// @param symbol Asset symbol, which is also NFT contract symbol
     /// @param uri Asset uri, which leads to visual representation of asset linked with NFT
-    /// @param value Asset current total value
+    /// @param price Single piece of asset price
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
     /// @param openTs Timestamp when the auction opens
@@ -71,7 +82,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         string memory name,
         string memory symbol,
         string memory uri,
-        uint256 value,
+        uint256 price,
         uint256 pieces,
         uint256 max,
         uint256 openTs,
@@ -121,7 +132,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @dev HELPERS DEV ONLY
-    function hacker(uint256 id, uint256 state) external {
+    function stateHack(uint256 id, uint256 state) external {
         Auction storage auction = s_auctions[id];
 
         // 0 - UNINITIALIZED
@@ -134,5 +145,19 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // 7 - ARCHIVED
 
         auction.auctionState = AuctionState(state);
+    }
+
+    function errorHack(uint256 errorType) external pure {
+        // 0 - Auctioner__AuctionDoesNotExist
+        // 1 - Auctioner__AuctionNotOpened
+        // 2 - Auctioner__InsufficientPieces
+        // 3 - Auctioner__NotEnoughFunds
+        // 4 - Auctioner__TransferFailed
+
+        if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
+        if (errorType == 1) revert Auctioner__AuctionNotOpened();
+        if (errorType == 2) revert Auctioner__InsufficientPieces();
+        if (errorType == 3) revert Auctioner__NotEnoughFunds();
+        if (errorType == 4) revert Auctioner__TransferFailed();
     }
 }
