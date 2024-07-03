@@ -9,7 +9,7 @@ interface IAuctioner {
 
     /// @notice Allows making an offer to buy a certain asset auctioned by broker instantly
     /// @param id Auction id that we want to interact with
-    function buyout(uint256 id) external;
+    function buyout(uint256 id) external payable;
 
     /// @notice Allows claiming revenue from pieces bought by buyers if auction closed successfully
     function claim() external;
