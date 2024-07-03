@@ -19,7 +19,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     error Auctioner__TransferFailed();
 
     /// @dev Variables
-    uint public s_totalAuctions;
+    uint256 public s_totalAuctions;
 
     /// @dev Arrays
 
@@ -56,6 +56,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @dev Events
     event Create();
+    event Plan();
     event Purchase();
     event Buyout();
     event Claim();
@@ -106,7 +107,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function buyout(uint256 id) external {
+    function buyout(uint256 id) external payable {
         // emit Buyout();
     }
 
