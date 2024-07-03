@@ -2,8 +2,13 @@
 pragma solidity ^0.8.25;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
+import {IAuctioner} from "./interfaces/IAuctioner.sol";
 
-contract Auctioner is Ownable {
+/// @title Auction Contract
+/// @notice Creates new auctions, mints NFT per auctioned asset
+/// @notice Allows users to buy pieces, buyout asset, claim revenues and refund
+contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @dev Libraries
 
     /// @dev Errors
@@ -18,30 +23,25 @@ contract Auctioner is Ownable {
 
     /// @dev Arrays
 
-    /// @dev STATUSES
-    // Planned - aukcja już jest zeschedulowana, smart contract oraz IPFS już powstały, ale rozpocznie się dopiero za określony czas
-    // Open - otwarta i można kupować
-    // Closed - wszystko sprzedano
-    // Failed - niewszystko sprzedane, a czas upłynął, dostępny jest refund
-    // Ongoing voting - ludzie głosują early buyout offer
-    // Revenue distribution - kasa jest już na smartcontractcie, użytkownicy mogą claimować przychody
-    // Archived - wszyscy sclaimowali przychód, inwestycja jest ostatecznie zamknięta
-
     /// @dev Enums
     enum AuctionState {
-        UNINITIALIZED, // auction has not been initialized
-        PLANNED, // auction has been initialized and awaits its start date
-        OPENED, // auction ready to get orders for pNFT
-        CLOSED, // auction finished positively - all pNFT bought
-        FAILED, // auction finished negatively - not all pNFT bought (refund available)
-        VOTING, // early buyout voting period
-        FINISHED, // all funds transferred to broker (claim available)
-        ARCHIVED // everyone claimed their revenue, investment closed
+        UNINITIALIZED,
+        PLANNED,
+        OPENED,
+        CLOSED,
+        FAILED,
+        VOTING,
+        FINISHED,
+        ARCHIVED
     }
 
     /// @dev Structs
+    struct Auction {
+        AuctionState auctionState;
+    }
 
     /// @dev Mappings
+    mapping(uint256 id => Auction map) private s_auctions;
 
     /// @dev Events
     event Create();
@@ -56,19 +56,28 @@ contract Auctioner is Ownable {
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
 
-    // 1. Broker zaklada request o aukcje - offchain
-    // 2. Admin potwierdza zalozenie aukcji wywolujac funkcje (schedule - aukcja w przyszlosci) (open - aukcja instant)
-
-    /// @dev PARAMETERS
-    // Nazwa inwestycji/przedmiotu + symbol (generated based on name / offchain)
-    // URI (zdjecie)
-    // Całkowita wartość aktywa
-    // Ilość kawałków
-    // Max. ilość kawałków ile może zakupić jeden user
-    // Datę rozpoczęcia aukcji
-    // Datę zamknięcia aukcji (domyślnie 7 dni po dacie rozpoczęcia)
-    // Adres portfela, na który trafić mają pieniądze ze sprzedaży aktywa w ramach aukcji.
-    function create() external onlyOwner {
+    /// @notice Creates new auction, mints NFT connected to auctioned asset
+    /// @dev Emits Create event
+    /// @param name Asset name, which is also NFT contract name
+    /// @param symbol Asset symbol, which is also NFT contract symbol
+    /// @param uri Asset uri, which leads to visual representation of asset linked with NFT
+    /// @param value Asset current total value
+    /// @param pieces Amount of asset pieces available for sell
+    /// @param max Maximum amount of pieces that one user can buy
+    /// @param openTs Timestamp when the auction opens
+    /// @param closeTs Timestamp when the auction ends
+    /// @param recipient Wallet address where funds from asset sale will be transferred
+    function create(
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        uint256 value,
+        uint256 pieces,
+        uint256 max,
+        uint256 openTs,
+        uint256 closeTs,
+        address recipient
+    ) external onlyOwner {
         // Na podstawie czasu kiedy aukcja ma sie rozpoczac wywolujemy funkcje 'open' (instant start) lub 'schedule' (delayed start)
         //
         // emit Create();
@@ -77,26 +86,53 @@ contract Auctioner is Ownable {
     // Function used for delayed auction start
     function delayedAuction() internal {}
 
-    // Function that allows buying pieces
-    function buy() external {
+    /// @inheritdoc IAuctioner
+    function buy(uint256 id) external payable nonReentrant {
         // emit Purchase();
         //
         // If last piece bought ->
         // emit TransferToBroker();
     }
 
-    // Function that allows to make offer to buy certain asset instantly
-    function buyout() external {
+    /// @inheritdoc IAuctioner
+    function buyout(uint256 id) external {
         // emit Buyout();
     }
 
-    // Function that allows claim revenue from pNFT
+    /// @inheritdoc IAuctioner
     function claim() external {
         // emit Claim();
     }
 
-    // Function that allows to withdraw funds by user if auction fails
+    /// @inheritdoc IAuctioner
     function refund() external {
         // emit Refund();
+    }
+
+    // =========================================
+    //              Developer Tools
+    // =========================================
+
+    /// @dev Getter -> to be removed
+    function getState(uint256 id) public view returns (AuctionState) {
+        Auction storage auction = s_auctions[id];
+
+        return auction.auctionState;
+    }
+
+    /// @dev HELPERS DEV ONLY
+    function hacker(uint256 id, uint256 state) external {
+        Auction storage auction = s_auctions[id];
+
+        // 0 - UNINITIALIZED
+        // 1 - PLANNED
+        // 2 - OPENED
+        // 3 - CLOSED
+        // 4 - FAILED
+        // 5 - VOTING
+        // 6 - FINISHED
+        // 7 - ARCHIVED
+
+        auction.auctionState = AuctionState(state);
     }
 }
