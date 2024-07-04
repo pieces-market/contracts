@@ -2,11 +2,16 @@
 pragma solidity ^0.8.25;
 
 import "@ERC721A/contracts/ERC721A.sol";
+import "@ERC721A/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/governance/utils/Votes.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
-contract FractAsset is ERC721A, EIP712, Votes {
+contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes {
+    /// @dev ERROR!
+    /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
+    /// @dev check if buyer of token has vote also
+
     // We are getting 'name' and 'symbol' from Auctioner.sol
     constructor(address initialOwner) ERC721A("MyToken", "MTK") EIP712("MyToken", "MTK") {}
 
@@ -14,18 +19,42 @@ contract FractAsset is ERC721A, EIP712, Votes {
         return "https";
     }
 
+    // Multi-mint function to mint multiple tokens to a single user
+    function safeBatchMint(address to, uint256 quantity) external {
+        _safeMint(to, quantity);
+        _delegate(to, to);
+    }
+
+    /// @dev Delegate needs to be called to assign votes
+    // function delegateVotes(address delegatee) external {
+    //     _delegate(delegatee, delegatee);
+    // }
+
     /// @dev See {ERC721-_afterTokenTransfer}. Adjusts votes when tokens are transferred.
     /// @dev Instead of {_afterTokenTransfer} that is used in ERC721, ERC721A uses {_afterTokenTransfers} (with an 's')
-    ///  Emits a {IVotes-DelegateVotesChanged} event.
+    /// @dev Emits a {IVotes-DelegateVotesChanged} event.
     function _afterTokenTransfers(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual override {
         _transferVotingUnits(from, to, batchSize);
+        _delegate(to, to);
         super._afterTokenTransfers(from, to, firstTokenId, batchSize);
     }
 
     /// @dev Returns the balance of `account`.
-    /// WARNING: Overriding this function will likely result in incorrect vote tracking.
+    /// @dev WARNING: Overriding this function will likely result in incorrect vote tracking.
     function _getVotingUnits(address account) internal view virtual override returns (uint256) {
         return balanceOf(account);
+    }
+
+    /// @dev Check if we indeed need it
+    /*
+     * @dev ERC721a Governance Token Interface Support
+     * @dev Implements the interface support check for ERC721a Governance Token
+     * @notice Checks if the contract implements an interface you query for, including ERC721A and Votes interfaces
+     * @param interfaceId The interface identifier, as specified in ERC-165
+     * @return True if the contract implements `interfaceId` or if `interfaceId` is the ERC-165 interface
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A) returns (bool) {
+        return interfaceId == type(IVotes).interfaceId || super.supportsInterface(interfaceId);
     }
 }
 
