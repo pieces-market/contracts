@@ -92,6 +92,20 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         return auction.auctionState;
     }
 
+    function errorHack(uint256 errorType) external pure {
+        // 0 - Auctioner__AuctionDoesNotExist
+        // 1 - Auctioner__AuctionNotOpened
+        // 2 - Auctioner__InsufficientPieces
+        // 3 - Auctioner__NotEnoughFunds
+        // 4 - Auctioner__TransferFailed
+
+        if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
+        if (errorType == 1) revert Auctioner__AuctionNotOpened();
+        if (errorType == 2) revert Auctioner__InsufficientPieces();
+        if (errorType == 3) revert Auctioner__NotEnoughFunds();
+        if (errorType == 4) revert Auctioner__TransferFailed();
+    }
+
     /// @dev HELPERS DEV ONLY
     function stateHack(uint256 id, uint256 state) external {
         Auction storage auction = s_auctions[id];
@@ -108,17 +122,25 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.auctionState = AuctionState(state);
     }
 
-    function errorHack(uint256 errorType) external pure {
-        // 0 - Auctioner__AuctionDoesNotExist
-        // 1 - Auctioner__AuctionNotOpened
-        // 2 - Auctioner__InsufficientPieces
-        // 3 - Auctioner__NotEnoughFunds
-        // 4 - Auctioner__TransferFailed
+    function eventHack(uint256 eventId) external {
+        // 0 - Create event
+        // 1 - Plan event
+        // 2 - Purchase event
+        // 3 - Buyout event
+        // 4 - Claim event
+        // 5 - Refund event
+        // 6 - Vote event
+        // 7 - TransferToBroker event
+        // 8 - StateChange event
 
-        if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
-        if (errorType == 1) revert Auctioner__AuctionNotOpened();
-        if (errorType == 2) revert Auctioner__InsufficientPieces();
-        if (errorType == 3) revert Auctioner__NotEnoughFunds();
-        if (errorType == 4) revert Auctioner__TransferFailed();
+        if (eventId == 0) emit Create();
+        if (eventId == 1) emit Plan();
+        if (eventId == 2) emit Purchase();
+        if (eventId == 3) emit Buyout();
+        if (eventId == 4) emit Claim();
+        if (eventId == 5) emit Refund();
+        if (eventId == 6) emit Vote();
+        if (eventId == 7) emit TransferToBroker(address(0), 0);
+        if (eventId == 8) emit StateChange(0, AuctionState.UNINITIALIZED);
     }
 }
