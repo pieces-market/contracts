@@ -1,3 +1,2 @@
-1. Events trigger
-2. ERC721
-3. Autotriger bez chainlinka
+1. ERC721
+2. Auction in future automation by Chainlink?
