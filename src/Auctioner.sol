@@ -11,59 +11,13 @@ import {IAuctioner} from "./interfaces/IAuctioner.sol";
 contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @dev Libraries
 
-    /// @dev Errors
-    error Auctioner__AuctionDoesNotExist();
-    error Auctioner__AuctionNotOpened();
-    error Auctioner__InsufficientPieces();
-    error Auctioner__NotEnoughFunds();
-    error Auctioner__TransferFailed();
-
     /// @dev Variables
-    uint256 public s_totalAuctions;
+    uint256 private s_totalAuctions;
 
     /// @dev Arrays
 
-    /// @dev Enums
-    enum AuctionState {
-        UNINITIALIZED,
-        PLANNED,
-        OPENED,
-        CLOSED,
-        FAILED,
-        VOTING,
-        FINISHED,
-        ARCHIVED
-    }
-
-    /// @dev Structs
-    struct Auction {
-        address asset;
-        string uri; // ??? -> we can get it from NFT
-        uint256 price;
-        uint256 pieces;
-        uint256 available;
-        uint256 max;
-        uint256 openTs;
-        uint256 closeTs;
-        address[] assetOwners; // we can get it from NFT
-        mapping(address => uint) ownerToFunds; // we can get it from NFT
-        address recipient;
-        AuctionState auctionState;
-    }
-
     /// @dev Mappings
     mapping(uint256 id => Auction map) private s_auctions;
-
-    /// @dev Events
-    event Create();
-    event Plan();
-    event Purchase();
-    event Buyout();
-    event Claim();
-    event Refund();
-    event Vote(); // Check if event is available in gov
-    event TransferToBroker(address indexed wallet, uint256 indexed amount);
-    event StateChange(uint256 indexed auction, AuctionState indexed state);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -99,7 +53,13 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     function delayedAuction() internal {}
 
     /// @inheritdoc IAuctioner
-    function buy(uint256 id) external payable nonReentrant {
+    function buy(uint256 id) external payable override nonReentrant {
+        Auction storage auction = s_auctions[id];
+
+        auction.max += 1;
+
+        s_totalAuctions += 1;
+
         // emit Purchase();
         //
         // If last piece bought ->
@@ -107,17 +67,17 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function buyout(uint256 id) external payable {
+    function buyout(uint256 id) external payable override {
         // emit Buyout();
     }
 
     /// @inheritdoc IAuctioner
-    function claim() external {
+    function claim() external override {
         // emit Claim();
     }
 
     /// @inheritdoc IAuctioner
-    function refund() external {
+    function refund() external override {
         // emit Refund();
     }
 
