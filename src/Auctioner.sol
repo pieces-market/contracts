@@ -54,12 +54,6 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function buy(uint256 id) external payable override nonReentrant {
-        Auction storage auction = s_auctions[id];
-
-        auction.max += 1;
-
-        s_totalAuctions += 1;
-
         // emit Purchase();
         //
         // If last piece bought ->
@@ -92,6 +86,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         return auction.auctionState;
     }
 
+    /// @dev HELPER DEV ONLY
     function errorHack(uint256 errorType) external pure {
         // 0 - Auctioner__AuctionDoesNotExist
         // 1 - Auctioner__AuctionNotOpened
@@ -106,7 +101,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (errorType == 4) revert Auctioner__TransferFailed();
     }
 
-    /// @dev HELPERS DEV ONLY
+    /// @dev HELPER DEV ONLY
     function stateHack(uint256 id, uint256 state) external {
         Auction storage auction = s_auctions[id];
 
@@ -122,6 +117,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.auctionState = AuctionState(state);
     }
 
+    /// @dev HELPER DEV ONLY
     function eventHack(uint256 eventId) external {
         // 0 - Create event
         // 1 - Plan event
