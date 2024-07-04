@@ -19,6 +19,8 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes {
         return "https";
     }
 
+    /// @dev Override tokenURI to keep 1 URI for all tokens
+
     // Multi-mint function to mint multiple tokens to a single user
     function safeBatchMint(address to, uint256 quantity) external {
         _safeMint(to, quantity);
