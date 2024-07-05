@@ -2,53 +2,42 @@
 pragma solidity ^0.8.25;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract FractGovernor is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl, Ownable {
+contract FractGovernor is Governor, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, Ownable {
     /// @dev ERROR!
     /// @dev Currently we can only work with one NFT
 
     constructor(
-        IVotes _token, // Asset (NFT) address -> we can assign aggregator here
-        TimelockController _timelock // TimelockController contract address
-    )
-        Governor("FractGovernor")
-        GovernorSettings(1 days, 1 weeks, 0)
-        GovernorVotes(_token)
-        GovernorVotesQuorumFraction(51)
-        GovernorTimelockControl(_timelock)
-        Ownable(msg.sender)
-    {}
+        IVotes _token // Asset (NFT) address -> we can assign aggregator here
+    ) Governor("FractGovernor") GovernorVotes(_token) GovernorVotesQuorumFraction(51) Ownable(msg.sender) {}
 
     // The following functions are overrides required by Solidity.
 
-    // We can set this to 0
-    function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
-        return super.votingDelay();
+    function votingDelay() public pure override(Governor) returns (uint256) {
+        return 0;
     }
 
-    function votingPeriod() public view override(Governor, GovernorSettings) returns (uint256) {
-        return super.votingPeriod();
+    function votingPeriod() public pure override(Governor) returns (uint256) {
+        return 1 days;
     }
 
     function quorum(uint256 blockNumber) public view override(Governor, GovernorVotesQuorumFraction) returns (uint256) {
         return super.quorum(blockNumber);
     }
 
-    function state(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (ProposalState) {
+    function state(uint256 proposalId) public view override(Governor) returns (ProposalState) {
         return super.state(proposalId);
     }
 
-    function proposalNeedsQueuing(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (bool) {
+    function proposalNeedsQueuing(uint256 proposalId) public view override(Governor) returns (bool) {
         return super.proposalNeedsQueuing(proposalId);
     }
 
-    function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
+    function proposalThreshold() public view override(Governor) returns (uint256) {
         return super.proposalThreshold();
     }
 
@@ -58,7 +47,7 @@ contract FractGovernor is Governor, GovernorSettings, GovernorCountingSimple, Go
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint48) {
+    ) internal override(Governor) returns (uint48) {
         return super._queueOperations(proposalId, targets, values, calldatas, descriptionHash);
     }
 
@@ -68,7 +57,7 @@ contract FractGovernor is Governor, GovernorSettings, GovernorCountingSimple, Go
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) {
+    ) internal override(Governor) {
         super._executeOperations(proposalId, targets, values, calldatas, descriptionHash);
     }
 
@@ -77,11 +66,11 @@ contract FractGovernor is Governor, GovernorSettings, GovernorCountingSimple, Go
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
+    ) internal override(Governor) returns (uint256) {
         return super._cancel(targets, values, calldatas, descriptionHash);
     }
 
-    function _executor() internal view override(Governor, GovernorTimelockControl) returns (address) {
+    function _executor() internal view override(Governor) returns (address) {
         return super._executor();
     }
 }
