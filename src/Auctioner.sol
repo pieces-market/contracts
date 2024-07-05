@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
+import {FractAsset} from "./FractAsset.sol";
 
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
@@ -30,8 +31,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @param price Single piece of asset price
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
-    /// @param openTs Timestamp when the auction opens
-    /// @param closeTs Timestamp when the auction ends
+    // @param openTs Timestamp when the auction opens
+    // @param closeTs Timestamp when the auction ends
     /// @param recipient Wallet address where funds from asset sale will be transferred
     function create(
         string memory name,
@@ -40,10 +41,23 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         uint256 price,
         uint256 pieces,
         uint256 max,
-        uint256 openTs,
-        uint256 closeTs,
+        // uint256 openTs, -> USELESS
+        // uint256 closeTs, -> USELESS
         address recipient
     ) external onlyOwner {
+        Auction storage auction = s_auctions[s_totalAuctions];
+
+        // Creating new NFT (asset)
+        FractAsset asset = new FractAsset(name, symbol, uri, pieces, msg.sender);
+
+        auction.asset = address(asset);
+        auction.price = price;
+        auction.pieces = pieces;
+        auction.max = max;
+        auction.openTs = block.timestamp;
+        auction.closeTs = block.timestamp + 7 days;
+        auction.recipient = recipient;
+
         // Na podstawie czasu kiedy aukcja ma sie rozpoczac wywolujemy funkcje 'open' (instant start) lub 'schedule' (delayed start)
         //
         // emit Create();
