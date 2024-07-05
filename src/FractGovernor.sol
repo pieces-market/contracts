@@ -17,60 +17,24 @@ contract FractGovernor is Governor, GovernorCountingSimple, GovernorVotes, Gover
 
     // The following functions are overrides required by Solidity.
 
+    /// @notice Returns the voting delay in blocks.
+    /// @dev This function is required to override the Governor contract's function.
+    /// @return The voting delay in blocks.
     function votingDelay() public pure override(Governor) returns (uint256) {
         return 0;
     }
 
+    /// @notice Returns the voting period in blocks.
+    /// @dev This function is required to override the Governor contract's function.
+    /// @return The voting period in blocks.
     function votingPeriod() public pure override(Governor) returns (uint256) {
         return 1 days;
     }
 
-    function quorum(uint256 blockNumber) public view override(Governor, GovernorVotesQuorumFraction) returns (uint256) {
-        return super.quorum(blockNumber);
-    }
-
-    function state(uint256 proposalId) public view override(Governor) returns (ProposalState) {
-        return super.state(proposalId);
-    }
-
-    function proposalNeedsQueuing(uint256 proposalId) public view override(Governor) returns (bool) {
-        return super.proposalNeedsQueuing(proposalId);
-    }
-
-    function proposalThreshold() public view override(Governor) returns (uint256) {
-        return super.proposalThreshold();
-    }
-
-    function _queueOperations(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor) returns (uint48) {
-        return super._queueOperations(proposalId, targets, values, calldatas, descriptionHash);
-    }
-
-    function _executeOperations(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor) {
-        super._executeOperations(proposalId, targets, values, calldatas, descriptionHash);
-    }
-
-    function _cancel(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor) returns (uint256) {
-        return super._cancel(targets, values, calldatas, descriptionHash);
-    }
-
-    function _executor() internal view override(Governor) returns (address) {
-        return super._executor();
+    /// @notice Returns the proposal threshold.
+    /// @dev The number of votes required to create a proposal.
+    /// @return The proposal threshold.
+    function proposalThreshold() public pure override(Governor) returns (uint256) {
+        return 0;
     }
 }
