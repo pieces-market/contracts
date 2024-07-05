@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @dev This is not probably the solution for our 'FractGovernor.sol'
 abstract contract VotingPowerAggregator is IVotes, Ownable {
     IVotes[] public nftContracts;
 
