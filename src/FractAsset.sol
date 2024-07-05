@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/governance/utils/Votes.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
+/// @dev ERC721A version of Asset (NFT) contract with cheap multiple minting function
 contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev ERROR!
     /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
