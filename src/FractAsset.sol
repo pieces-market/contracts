@@ -13,8 +13,23 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
     /// @dev check if buyer of token has vote also
 
+    /// @dev ERROR!
+    /// @dev Get rid of Owner? Do we even need owner for this contract?
+
+    uint256 private maxSupply;
+    string private baseURI;
+
     // We are getting 'name' and 'symbol' from Auctioner.sol
-    constructor(address initialOwner) ERC721A("MyToken", "MTK") EIP712("MyToken", "MTK") Ownable(msg.sender) {}
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        uint256 pieces,
+        address owner
+    ) ERC721A(name, symbol) EIP712(name, symbol) Ownable(owner) {
+        maxSupply = pieces;
+        baseURI = uri;
+    }
 
     function _baseURI() internal pure override returns (string memory) {
         return "https";
