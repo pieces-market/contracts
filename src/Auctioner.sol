@@ -6,7 +6,7 @@ import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
 
 /// @title Auction Contract
-/// @notice Creates new auctions, mints NFT per auctioned asset
+/// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
 /// @notice Allows users to buy pieces, buyout asset, claim revenues and refund
 contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @dev Libraries
