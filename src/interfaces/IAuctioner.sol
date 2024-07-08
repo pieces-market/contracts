@@ -8,6 +8,10 @@ interface IAuctioner {
     error Auctioner__InsufficientPieces();
     error Auctioner__NotEnoughFunds();
     error Auctioner__TransferFailed();
+    error Auctioner__AuctionAlreadyInitialized();
+    error Auctioner__ZeroValueNotAllowed();
+    error Auctioner__IncorrectTimestamp();
+    error Auctioner__ZeroAddressNotAllowed();
 
     /// @dev Enums
     enum AuctionState {
