@@ -67,13 +67,16 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.openTs > block.timestamp) {
             auction.auctionState = AuctionState.PLANNED;
             s_scheduledAuctions.push(s_totalAuctions);
+
+            emit Plan(s_totalAuctions);
         } else {
             auction.auctionState = AuctionState.OPENED;
         }
 
-        s_totalAuctions += 1;
+        emit StateChange(s_totalAuctions, auction.auctionState);
+        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient);
 
-        emit Create();
+        s_totalAuctions += 1;
     }
 
     /// @inheritdoc IAuctioner
@@ -158,8 +161,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // 7 - TransferToBroker event
         // 8 - StateChange event
 
-        if (eventId == 0) emit Create();
-        if (eventId == 1) emit Plan();
+        if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
+        if (eventId == 1) emit Plan(0);
         if (eventId == 2) emit Purchase();
         if (eventId == 3) emit Buyout();
         if (eventId == 4) emit Claim();
