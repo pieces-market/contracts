@@ -64,13 +64,11 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     }
 
     /// @dev Check if we indeed need it
-    /*
-     * @dev ERC721a Governance Token Interface Support
-     * @dev Implements the interface support check for ERC721a Governance Token
-     * @notice Checks if the contract implements an interface you query for, including ERC721A and Votes interfaces
-     * @param interfaceId The interface identifier, as specified in ERC-165
-     * @return True if the contract implements `interfaceId` or if `interfaceId` is the ERC-165 interface
-     */
+    /// @dev ERC721a Governance Token Interface Support
+    /// @dev Implements the interface support check for ERC721a Governance Token
+    /// @notice Checks if the contract implements an interface you query for, including ERC721A and Votes interfaces
+    /// @param interfaceId The interface identifier, as specified in ERC-165
+    /// @return True if the contract implements `interfaceId` or if `interfaceId` is the ERC-165 interface
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A) returns (bool) {
         return interfaceId == type(IVotes).interfaceId || super.supportsInterface(interfaceId);
     }
