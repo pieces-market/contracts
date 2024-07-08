@@ -117,12 +117,17 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // 2 - Auctioner__InsufficientPieces
         // 3 - Auctioner__NotEnoughFunds
         // 4 - Auctioner__TransferFailed
+        // ...
 
         if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
         if (errorType == 1) revert Auctioner__AuctionNotOpened();
         if (errorType == 2) revert Auctioner__InsufficientPieces();
         if (errorType == 3) revert Auctioner__NotEnoughFunds();
         if (errorType == 4) revert Auctioner__TransferFailed();
+        if (errorType == 5) revert Auctioner__AuctionAlreadyInitialized();
+        if (errorType == 6) revert Auctioner__ZeroValueNotAllowed();
+        if (errorType == 7) revert Auctioner__IncorrectTimestamp();
+        if (errorType == 8) revert Auctioner__ZeroAddressNotAllowed();
     }
 
     /// @dev HELPER DEV ONLY
