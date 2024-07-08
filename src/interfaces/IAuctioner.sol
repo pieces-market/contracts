@@ -42,8 +42,8 @@ interface IAuctioner {
     }
 
     /// @dev Events
-    event Create();
-    event Plan();
+    event Create(uint256 indexed id, address indexed asset, uint256 price, uint256 pieces, uint256 max, uint256 start, uint256 end, address indexed recipient);
+    event Plan(uint256 id);
     event Purchase();
     event Buyout();
     event Claim();
