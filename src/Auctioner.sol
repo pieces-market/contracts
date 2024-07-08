@@ -55,17 +55,19 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.price = price;
         auction.pieces = pieces;
         auction.max = max;
-        auction.recipient = recipient;
         auction.openTs = start;
         auction.closeTs = end;
+        auction.recipient = recipient;
 
-        if (auction.openTs > block.timestamp) s_scheduledAuctions.push(s_totalAuctions);
+        if (auction.openTs > block.timestamp) {
+            auction.auctionState = AuctionState.PLANNED;
+            s_scheduledAuctions.push(s_totalAuctions);
+        } else {
+            auction.auctionState = AuctionState.OPENED;
+        }
 
         emit Create();
     }
-
-    // Function used for delayed auction start
-    function delayedAuction() internal {}
 
     /// @inheritdoc IAuctioner
     function buy(uint256 id) external payable override nonReentrant {
