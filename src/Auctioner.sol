@@ -16,6 +16,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     uint256 private s_totalAuctions;
 
     /// @dev Arrays
+    uint256[] private s_scheduledAuctions;
 
     /// @dev Mappings
     mapping(uint256 id => Auction map) private s_auctions;
@@ -31,8 +32,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @param price Single piece of asset price
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
-    // @param openTs Timestamp when the auction opens
-    // @param closeTs Timestamp when the auction ends
+    /// @param start Timestamp when the auction should open
+    /// @param end Timestamp when the auction should close
     /// @param recipient Wallet address where funds from asset sale will be transferred
     function create(
         string memory name,
@@ -41,8 +42,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         uint256 price,
         uint256 pieces,
         uint256 max,
-        // uint256 openTs, -> USELESS
-        // uint256 closeTs, -> USELESS
+        uint256 start,
+        uint256 end,
         address recipient
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
@@ -54,13 +55,13 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.price = price;
         auction.pieces = pieces;
         auction.max = max;
-        auction.openTs = block.timestamp;
-        auction.closeTs = block.timestamp + 7 days;
         auction.recipient = recipient;
+        auction.openTs = start;
+        auction.closeTs = end;
 
-        // Na podstawie czasu kiedy aukcja ma sie rozpoczac wywolujemy funkcje 'open' (instant start) lub 'schedule' (delayed start)
-        //
-        // emit Create();
+        if (auction.openTs > block.timestamp) s_scheduledAuctions.push(s_totalAuctions);
+
+        emit Create();
     }
 
     // Function used for delayed auction start
