@@ -28,7 +28,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @dev Emits Create event
     /// @param name Asset name, which is also NFT contract name
     /// @param symbol Asset symbol, which is also NFT contract symbol
-    /// @param uri Asset uri, which leads to visual representation of asset linked with NFT
+    /// @param uri Asset uri, which points to metadata file containing associated NFT data
     /// @param price Single piece of asset price
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
@@ -47,6 +47,10 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         address recipient
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
+        if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
+        if (start < block.timestamp || end <= block.timestamp) revert Auctioner__IncorrectTimestamp();
+        if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
+        if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
         // Creating new NFT (asset)
         FractAsset asset = new FractAsset(name, symbol, uri, pieces, msg.sender);
@@ -54,6 +58,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.asset = address(asset);
         auction.price = price;
         auction.pieces = pieces;
+        auction.available = pieces;
         auction.max = max;
         auction.openTs = start;
         auction.closeTs = end;
@@ -65,6 +70,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         } else {
             auction.auctionState = AuctionState.OPENED;
         }
+
+        s_totalAuctions += 1;
 
         emit Create();
     }
