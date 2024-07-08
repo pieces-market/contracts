@@ -48,7 +48,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
-        if (start < block.timestamp || end <= block.timestamp) revert Auctioner__IncorrectTimestamp();
+        if (start < block.timestamp || end <= block.timestamp || (start + 1 days) >= end) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
         if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
