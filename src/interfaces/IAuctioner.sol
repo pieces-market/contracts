@@ -43,14 +43,14 @@ interface IAuctioner {
 
     /// @dev Events
     event Create(uint256 indexed id, address indexed asset, uint256 price, uint256 pieces, uint256 max, uint256 start, uint256 end, address indexed recipient);
-    event Plan(uint256 id);
+    event Plan(uint256 indexed id);
     event Purchase();
     event Buyout();
     event Claim();
     event Refund();
     event Vote(); // Check if event is available in gov
     event TransferToBroker(address indexed wallet, uint256 indexed amount);
-    event StateChange(uint256 indexed auction, AuctionState indexed state);
+    event StateChange(uint256 indexed id, AuctionState indexed state);
 
     /// @notice Allows buying pieces of asset auctioned by broker
     /// @param id Auction id that we want to interact with
