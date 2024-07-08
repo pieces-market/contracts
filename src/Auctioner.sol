@@ -53,7 +53,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
         // Creating new NFT (asset)
-        FractAsset asset = new FractAsset(name, symbol, uri, pieces, msg.sender);
+        FractAsset asset = new FractAsset(name, symbol, uri, pieces, recipient);
 
         auction.asset = address(asset);
         auction.price = price;
