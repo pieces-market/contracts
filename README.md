@@ -16,7 +16,7 @@ NFT - pNFT (mint)
 ### Auction States
 
 -   **`UNINITIALIZED:`** Auction has not been initialized
--   **`PLANNED:`** Auction has been initialized and awaits its start date
+-   **`SCHEDULED:`** Auction has been initialized and awaits its start date
 -   **`OPENED:`** Auction ready to get orders for asset pieces
 -   **`CLOSED:`** Auction finished positively - all asset pieces sold
 -   **`FAILED:`** Auction finished negatively - not all asset pieces bought, buyers can refund
@@ -50,7 +50,7 @@ NFT - pNFT (mint)
 ### Events
 
 -   **`Create:`** Emitted when a new auction is created.
--   **`Plan:`** Emitted when auction is created with open timestamp in future.
+-   **`Schedule:`** Emitted when auction is created with open timestamp in future.
 -   **`Purchase:`** Emitted when pieces of an auction are bought.
 -   **`Buyout:`** Emitted when a buyout offer is made for an auction.
 -   **`Claim:`** Emitted when revenue is claimed from an auction.
