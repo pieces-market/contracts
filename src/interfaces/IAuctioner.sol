@@ -12,11 +12,12 @@ interface IAuctioner {
     error Auctioner__ZeroValueNotAllowed();
     error Auctioner__IncorrectTimestamp();
     error Auctioner__ZeroAddressNotAllowed();
+    error Auctioner__Overpayment();
 
     /// @dev Enums
     enum AuctionState {
         UNINITIALIZED,
-        PLANNED,
+        SCHEDULED,
         OPENED,
         CLOSED,
         FAILED,
@@ -28,28 +29,28 @@ interface IAuctioner {
     /// @dev Structs
     struct Auction {
         address asset;
-        string uri; // we need to pass it into FractAsset.sol
+        string uri;
         uint256 price;
         uint256 pieces;
         uint256 available;
         uint256 max;
         uint256 openTs;
         uint256 closeTs;
-        address[] assetOwners; // we can get it from NFT
-        mapping(address => uint) ownerToFunds; // we can get it from NFT
+        address[] assetOwners;
+        mapping(address => uint) ownerToFunds; // we can get it from NFT | balanceOf() -> returns pieces
         address recipient;
         AuctionState auctionState;
     }
 
     /// @dev Events
     event Create(uint256 indexed id, address indexed asset, uint256 price, uint256 pieces, uint256 max, uint256 start, uint256 end, address indexed recipient);
-    event Plan(uint256 indexed id, uint256 indexed start);
-    event Purchase();
+    event Schedule(uint256 indexed id, uint256 indexed start);
+    event Purchase(uint256 indexed id, uint256 indexed pieces, address buyer);
     event Buyout();
     event Claim();
     event Refund();
     event Vote(); // Check if event is available in gov
-    event TransferToBroker(address indexed wallet, uint256 indexed amount);
+    event TransferToBroker(uint256 indexed id, address indexed wallet, uint256 indexed amount);
     event StateChange(uint256 indexed id, AuctionState indexed state);
 
     /// @notice Allows buying pieces of asset auctioned by broker
