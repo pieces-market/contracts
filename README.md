@@ -30,7 +30,6 @@ NFT - pNFT (mint)
 -   **`string uri:`** URI for visual representation of the asset linked with NFT
 -   **`uint256 price:`** Single piece of asset price
 -   **`uint256 pieces:`** Total number of pieces available for sale
--   **`uint256 available:`** Number of pieces still available for sale
 -   **`uint256 max:`** Maximum number of pieces one user can buy
 -   **`uint256 openTs:`** Timestamp when the auction opens
 -   **`uint256 closeTs:`** Timestamp when the auction ends
