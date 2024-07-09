@@ -16,7 +16,7 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev ERROR!
     /// @dev Get rid of Owner? Do we even need owner for this contract?
 
-    uint256 private maxSupply;
+    uint256 private supply;
     string private baseURI;
 
     // We are getting 'name' and 'symbol' from Auctioner.sol
@@ -27,10 +27,12 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
         uint256 pieces,
         address owner
     ) ERC721A(name, symbol) EIP712(name, symbol) Ownable(owner) {
-        maxSupply = pieces;
+        supply = pieces;
         baseURI = uri;
     }
 
+    // This will lead to Metadata, which will be unique for each token
+    // There will be 'image' field in Metadata that will be same for all tokens per asset
     function _baseURI() internal pure override returns (string memory) {
         return "https";
     }
