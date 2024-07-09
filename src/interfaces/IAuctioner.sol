@@ -13,6 +13,7 @@ interface IAuctioner {
     error Auctioner__IncorrectTimestamp();
     error Auctioner__ZeroAddressNotAllowed();
     error Auctioner__Overpayment();
+    error Auctioner__BuyLimitExceeded();
 
     /// @dev Enums
     enum AuctionState {
@@ -32,7 +33,6 @@ interface IAuctioner {
         string uri;
         uint256 price;
         uint256 pieces;
-        uint256 available;
         uint256 max;
         uint256 openTs;
         uint256 closeTs;
