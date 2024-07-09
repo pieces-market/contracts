@@ -52,13 +52,12 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
         if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
-        // Creating new NFT (asset)
-        FractAsset asset = new FractAsset(name, symbol, uri, pieces, msg.sender);
+        /// @notice Creating new NFT (asset)
+        FractAsset asset = new FractAsset(name, symbol, uri, address(this));
 
         auction.asset = address(asset);
         auction.price = price;
         auction.pieces = pieces;
-        auction.available = pieces;
         auction.max = max;
         auction.openTs = start;
         auction.closeTs = start + (span * 1 days);
@@ -85,16 +84,14 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         Auction storage auction = s_auctions[id];
         if (auction.auctionState != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
-        if (auction.available < pieces) revert Auctioner__InsufficientPieces();
+        if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
+        if (FractAsset(auction.asset).balanceOf(msg.sender) >= auction.max) revert Auctioner__BuyLimitExceeded();
 
         uint256 cost = auction.price * pieces;
         if (msg.value < cost) revert Auctioner__InsufficientFunds();
         if (msg.value > cost) revert Auctioner__Overpayment();
 
-        /// @dev Not necessary? test if storing is more expensive than calc
-        //auction.payments += msg.value;
-
-        auction.available -= pieces;
+        auction.pieces -= pieces;
         if (auction.ownerToFunds[msg.sender] == 0) auction.assetOwners.push(msg.sender);
         auction.ownerToFunds[msg.sender] += msg.value;
 
@@ -103,13 +100,14 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
         emit Purchase(id, pieces, msg.sender);
 
-        if (auction.available == 0) {
+        /// @dev Consider moving below into Keepers -> check gas costs
+        if (auction.pieces == 0) {
             auction.auctionState = AuctionState.CLOSED;
 
             emit StateChange(id, auction.auctionState);
 
             /// @notice Transfer funds to the broker
-            uint256 payment = auction.pieces * auction.price;
+            uint256 payment = FractAsset(auction.asset).totalSupply() * auction.price;
 
             (bool success, ) = auction.recipient.call{value: payment}("");
             if (!success) revert Auctioner__TransferFailed();
@@ -137,8 +135,6 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     //              Developer Tools
     // =========================================
 
-    function open() external;
-
     /// @dev Getter -> to be removed
     function getState(uint256 id) public view returns (AuctionState) {
         Auction storage auction = s_auctions[id];
@@ -165,6 +161,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (errorType == 7) revert Auctioner__IncorrectTimestamp();
         if (errorType == 8) revert Auctioner__ZeroAddressNotAllowed();
         if (errorType == 9) revert Auctioner__Overpayment();
+        if (errorType == 10) revert Auctioner__BuyLimitExceeded();
     }
 
     /// @dev HELPER DEV ONLY
@@ -172,7 +169,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         Auction storage auction = s_auctions[id];
 
         // 0 - UNINITIALIZED
-        // 1 - PLANNED
+        // 1 - SCHEDULED
         // 2 - OPENED
         // 3 - CLOSED
         // 4 - FAILED
