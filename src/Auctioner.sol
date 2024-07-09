@@ -53,7 +53,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
         // Creating new NFT (asset)
-        FractAsset asset = new FractAsset(name, symbol, uri, pieces, recipient);
+        FractAsset asset = new FractAsset(name, symbol, uri, pieces, msg.sender);
 
         auction.asset = address(asset);
         auction.price = price;
@@ -65,10 +65,10 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.recipient = recipient;
 
         if (auction.openTs > block.timestamp) {
-            auction.auctionState = AuctionState.PLANNED;
+            auction.auctionState = AuctionState.SCHEDULED;
             s_scheduledAuctions.push(s_totalAuctions);
 
-            emit Plan(s_totalAuctions, start);
+            emit Schedule(s_totalAuctions, start);
         } else {
             auction.auctionState = AuctionState.OPENED;
         }
@@ -86,12 +86,36 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.auctionState != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
         if (auction.available < pieces) revert Auctioner__InsufficientPieces();
-        if (msg.value < (pieces * auction.price)) revert Auctioner__InsufficientFunds();
 
-        // emit Purchase();
-        //
-        // If last piece bought ->
-        // emit TransferToBroker();
+        uint256 cost = auction.price * pieces;
+        if (msg.value < cost) revert Auctioner__InsufficientFunds();
+        if (msg.value > cost) revert Auctioner__Overpayment();
+
+        /// @dev Not necessary? test if storing is more expensive than calc
+        //auction.payments += msg.value;
+
+        auction.available -= pieces;
+        if (auction.ownerToFunds[msg.sender] == 0) auction.assetOwners.push(msg.sender);
+        auction.ownerToFunds[msg.sender] += msg.value;
+
+        /// @notice Mint pieces and immediately delegate votes to the buyer
+        FractAsset(auction.asset).safeBatchMint(msg.sender, pieces);
+
+        emit Purchase(id, pieces, msg.sender);
+
+        if (auction.available == 0) {
+            auction.auctionState = AuctionState.CLOSED;
+
+            emit StateChange(id, auction.auctionState);
+
+            /// @notice Transfer funds to the broker
+            uint256 payment = auction.pieces * auction.price;
+
+            (bool success, ) = auction.recipient.call{value: payment}("");
+            if (!success) revert Auctioner__TransferFailed();
+
+            emit TransferToBroker(id, auction.recipient, payment);
+        }
     }
 
     /// @inheritdoc IAuctioner
@@ -112,6 +136,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     // =========================================
     //              Developer Tools
     // =========================================
+
+    function open() external;
 
     /// @dev Getter -> to be removed
     function getState(uint256 id) public view returns (AuctionState) {
@@ -138,6 +164,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (errorType == 6) revert Auctioner__ZeroValueNotAllowed();
         if (errorType == 7) revert Auctioner__IncorrectTimestamp();
         if (errorType == 8) revert Auctioner__ZeroAddressNotAllowed();
+        if (errorType == 9) revert Auctioner__Overpayment();
     }
 
     /// @dev HELPER DEV ONLY
@@ -159,7 +186,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @dev HELPER DEV ONLY
     function eventHack(uint256 eventId) external {
         // 0 - Create event
-        // 1 - Plan event
+        // 1 - Schedule event
         // 2 - Purchase event
         // 3 - Buyout event
         // 4 - Claim event
@@ -169,13 +196,13 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // 8 - StateChange event
 
         if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
-        if (eventId == 1) emit Plan(0, 0);
-        if (eventId == 2) emit Purchase();
+        if (eventId == 1) emit Schedule(0, 0);
+        if (eventId == 2) emit Purchase(0, 0, address(0));
         if (eventId == 3) emit Buyout();
         if (eventId == 4) emit Claim();
         if (eventId == 5) emit Refund();
         if (eventId == 6) emit Vote();
-        if (eventId == 7) emit TransferToBroker(address(0), 0);
+        if (eventId == 7) emit TransferToBroker(0, address(0), 0);
         if (eventId == 8) emit StateChange(0, AuctionState.UNINITIALIZED);
     }
 }
