@@ -33,7 +33,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
     /// @param start Timestamp when the auction should open
-    /// @param end Timestamp when the auction should close
+    /// @param span Duration of auction expressed in days. Smallest possible value is 1 (1 day auction duration)
     /// @param recipient Wallet address where funds from asset sale will be transferred
     function create(
         string memory name,
@@ -43,12 +43,12 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         uint256 pieces,
         uint256 max,
         uint256 start,
-        uint256 end,
+        uint256 span,
         address recipient
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
-        if (start < block.timestamp || end <= block.timestamp || (start + 1 days) >= end) revert Auctioner__IncorrectTimestamp();
+        if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
         if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
@@ -61,7 +61,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.available = pieces;
         auction.max = max;
         auction.openTs = start;
-        auction.closeTs = end;
+        auction.closeTs = start + (span * 1 days);
         auction.recipient = recipient;
 
         if (auction.openTs > block.timestamp) {
@@ -74,7 +74,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         }
 
         emit StateChange(s_totalAuctions, auction.auctionState);
-        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient);
+        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
 
         s_totalAuctions += 1;
     }
