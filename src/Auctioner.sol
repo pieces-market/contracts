@@ -68,7 +68,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
             auction.auctionState = AuctionState.PLANNED;
             s_scheduledAuctions.push(s_totalAuctions);
 
-            emit Plan(s_totalAuctions);
+            emit Plan(s_totalAuctions, start);
         } else {
             auction.auctionState = AuctionState.OPENED;
         }
@@ -80,7 +80,14 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function buy(uint256 id) external payable override nonReentrant {
+    function buy(uint256 id, uint256 pieces) external payable override nonReentrant {
+        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
+        Auction storage auction = s_auctions[id];
+        if (auction.auctionState != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
+        if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
+        if (auction.available < pieces) revert Auctioner__InsufficientPieces();
+        if (msg.value < (pieces * auction.price)) revert Auctioner__InsufficientFunds();
+
         // emit Purchase();
         //
         // If last piece bought ->
@@ -125,7 +132,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
         if (errorType == 1) revert Auctioner__AuctionNotOpened();
         if (errorType == 2) revert Auctioner__InsufficientPieces();
-        if (errorType == 3) revert Auctioner__NotEnoughFunds();
+        if (errorType == 3) revert Auctioner__InsufficientFunds();
         if (errorType == 4) revert Auctioner__TransferFailed();
         if (errorType == 5) revert Auctioner__AuctionAlreadyInitialized();
         if (errorType == 6) revert Auctioner__ZeroValueNotAllowed();
@@ -162,7 +169,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // 8 - StateChange event
 
         if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
-        if (eventId == 1) emit Plan(0);
+        if (eventId == 1) emit Plan(0, 0);
         if (eventId == 2) emit Purchase();
         if (eventId == 3) emit Buyout();
         if (eventId == 4) emit Claim();
