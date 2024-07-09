@@ -13,13 +13,10 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
     /// @dev check if buyer of token has vote also
 
-    /// @dev ERROR!
-    /// @dev Get rid of Owner? Do we even need owner for this contract?
-
     uint256 private supply;
     string private baseURI;
 
-    // We are getting 'name' and 'symbol' from Auctioner.sol
+    // We are getting 'name' and 'symbol' from Auctioner.sol -> Owner of this contract is Auctioner.sol
     constructor(
         string memory name,
         string memory symbol,
@@ -40,7 +37,7 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev Override tokenURI to keep 1 URI for all tokens
 
     // Multi-mint function to mint multiple tokens to a single user
-    function safeBatchMint(address to, uint256 quantity) external {
+    function safeBatchMint(address to, uint256 quantity) external onlyOwner {
         _safeMint(to, quantity);
         _delegate(to, to);
     }
