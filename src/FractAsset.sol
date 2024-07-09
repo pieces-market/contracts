@@ -13,25 +13,18 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
     /// @dev check if buyer of token has vote also
 
-    uint256 private supply;
+    /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
 
     // We are getting 'name' and 'symbol' from Auctioner.sol -> Owner of this contract is Auctioner.sol
-    constructor(
-        string memory name,
-        string memory symbol,
-        string memory uri,
-        uint256 pieces,
-        address owner
-    ) ERC721A(name, symbol) EIP712(name, symbol) Ownable(owner) {
-        supply = pieces;
+    constructor(string memory name, string memory symbol, string memory uri, address owner) ERC721A(name, symbol) EIP712(name, symbol) Ownable(owner) {
         baseURI = uri;
     }
 
     // This will lead to Metadata, which will be unique for each token
     // There will be 'image' field in Metadata that will be same for all tokens per asset
-    function _baseURI() internal pure override returns (string memory) {
-        return "https";
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
     }
 
     /// @dev Override tokenURI to keep 1 URI for all tokens
@@ -41,6 +34,10 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
         _safeMint(to, quantity);
         _delegate(to, to);
     }
+
+    /// @dev WE NEED TO OVERRIDE BURN, DELEGATE etc.!!! (onlyOwner)
+    ///
+    ///
 
     /// @dev Delegate needs to be called to assign votes
     // function delegateVotes(address delegatee) external {
