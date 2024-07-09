@@ -6,7 +6,7 @@ interface IAuctioner {
     error Auctioner__AuctionDoesNotExist();
     error Auctioner__AuctionNotOpened();
     error Auctioner__InsufficientPieces();
-    error Auctioner__NotEnoughFunds();
+    error Auctioner__InsufficientFunds();
     error Auctioner__TransferFailed();
     error Auctioner__AuctionAlreadyInitialized();
     error Auctioner__ZeroValueNotAllowed();
@@ -20,7 +20,7 @@ interface IAuctioner {
         OPENED,
         CLOSED,
         FAILED,
-        VOTING,
+        VOTING, // Rethink this while developing Governor
         FINISHED,
         ARCHIVED
     }
@@ -43,7 +43,7 @@ interface IAuctioner {
 
     /// @dev Events
     event Create(uint256 indexed id, address indexed asset, uint256 price, uint256 pieces, uint256 max, uint256 start, uint256 end, address indexed recipient);
-    event Plan(uint256 indexed id);
+    event Plan(uint256 indexed id, uint256 indexed start);
     event Purchase();
     event Buyout();
     event Claim();
@@ -54,8 +54,9 @@ interface IAuctioner {
 
     /// @notice Allows buying pieces of asset auctioned by broker
     /// @param id Auction id that we want to interact with
+    /// @param pieces Number of pieces that user wants to buy
     /// @dev Emits Purchase event and TransferToBroker event if last piece has been bought
-    function buy(uint256 id) external payable;
+    function buy(uint256 id, uint256 pieces) external payable;
 
     /// @notice Allows making an offer to buy a certain asset auctioned by broker instantly
     /// @param id Auction id that we want to interact with
