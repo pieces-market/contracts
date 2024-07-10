@@ -126,9 +126,35 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // emit Claim();
     }
 
+    /// @dev Function that will be refactored while connecting stuff for Chainlink Keepers
+    function assignRefunds() external {}
+
     /// @inheritdoc IAuctioner
-    function refund() external override {
-        // emit Refund();
+    function refund(uint256 id) external override {
+        /// @dev Do we burn tokens? -> expensive solution
+        Auction storage auction = s_auctions[id];
+
+        uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
+        // if (tokenBalance == 0) revert Auctioner__InsufficientFunds();
+        uint256 amount = tokenBalance * auction.price;
+
+        // uint amount = s_funderToFunds[msg.sender];
+
+        if (amount > 0) {
+            // s_funderToFunds[msg.sender] = 0;
+            FractAsset(auction.asset).burnFrom();
+        } else {
+            revert Auctioner__InsufficientFunds();
+        }
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+
+        if (!success) {
+            // s_funderToFunds[msg.sender] = amount;
+            revert Auctioner__TransferFailed();
+        }
+
+        emit Refund(id, amount, msg.sender);
     }
 
     // =========================================
@@ -197,7 +223,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (eventId == 2) emit Purchase(0, 0, address(0));
         if (eventId == 3) emit Buyout();
         if (eventId == 4) emit Claim();
-        if (eventId == 5) emit Refund();
+        if (eventId == 5) emit Refund(0, 0, address(0));
         if (eventId == 6) emit Vote();
         if (eventId == 7) emit TransferToBroker(0, address(0), 0);
         if (eventId == 8) emit StateChange(0, AuctionState.UNINITIALIZED);
