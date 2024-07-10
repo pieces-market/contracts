@@ -48,7 +48,7 @@ interface IAuctioner {
     event Purchase(uint256 indexed id, uint256 indexed pieces, address buyer);
     event Buyout();
     event Claim();
-    event Refund();
+    event Refund(uint256 id, uint256 amount, address user);
     event Vote(); // Check if event is available in gov
     event TransferToBroker(uint256 indexed id, address indexed wallet, uint256 indexed amount);
     event StateChange(uint256 indexed id, AuctionState indexed state);
@@ -67,5 +67,5 @@ interface IAuctioner {
     function claim() external;
 
     /// @notice Allows withdrawing funds by buyers if auction failed selling all pieces in given time period
-    function refund() external;
+    function refund(uint256 id) external;
 }
