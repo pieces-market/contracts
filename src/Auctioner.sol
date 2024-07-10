@@ -85,7 +85,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.auctionState != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
-        if (FractAsset(auction.asset).balanceOf(msg.sender) >= auction.max) revert Auctioner__BuyLimitExceeded();
+        if (pieces > auction.max || FractAsset(auction.asset).balanceOf(msg.sender) >= auction.max) revert Auctioner__BuyLimitExceeded();
 
         uint256 cost = auction.price * pieces;
         if (msg.value < cost) revert Auctioner__InsufficientFunds();
