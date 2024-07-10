@@ -3,12 +3,15 @@ pragma solidity ^0.8.25;
 
 import "@ERC721A/contracts/ERC721A.sol";
 import "@ERC721A/contracts/extensions/ERC721ABurnable.sol";
+import "@ERC721A/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/governance/utils/Votes.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
+/// @dev ERC404
+
 /// @dev ERC721A version of Asset (NFT) contract with cheap multiple minting function
-contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
+contract FractAsset is ERC721A, ERC721ABurnable, ERC721AQueryable, EIP712, Votes, Ownable {
     /// @dev ERROR!
     /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
     /// @dev check if buyer of token has vote also
@@ -35,6 +38,14 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
         _delegate(to, to);
     }
 
+    function burnFrom() external onlyOwner {
+        uint256[] memory tokenIds = this.tokensOfOwner(msg.sender);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            _burn(tokenIds[i]);
+        }
+    }
+
     /// @dev WE NEED TO OVERRIDE BURN, DELEGATE etc.!!! (onlyOwner)
     ///
     ///
@@ -47,11 +58,12 @@ contract FractAsset is ERC721A, ERC721ABurnable, EIP712, Votes, Ownable {
     /// @dev See {ERC721-_afterTokenTransfer}. Adjusts votes when tokens are transferred.
     /// @dev Instead of {_afterTokenTransfer} that is used in ERC721, ERC721A uses {_afterTokenTransfers} (with an 's')
     /// @dev Emits a {IVotes-DelegateVotesChanged} event.
-    function _afterTokenTransfers(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual override {
-        _transferVotingUnits(from, to, batchSize);
-        _delegate(to, to);
-        super._afterTokenTransfers(from, to, firstTokenId, batchSize);
-    }
+    /// @dev This function is corrupting burn
+    // function _afterTokenTransfers(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual override {
+    //     _transferVotingUnits(from, to, batchSize);
+    //     _delegate(to, to);
+    //     super._afterTokenTransfers(from, to, firstTokenId, batchSize);
+    // }
 
     /// @dev Returns the balance of `account`.
     /// @dev WARNING: Overriding this function will likely result in incorrect vote tracking.
