@@ -35,8 +35,6 @@ interface IAuctioner {
         uint256 max;
         uint256 openTs;
         uint256 closeTs;
-        address[] assetOwners; // unused
-        mapping(address => uint) ownerToFunds; // we can get it from NFT | balanceOf() -> returns pieces
         address recipient;
         AuctionState auctionState;
     }
