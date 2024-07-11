@@ -24,21 +24,20 @@ contract FractAsset is ERC721A, ERC721ABurnable, ERC721AQueryable, EIP712, Votes
         baseURI = uri;
     }
 
+    /// @dev Override tokenURI to keep 1 URI for all tokens?
     // This will lead to Metadata, which will be unique for each token
     // There will be 'image' field in Metadata that will be same for all tokens per asset
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
-    /// @dev Override tokenURI to keep 1 URI for all tokens
-
-    // Multi-mint function to mint multiple tokens to a single user
+    /// @notice Multi-mint function to mint multiple tokens to a single user
     function safeBatchMint(address to, uint256 quantity) external onlyOwner {
         _safeMint(to, quantity);
         _delegate(to, to);
     }
 
-    function burnFrom() external onlyOwner {
+    function burnBatch() external onlyOwner {
         uint256[] memory tokenIds = this.tokensOfOwner(msg.sender);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
