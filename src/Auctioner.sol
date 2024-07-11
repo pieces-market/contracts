@@ -92,8 +92,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (msg.value > cost) revert Auctioner__Overpayment();
 
         auction.pieces -= pieces;
-        if (auction.ownerToFunds[msg.sender] == 0) auction.assetOwners.push(msg.sender);
-        auction.ownerToFunds[msg.sender] += msg.value;
+        if (auction.ownerToFunds[msg.sender] == 0) auction.assetOwners.push(msg.sender); /// @dev Remove?
+        auction.ownerToFunds[msg.sender] += msg.value; /// @dev Remove?
 
         /// @notice Mint pieces and immediately delegate votes to the buyer
         FractAsset(auction.asset).safeBatchMint(msg.sender, pieces);
@@ -131,28 +131,20 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function refund(uint256 id) external override {
-        /// @dev Do we burn tokens? -> expensive solution
         Auction storage auction = s_auctions[id];
 
         uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
-        // if (tokenBalance == 0) revert Auctioner__InsufficientFunds();
         uint256 amount = tokenBalance * auction.price;
 
-        // uint amount = s_funderToFunds[msg.sender];
-
         if (amount > 0) {
-            // s_funderToFunds[msg.sender] = 0;
-            FractAsset(auction.asset).burnFrom();
+            FractAsset(auction.asset).burnBatch();
         } else {
             revert Auctioner__InsufficientFunds();
         }
 
         (bool success, ) = msg.sender.call{value: amount}("");
-
-        if (!success) {
-            // s_funderToFunds[msg.sender] = amount;
-            revert Auctioner__TransferFailed();
-        }
+        /// @dev If this revert will take place check if tokens were not burnt
+        if (!success) revert Auctioner__TransferFailed();
 
         emit Refund(id, amount, msg.sender);
     }
