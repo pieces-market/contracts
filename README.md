@@ -2,6 +2,11 @@
 
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
+## Deployed Contracts:
+
+-   **Aleph Zero Testnet:** 0x0
+-   **Sepolia:** 0x5bbdCB1cA918FB54Ef2f42fd7550F37273C43534
+
 NFT - pNFT (mint)
 
 -   predefiniowany czas trwania inwestycji
