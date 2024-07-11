@@ -2,7 +2,8 @@
 pragma solidity ^0.8.25;
 
 import "@ERC721A/contracts/ERC721A.sol";
-import "@ERC721A/contracts/extensions/ERC721ABurnable.sol";
+/// @dev Do we need this? ERC721A has built in burn fn
+// import "@ERC721A/contracts/extensions/ERC721ABurnable.sol";
 import "@ERC721A/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/governance/utils/Votes.sol";
@@ -11,7 +12,7 @@ import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 /// @dev ERC404
 
 /// @dev ERC721A version of Asset (NFT) contract with cheap multiple minting function
-contract FractAsset is ERC721A, ERC721ABurnable, ERC721AQueryable, EIP712, Votes, Ownable {
+contract FractAsset is ERC721A, ERC721AQueryable, EIP712, Votes, Ownable {
     /// @dev ERROR!
     /// @dev Consider case when, tokenTransfer is peformed during voting (original owner already voted then transferred token)
     /// @dev check if buyer of token has vote also
