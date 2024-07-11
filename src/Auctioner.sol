@@ -129,6 +129,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function refund(uint256 id) external override {
+        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
 
         uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
