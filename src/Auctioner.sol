@@ -92,8 +92,6 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (msg.value > cost) revert Auctioner__Overpayment();
 
         auction.pieces -= pieces;
-        if (auction.ownerToFunds[msg.sender] == 0) auction.assetOwners.push(msg.sender); /// @dev Remove?
-        auction.ownerToFunds[msg.sender] += msg.value; /// @dev Remove?
 
         /// @notice Mint pieces and immediately delegate votes to the buyer
         FractAsset(auction.asset).safeBatchMint(msg.sender, pieces);
@@ -153,15 +151,22 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     //              Developer Tools
     // =========================================
 
-    /// @dev Getter -> to be removed
-    function getState(uint256 id) public view returns (AuctionState) {
+    /// @dev Tokens Owned By Address Getter -> to be removed
+    function getTokens(uint id, address owner) public view returns (uint) {
         Auction storage auction = s_auctions[id];
 
-        return auction.auctionState;
+        return FractAsset(auction.asset).balanceOf(owner);
+    }
+
+    /// @dev Auction Data Getter -> to be removed
+    function getData(uint256 id) public view returns (address, uint, uint, uint, uint, uint, address, AuctionState) {
+        Auction storage auction = s_auctions[id];
+
+        return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.auctionState);
     }
 
     /// @dev HELPER DEV ONLY
-    function errorHack(uint256 errorType) external pure {
+    function errorHack(uint256 errorType) public pure {
         // 0 - Auctioner__AuctionDoesNotExist
         // 1 - Auctioner__AuctionNotOpened
         // 2 - Auctioner__InsufficientPieces
@@ -183,7 +188,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @dev HELPER DEV ONLY
-    function stateHack(uint256 id, uint256 state) external {
+    function stateHack(uint256 id, uint256 state) public {
         Auction storage auction = s_auctions[id];
 
         // 0 - UNINITIALIZED
@@ -199,7 +204,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @dev HELPER DEV ONLY
-    function eventHack(uint256 eventId) external {
+    function eventHack(uint256 eventId) public {
         // 0 - Create event
         // 1 - Schedule event
         // 2 - Purchase event
