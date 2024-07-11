@@ -43,5 +43,11 @@ contract AuctionerTest is Test {
 
         vm.prank(BUYER);
         auctioner.refund(0);
+
+        auctioner.getTokens(0, BUYER);
+
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        vm.prank(BUYER);
+        auctioner.refund(0);
     }
 }
