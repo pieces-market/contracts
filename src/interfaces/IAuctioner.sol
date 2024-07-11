@@ -30,13 +30,12 @@ interface IAuctioner {
     /// @dev Structs
     struct Auction {
         address asset;
-        string uri;
         uint256 price;
         uint256 pieces;
         uint256 max;
         uint256 openTs;
         uint256 closeTs;
-        address[] assetOwners;
+        address[] assetOwners; // unused
         mapping(address => uint) ownerToFunds; // we can get it from NFT | balanceOf() -> returns pieces
         address recipient;
         AuctionState auctionState;
