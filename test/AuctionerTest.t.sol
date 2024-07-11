@@ -38,13 +38,18 @@ contract AuctionerTest is Test {
 
         auctioner.create(name, symbol, uri, price, pieces, max, start, end, rec);
 
+        uint tokens;
+        tokens = auctioner.getTokens(0, BUYER);
+        assertEq(tokens, 0);
+
         vm.prank(BUYER);
         auctioner.buy{value: 6 ether}(0, 3);
 
         vm.prank(BUYER);
         auctioner.refund(0);
 
-        auctioner.getTokens(0, BUYER);
+        tokens = auctioner.getTokens(0, BUYER);
+        assertEq(tokens, 0);
 
         vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
         vm.prank(BUYER);
