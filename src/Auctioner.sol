@@ -135,7 +135,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         uint256 amount = tokenBalance * auction.price;
 
         if (amount > 0) {
-            FractAsset(auction.asset).burnBatch();
+            FractAsset(auction.asset).burnBatch(msg.sender);
         } else {
             revert Auctioner__InsufficientFunds();
         }
