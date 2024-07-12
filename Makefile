@@ -76,7 +76,6 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 # --skip-simulation
-# 0x89C9040709ebce46e3b68E75c2664653E9816c9B
 ifeq ($(findstring --network alepht,$(ARGS)),--network alepht)
 	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ALEPH_API_KEY) -vvvv
 endif
