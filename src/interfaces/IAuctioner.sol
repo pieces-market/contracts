@@ -34,7 +34,7 @@ interface IAuctioner {
         uint256 openTs;
         uint256 closeTs;
         address recipient;
-        AuctionState auctionState;
+        AuctionState state;
     }
 
     /// @notice Emitted when an auction is created
