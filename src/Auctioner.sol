@@ -131,6 +131,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     function refund(uint256 id) external override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
+        if (auction.auctionState != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
 
         uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
         uint256 amount = tokenBalance * auction.price;
@@ -177,15 +178,16 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
         if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
         if (errorType == 1) revert Auctioner__AuctionNotOpened();
-        if (errorType == 2) revert Auctioner__InsufficientPieces();
-        if (errorType == 3) revert Auctioner__InsufficientFunds();
-        if (errorType == 4) revert Auctioner__TransferFailed();
-        if (errorType == 5) revert Auctioner__AuctionAlreadyInitialized();
-        if (errorType == 6) revert Auctioner__ZeroValueNotAllowed();
-        if (errorType == 7) revert Auctioner__IncorrectTimestamp();
-        if (errorType == 8) revert Auctioner__ZeroAddressNotAllowed();
-        if (errorType == 9) revert Auctioner__Overpayment();
-        if (errorType == 10) revert Auctioner__BuyLimitExceeded();
+        if (errorType == 2) revert Auctioner__AuctionNotFailed();
+        if (errorType == 3) revert Auctioner__InsufficientPieces();
+        if (errorType == 4) revert Auctioner__InsufficientFunds();
+        if (errorType == 5) revert Auctioner__TransferFailed();
+        if (errorType == 6) revert Auctioner__AuctionAlreadyInitialized();
+        if (errorType == 7) revert Auctioner__ZeroValueNotAllowed();
+        if (errorType == 8) revert Auctioner__IncorrectTimestamp();
+        if (errorType == 9) revert Auctioner__ZeroAddressNotAllowed();
+        if (errorType == 10) revert Auctioner__Overpayment();
+        if (errorType == 11) revert Auctioner__BuyLimitExceeded();
     }
 
     /// @dev HELPER DEV ONLY
