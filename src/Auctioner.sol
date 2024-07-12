@@ -120,7 +120,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function claim() external override {
+    function claim(uint256 id) external override {
         // emit Claim();
     }
 
