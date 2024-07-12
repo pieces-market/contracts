@@ -2,7 +2,7 @@
 
 ## 🚀 **Deployments**
 
--   **Aleph Zero Testnet:** 0x0
+-   **Aleph Zero Testnet:** 0x89C9040709ebce46e3b68E75c2664653E9816c9B
 -   **Sepolia:** 0x5bbdCB1cA918FB54Ef2f42fd7550F37273C43534
 
 ## **Other**
