@@ -7,15 +7,15 @@
 
 ## 👷‍♂️ **To Implement**
 
--   mozliwosc glosowania jesli pojawi sie oferta wykupu assetu (early buyout) (tylko do wykupu)
-    [ktos wrzuca kase do tego wykupu na kontrakt -> udzialowcy glosuja -> decyzja i albo wykup kasa do udzialowcow albo zwrot]
--   starting price 100 usd
+-   The ability to vote if an early buyout offer for the asset appears (early buyout) (only for buyout)
+    [someone deposits money into the buyout contract -> shareholders vote -> decision is made, and either the buyout proceeds with money going to shareholders or the money is returned]
+-   Starting price 100 USD
 
 ## 📃 **Documentation**
 
 ### Contracts Structure
 
-### Auction States -> This will be moved into IAuctioner
+### Auction States
 
 -   **`UNINITIALIZED:`** Auction has not been initialized
 -   **`SCHEDULED:`** Auction has been initialized and awaits its start date
@@ -26,7 +26,7 @@
 -   **`FINISHED:`** All funds gathered from closed auction have been transferred to broker and broker transferred revenues to contract, buyers can claim revenues
 -   **`ARCHIVED:`** Everyone claimed their revenues, investment ultimately closed
 
-### Auction Structure -> This will be moved into IAuctioner
+### Auction Structure
 
 -   **`address asset:`** Address of NFT related to auctioned asset
 -   **`uint256 price:`** Single piece of asset price
@@ -35,17 +35,24 @@
 -   **`uint256 openTs:`** Timestamp when the auction opens
 -   **`uint256 closeTs:`** Timestamp when the auction ends
 -   **`address recipient:`** Wallet address where funds from asset sale will be transferred
--   **`auctionState:`** Current state of the auction
+-   **`auctionState state:`** Current state of the auction
 
-### Error Handling -> This will be moved into IAuctioner
+### Error Handling
 
 -   **`AuctionDoesNotExist:`** Error thrown when attempting to interact with a non-existent auction
 -   **`AuctionNotOpened:`** Error thrown when attempting to perform an action on an auction that hasn't opened yet
+-   **`AuctionNotFailed:`** Error thrown when user tries to refund but auction is not in failed state
 -   **`InsufficientPieces`**: Error thrown when there aren't enough pieces left to fulfill an order
--   **`NotEnoughFunds:`** Error thrown when there are insufficient funds for an action
+-   **`InsufficientFunds:`** Error thrown when there are insufficient funds for an action
 -   **`TransferFailed:`** Error thrown when a fund transfer operation fails
+-   **`AuctionAlreadyInitialized:`** Error thrown when admin calls create on existing auction
+-   **`ZeroValueNotAllowed:`** Error thrown when a zero value is provided as parameter where it is not allowed
+-   **`IncorrectTimestamp:`** Error thrown when a provided timestamp is incorrect or invalid
+-   **`ZeroAddressNotAllowed:`** Error thrown when a zero address is provided where it is not allowed
+-   **`Overpayment:`** Error thrown when an overpayment is detected in buy or buyout functions
+-   **`BuyLimitExceeded:`** Error thrown when the buy limit of pieces for an auction is exceeded
 
-### Events -> This will be moved into IAuctioner
+### Events
 
 -   **`Create:`** Emitted when a new auction is created.
 -   **`Schedule:`** Emitted when auction is created with open timestamp in future.
