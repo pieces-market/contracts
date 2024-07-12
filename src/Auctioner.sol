@@ -50,7 +50,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
         if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
-        if (auction.auctionState != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
+        if (auction.state != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
         /// @notice Creating new NFT (asset)
         FractAsset asset = new FractAsset(name, symbol, uri, address(this));
@@ -64,15 +64,15 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.recipient = recipient;
 
         if (auction.openTs > block.timestamp) {
-            auction.auctionState = AuctionState.SCHEDULED;
+            auction.state = AuctionState.SCHEDULED;
             s_scheduledAuctions.push(s_totalAuctions);
 
             emit Schedule(s_totalAuctions, start);
         } else {
-            auction.auctionState = AuctionState.OPENED;
+            auction.state = AuctionState.OPENED;
         }
 
-        emit StateChange(s_totalAuctions, auction.auctionState);
+        emit StateChange(s_totalAuctions, auction.state);
         emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
 
         s_totalAuctions += 1;
@@ -82,7 +82,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     function buy(uint256 id, uint256 pieces) external payable override nonReentrant {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
-        if (auction.auctionState != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
+        if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
         if ((FractAsset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
@@ -100,9 +100,9 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
         /// @dev Consider moving below into Keepers -> check gas costs
         if (auction.pieces == 0) {
-            auction.auctionState = AuctionState.CLOSED;
+            auction.state = AuctionState.CLOSED;
 
-            emit StateChange(id, auction.auctionState);
+            emit StateChange(id, auction.state);
 
             /// @notice Transfer funds to the broker
             uint256 payment = FractAsset(auction.asset).totalSupply() * auction.price;
@@ -131,7 +131,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     function refund(uint256 id) external override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
-        if (auction.auctionState != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
+        if (auction.state != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
 
         uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
         uint256 amount = tokenBalance * auction.price;
@@ -164,7 +164,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     function getData(uint256 id) public view returns (address, uint, uint, uint, uint, uint, address, AuctionState) {
         Auction storage auction = s_auctions[id];
 
-        return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.auctionState);
+        return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.state);
     }
 
     /// @dev HELPER DEV ONLY
@@ -203,7 +203,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // 6 - FINISHED
         // 7 - ARCHIVED
 
-        auction.auctionState = AuctionState(state);
+        auction.state = AuctionState(state);
     }
 
     /// @dev HELPER DEV ONLY
