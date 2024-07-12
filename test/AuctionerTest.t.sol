@@ -45,6 +45,9 @@ contract AuctionerTest is Test {
         vm.prank(BUYER);
         auctioner.buy{value: 6 ether}(0, 3);
 
+        /// @dev Changing auction state to failed, so refunds are available
+        auctioner.stateHack(0, 4);
+
         vm.prank(BUYER);
         auctioner.refund(0);
 
