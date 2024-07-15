@@ -21,7 +21,7 @@ contract FractAsset is ERC721A, ERC721AQueryable, EIP712, Votes, Ownable {
     string private baseURI;
 
     // We are getting 'name' and 'symbol' from Auctioner.sol -> Owner of this contract is Auctioner.sol
-    constructor(string memory name, string memory symbol, string memory uri, address owner) ERC721A(name, symbol) EIP712(name, symbol) Ownable(owner) {
+    constructor(string memory name, string memory symbol, string memory uri, address owner) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
         baseURI = uri;
     }
 
