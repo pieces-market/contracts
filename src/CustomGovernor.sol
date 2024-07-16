@@ -9,7 +9,6 @@ contract CustomGovernor {
     /// @dev FUNCTION delegate
     /// @dev FUNCTION vote
     /// @dev FUNCTION getVotes
-    /// @dev FUNCTION votingPeriod
 
     /// @dev FUNCTION quorum = 51%
 
@@ -29,6 +28,22 @@ contract CustomGovernor {
     mapping(uint256 => ProposalVote) private _proposalVotes;
 
     constructor() {}
+
+    function propose() external {}
+
+    function execute() external {}
+
+    function cancel() external {}
+
+    function delegate() external {}
+
+    function vote() external {}
+
+    function getVotes() external {}
+
+    function votingPeriod() external {}
+
+    /// @dev SimpleVoting
 
     function proposalVotes(uint256 proposalId) public view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
         ProposalVote storage proposalVote = _proposalVotes[proposalId];
