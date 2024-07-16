@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @dev ERC404
 
 /// @dev Standard ERC721 version of Asset (NFT) with votes
-contract FractAsset is ERC721, ERC721Consecutive, ERC721Enumerable, ERC721Burnable, EIP712, ERC721Votes, Ownable {
+contract FractAssetERC721 is ERC721, ERC721Consecutive, ERC721Enumerable, ERC721Burnable, EIP712, ERC721Votes, Ownable {
     // We are getting 'name' and 'symbol' from Auctioner.sol
     constructor(address initialOwner) ERC721("MyToken", "MTK") Ownable(initialOwner) EIP712("MyToken", "1") {}
 
