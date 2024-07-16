@@ -19,7 +19,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     uint256[] private s_scheduledAuctions;
 
     /// @dev Mappings
-    mapping(uint256 id => Auction map) private s_auctions;
+    mapping(uint256 id => Auction) private s_auctions;
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
