@@ -13,7 +13,7 @@ contract UsualGovernor is Governor, GovernorCountingSimple, GovernorVotes, Gover
     /// @dev Currently we can only work with one NFT
     /// @dev We would need to create our own ERC20 designed for voting only
 
-    constructor(IVotes _token) Governor("FractGovernor") GovernorVotes(_token) GovernorVotesQuorumFraction(51) Ownable(msg.sender) {}
+    constructor(IVotes _token) Governor("UsualGovernor") GovernorVotes(_token) GovernorVotesQuorumFraction(51) Ownable(msg.sender) {}
 
     // The following functions are overrides required by Solidity.
 
