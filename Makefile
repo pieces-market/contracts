@@ -76,9 +76,16 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 # --skip-simulation
+# ifeq ($(findstring --network alepht,$(ARGS)),--network alepht)
+# 	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ALEPH_API_KEY) -vvvv
+# endif
+
 ifeq ($(findstring --network alepht,$(ARGS)),--network alepht)
-	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ALEPH_API_KEY) -vvvv
+	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --verify --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
 endif
 
 deployAuc:
-	@forge script script/DeployAuctioner.s.sol:DeployAuctioner $(NETWORK_ARGS)
+	@forge create Auctioner $(NETWORK_ARGS)
+
+verifyContract:
+	@forge verify-contract $(AUCTIONER_ADDRESS) Auctioner --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
