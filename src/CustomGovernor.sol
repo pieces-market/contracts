@@ -18,7 +18,6 @@ contract CustomGovernor is Ownable {
         Failed
     }
 
-    /// @dev ???
     enum VoteType {
         For,
         Against,
@@ -69,11 +68,14 @@ contract CustomGovernor is Ownable {
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
 
         if (vote == VoteType.For) proposal.forVotes += 1;
+        if (vote == VoteType.Against) proposal.againstVotes += 1;
+        if (vote == VoteType.Abstain) proposal.abstainVotes += 1;
     }
 
     function quorumReached(uint256 proposalId) internal view returns (bool) {
         ProposalCore storage proposal = _proposals[proposalId];
 
+        /// @dev total available votes (tokens minted so far per asset) <=
         return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
     }
 
@@ -90,7 +92,7 @@ contract CustomGovernor is Ownable {
     function votingPeriod() external {}
 
     /// @dev Getter
-    function proposals(uint256 proposalId) public view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
+    function proposalData(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
         ProposalCore storage proposal = _proposals[proposalId];
 
         return (proposal.againstVotes, proposal.forVotes, proposal.abstainVotes);
