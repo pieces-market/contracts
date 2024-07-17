@@ -13,13 +13,13 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     /// @dev Libraries
 
     /// @dev Variables
-    uint256 private s_totalAuctions;
+    uint256 private _totalAuctions;
 
     /// @dev Arrays
-    uint256[] private s_scheduledAuctions;
+    uint256[] private _scheduledAuctions;
 
     /// @dev Mappings
-    mapping(uint256 id => Auction) private s_auctions;
+    mapping(uint256 id => Auction) private _auctions;
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -46,7 +46,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         uint256 span,
         address recipient
     ) external onlyOwner {
-        Auction storage auction = s_auctions[s_totalAuctions];
+        Auction storage auction = _auctions[_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
         if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
@@ -65,23 +65,23 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
         if (auction.openTs > block.timestamp) {
             auction.state = AuctionState.SCHEDULED;
-            s_scheduledAuctions.push(s_totalAuctions);
+            _scheduledAuctions.push(_totalAuctions);
 
-            emit Schedule(s_totalAuctions, start);
+            emit Schedule(_totalAuctions, start);
         } else {
             auction.state = AuctionState.OPENED;
         }
 
-        emit StateChange(s_totalAuctions, auction.state);
-        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
+        emit StateChange(_totalAuctions, auction.state);
+        emit Create(_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
 
-        s_totalAuctions += 1;
+        _totalAuctions += 1;
     }
 
     /// @inheritdoc IAuctioner
     function buy(uint256 id, uint256 pieces) external payable override nonReentrant {
-        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
-        Auction storage auction = s_auctions[id];
+        if (id >= _totalAuctions) revert Auctioner__AuctionDoesNotExist();
+        Auction storage auction = _auctions[id];
         if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
@@ -129,8 +129,8 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function refund(uint256 id) external override {
-        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
-        Auction storage auction = s_auctions[id];
+        if (id >= _totalAuctions) revert Auctioner__AuctionDoesNotExist();
+        Auction storage auction = _auctions[id];
         if (auction.state != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
 
         uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
@@ -155,14 +155,14 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @dev Tokens Owned By Address Getter -> to be removed
     function getTokens(uint id, address owner) public view returns (uint) {
-        Auction storage auction = s_auctions[id];
+        Auction storage auction = _auctions[id];
 
         return FractAsset(auction.asset).balanceOf(owner);
     }
 
     /// @dev Auction Data Getter -> to be removed
     function getData(uint256 id) public view returns (address, uint, uint, uint, uint, uint, address, AuctionState) {
-        Auction storage auction = s_auctions[id];
+        Auction storage auction = _auctions[id];
 
         return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.state);
     }
@@ -192,7 +192,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
 
     /// @dev HELPER DEV ONLY
     function stateHack(uint256 id, uint256 state) public {
-        Auction storage auction = s_auctions[id];
+        Auction storage auction = _auctions[id];
 
         // 0 - UNINITIALIZED
         // 1 - SCHEDULED
