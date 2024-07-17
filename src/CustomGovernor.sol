@@ -1,21 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
-/// @dev This contract only will be allowed to execute buyout function from Auctioner
-contract CustomGovernor {
-    /// @dev FUNCTION votingPeriod
-    /// @dev FUNCTION execute -> if voting successful
-    /// @dev FUNCTION cancel -> if voting fails
-    /// @dev FUNCTION delegate
-    /// @dev FUNCTION vote
-    /// @dev FUNCTION getVotes
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @dev This contract only will be allowed to execute buyout function from Auctioner
+/// @dev Make Auctioner owner -> so it can call execute here by Chainlink Keepers?
+contract CustomGovernor is Ownable {
     /// @dev FUNCTION quorum = 51%
 
+    enum ProposalState {
+        Inactive,
+        Active,
+        Passed,
+        Failed
+    }
+
     enum VoteType {
-        Against,
         For,
+        Against,
         Abstain
+    }
+
+    struct ProposalCore {
+        uint256 timeLeft;
+        bool executed;
+        bool canceled;
     }
 
     struct ProposalVote {
@@ -25,9 +34,10 @@ contract CustomGovernor {
         mapping(address => bool) hasVoted;
     }
 
-    mapping(uint256 => ProposalVote) private _proposalVotes;
+    mapping(uint256 => ProposalCore) private _proposals;
+    mapping(uint256 proposalId => ProposalVote) private _proposalVotes;
 
-    constructor() {}
+    constructor(address owner) Ownable(owner) {}
 
     function propose() external {}
 
