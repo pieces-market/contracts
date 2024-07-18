@@ -42,6 +42,7 @@ contract FractAsset is ERC721A, ERC721AQueryable, EIP712, Votes, Ownable {
         uint256[] memory tokenIds = this.tokensOfOwner(owner);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
+            // _transferVotingUnits(from, to, batchSize); -> to (address(0))
             _burn(tokenIds[i]);
         }
     }
