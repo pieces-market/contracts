@@ -11,6 +11,7 @@ contract CustomGovernor is Ownable {
 
     error Governor__ProposalNotActive();
     error Governor__ProposalDoesNotExist();
+    error Governor__TokenAlreadyUsedForVoting(uint proposalId, uint tokenId);
 
     event Propose(uint indexed id, address indexed asset, uint indexed deadline, string description);
 
@@ -34,7 +35,7 @@ contract CustomGovernor is Ownable {
         uint256 forVotes;
         uint256 againstVotes;
         uint256 abstainVotes;
-        mapping(address => bool) hasVoted;
+        mapping(uint => bool) hasVoted;
         ProposalState state;
     }
 
@@ -78,11 +79,21 @@ contract CustomGovernor is Ownable {
         ProposalCore storage proposal = _proposals[proposalId];
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
 
-        uint power = FractAsset(proposal.asset).balanceOf(msg.sender);
+        /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
+        /// @dev In ERC721A check if address has already voted, if so do not transfer voting power, if not transfer voting power accordingly
+        uint[] memory tokenIds = FractAsset(proposal.asset).tokensOfOwner(msg.sender);
+        uint voteCount = tokenIds.length;
 
-        if (vote == VoteType.For) proposal.forVotes += power;
-        if (vote == VoteType.Against) proposal.againstVotes += power;
-        if (vote == VoteType.Abstain) proposal.abstainVotes += power;
+        // Mark all tokens as used for voting
+        for (uint i; i < voteCount; i++) {
+            if (proposal.hasVoted[tokenIds[i]] == true) revert Governor__TokenAlreadyUsedForVoting(proposalId, tokenIds[i]);
+
+            proposal.hasVoted[tokenIds[i]] = true;
+        }
+
+        if (vote == VoteType.For) proposal.forVotes += voteCount;
+        if (vote == VoteType.Against) proposal.againstVotes += voteCount;
+        if (vote == VoteType.Abstain) proposal.abstainVotes += voteCount;
     }
 
     function quorumReached(uint256 proposalId) internal view returns (bool) {
