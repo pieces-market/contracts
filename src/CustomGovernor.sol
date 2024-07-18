@@ -11,6 +11,8 @@ contract CustomGovernor is Ownable {
     error Governor__ProposalNotActive();
     error Governor__ProposalDoesNotExist();
 
+    event Propose(uint indexed id, address indexed asset, uint indexed deadline, string description);
+
     enum ProposalState {
         Inactive,
         Active,
@@ -27,6 +29,7 @@ contract CustomGovernor is Ownable {
     struct ProposalCore {
         address assset;
         uint256 timeLeft;
+        string description;
         ProposalState state;
         uint256 forVotes;
         uint256 againstVotes;
@@ -43,10 +46,17 @@ contract CustomGovernor is Ownable {
     /// @dev Constructor
     constructor(address owner) Ownable(owner) {}
 
-    function propose() external onlyOwner {
+    /// @dev This function will be called by 'buyout()' fn from 'Auctioner.sol'
+    function propose(address asset, string memory description) external onlyOwner {
         ProposalCore storage proposal = _proposals[_totalProposals];
 
+        proposal.assset = asset;
+        /// @dev To be confirmed -> how long will we give each proposal to live
+        proposal.timeLeft = block.timestamp + 1 days;
+        proposal.description = description;
         proposal.state = ProposalState.Active;
+
+        emit Propose(_totalProposals, asset, proposal.timeLeft, description);
 
         _totalProposals += 1;
     }
@@ -89,7 +99,11 @@ contract CustomGovernor is Ownable {
     function getVotes() external {}
 
     /// @dev Getter
-    function votingPeriod() external {}
+    function votingPeriod(uint proposalId) external view returns (uint) {
+        ProposalCore storage proposal = _proposals[proposalId];
+
+        return (proposal.timeLeft < block.timestamp) ? 0 : (proposal.timeLeft - block.timestamp);
+    }
 
     /// @dev Getter
     function proposalData(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
