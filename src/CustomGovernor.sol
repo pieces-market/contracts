@@ -2,6 +2,7 @@
 pragma solidity ^0.8.25;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {FractAsset} from "./FractAsset.sol";
 
 /// @dev This contract only will be allowed to execute buyout function from Auctioner
 /// @dev Make Auctioner owner -> so it can call execute here by Chainlink Keepers?
@@ -27,14 +28,14 @@ contract CustomGovernor is Ownable {
     }
 
     struct ProposalCore {
-        address assset;
+        address asset;
         uint256 timeLeft;
         string description;
-        ProposalState state;
         uint256 forVotes;
         uint256 againstVotes;
         uint256 abstainVotes;
         mapping(address => bool) hasVoted;
+        ProposalState state;
     }
 
     /// @dev Variables
@@ -50,7 +51,7 @@ contract CustomGovernor is Ownable {
     function propose(address asset, string memory description) external onlyOwner {
         ProposalCore storage proposal = _proposals[_totalProposals];
 
-        proposal.assset = asset;
+        proposal.asset = asset;
         /// @dev To be confirmed -> how long will we give each proposal to live
         proposal.timeLeft = block.timestamp + 1 days;
         proposal.description = description;
@@ -77,9 +78,11 @@ contract CustomGovernor is Ownable {
         ProposalCore storage proposal = _proposals[proposalId];
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
 
-        if (vote == VoteType.For) proposal.forVotes += 1;
-        if (vote == VoteType.Against) proposal.againstVotes += 1;
-        if (vote == VoteType.Abstain) proposal.abstainVotes += 1;
+        uint power = FractAsset(proposal.asset).balanceOf(msg.sender);
+
+        if (vote == VoteType.For) proposal.forVotes += power;
+        if (vote == VoteType.Against) proposal.againstVotes += power;
+        if (vote == VoteType.Abstain) proposal.abstainVotes += power;
     }
 
     function quorumReached(uint256 proposalId) internal view returns (bool) {
@@ -113,7 +116,9 @@ contract CustomGovernor is Ownable {
     }
 
     /// @dev Getter
-    function totalVotes(uint256 /* proposalId */) internal pure returns (uint256) {
-        return 0;
+    function totalVotes(uint256 proposalId) internal view returns (uint256) {
+        ProposalCore storage proposal = _proposals[proposalId];
+
+        return proposal.forVotes + proposal.againstVotes + proposal.abstainVotes;
     }
 }
