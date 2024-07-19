@@ -15,17 +15,22 @@ contract GovernorTest is Test {
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
-    address private OWNER;
+    address private OWNER = makeAddr("owner");
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
 
     function setUp() public {
+        deal(OWNER, STARTING_BALANCE);
+
+        vm.startPrank(OWNER);
         auctioner = new Auctioner();
-        console.log("Auctioner: ", address(auctioner));
         asset = new Asset("Asset", "AST", "https:", OWNER);
-        console.log("Asset: ", address(asset));
         governor = new Governor(address(auctioner));
+        vm.stopPrank();
+
+        console.log("Auctioner: ", address(auctioner));
+        console.log("Asset: ", address(asset));
         console.log("Governor: ", address(asset));
 
         deal(USER, STARTING_BALANCE);
