@@ -11,6 +11,7 @@ import {ICustomGovernor} from "../src/interfaces/ICustomGovernor.sol";
 contract CustomGovernorTest is Test {
     Auctioner public auctioner;
     Asset public asset;
+    CustomGovernor public governor;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
@@ -22,9 +23,15 @@ contract CustomGovernorTest is Test {
     function setUp() public {
         auctioner = new Auctioner();
         console.log("Auctioner: ", address(auctioner));
+        asset = new Asset("Asset", "AST", "https:", OWNER);
+        console.log("Asset: ", address(asset));
+        governor = new CustomGovernor(address(auctioner));
+        console.log("Governor: ", address(asset));
 
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
     }
+
+    function testSomething() public {}
 }
