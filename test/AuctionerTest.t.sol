@@ -3,7 +3,7 @@ pragma solidity ^0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
 import {Auctioner} from "../src/Auctioner.sol";
-import {FractAsset} from "../src/FractAsset.sol";
+import {Asset} from "../src/Asset.sol";
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 
 contract AuctionerTest is Test {
