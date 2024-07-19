@@ -72,6 +72,7 @@ contract CustomGovernor is Ownable {
         proposal.state = ProposalState.Failed;
     }
 
+    /// @dev This has to be in ERC721A
     function delegate() external {}
 
     function castVote(uint proposalId, VoteType vote) external {
