@@ -13,7 +13,7 @@
 
 ## 📃 **Documentation**
 
-### Contracts Structure
+### Auctioner Contract Structure
 
 ### Auction States
 
@@ -63,6 +63,10 @@
 -   **`Vote:`** (Additional event check if event is available in gov)
 -   **`TransferToBroker:`** Emitted when funds are transferred to the broker.
 -   **`StateChange:`** Emitted when the state of an auction changes.
+
+### Asset Contract Structure
+
+### Governor Contract Structure
 
 ### License
 
