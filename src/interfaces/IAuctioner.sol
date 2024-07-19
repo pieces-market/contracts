@@ -26,17 +26,6 @@ interface IAuctioner {
         ARCHIVED
     }
 
-    struct Auction {
-        address asset;
-        uint256 price;
-        uint256 pieces;
-        uint256 max;
-        uint256 openTs;
-        uint256 closeTs;
-        address recipient;
-        AuctionState state;
-    }
-
     /// @notice Emitted when an auction is created
     /// @param id The id of the auction
     /// @param asset The address of the NFT related to the auctioned asset
