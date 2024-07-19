@@ -2,7 +2,7 @@
 pragma solidity ^0.8.25;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {FractAsset} from "./FractAsset.sol";
+import {Asset} from "./Asset.sol";
 
 /// @dev This contract only will be allowed to execute buyout function from Auctioner
 /// @dev Make Auctioner owner -> so it can call execute here by Chainlink Keepers?
@@ -82,7 +82,7 @@ contract CustomGovernor is Ownable {
 
         /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
         /// @dev In ERC721A check if address has already voted, if so do not transfer voting power, if not transfer voting power accordingly
-        uint[] memory tokenIds = FractAsset(proposal.asset).tokensOfOwner(msg.sender);
+        uint[] memory tokenIds = Asset(proposal.asset).tokensOfOwner(msg.sender);
         uint voteCount = tokenIds.length;
 
         // Mark all tokens as used for voting
