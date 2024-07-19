@@ -11,12 +11,15 @@ contract AuctionerTest is Test {
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
-    address private OWNER;
+    address private OWNER = makeAddr("owner");
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
 
     function setUp() public {
+        deal(OWNER, STARTING_BALANCE);
+
+        vm.prank(OWNER);
         auctioner = new Auctioner();
         console.log("Auctioner: ", address(auctioner));
 
@@ -36,6 +39,7 @@ contract AuctionerTest is Test {
         uint end = block.timestamp + 7 days;
         address rec = DEVIL;
 
+        vm.prank(OWNER);
         auctioner.create(name, symbol, uri, price, pieces, max, start, end, rec);
 
         uint tokens;
