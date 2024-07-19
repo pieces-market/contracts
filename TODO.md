@@ -5,5 +5,5 @@
 
 transaction cost(Remix) \* https://etherscan.io/gastracker -> GWEI: convert GWEI https://eth-converter.com/ into USD
 
-1. Check if FractAsset tracks votes correctly and works with burn fn
+1. Write tests for Auctioner, Asset and Governor to check votes tracking alog with cheap double voting prevention
 2. Refactor custom governor to read votes per user
