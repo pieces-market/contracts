@@ -4,7 +4,7 @@ pragma solidity ^0.8.25;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
-import {FractAsset} from "./FractAsset.sol";
+import {Asset} from "./Asset.sol";
 
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
@@ -53,7 +53,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.state != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
         /// @notice Creating new NFT (asset)
-        FractAsset asset = new FractAsset(name, symbol, uri, address(this));
+        Asset asset = new Asset(name, symbol, uri, address(this));
 
         auction.asset = address(asset);
         auction.price = price;
@@ -85,7 +85,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
-        if ((FractAsset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
+        if ((Asset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
 
         uint256 cost = auction.price * pieces;
         if (msg.value < cost) revert Auctioner__InsufficientFunds();
@@ -94,7 +94,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         auction.pieces -= pieces;
 
         /// @notice Mint pieces and immediately delegate votes to the buyer
-        FractAsset(auction.asset).safeBatchMint(msg.sender, pieces);
+        Asset(auction.asset).safeBatchMint(msg.sender, pieces);
 
         emit Purchase(id, pieces, msg.sender);
 
@@ -105,7 +105,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
             emit StateChange(id, auction.state);
 
             /// @notice Transfer funds to the broker
-            uint256 payment = FractAsset(auction.asset).totalSupply() * auction.price;
+            uint256 payment = Asset(auction.asset).totalSupply() * auction.price;
 
             (bool success, ) = auction.recipient.call{value: payment}("");
             if (!success) revert Auctioner__TransferFailed();
@@ -124,20 +124,17 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
         // emit Claim();
     }
 
-    /// @dev Function that will be refactored while connecting stuff for Chainlink Keepers
-    function assignRefunds() external {}
-
     /// @inheritdoc IAuctioner
     function refund(uint256 id) external override {
         if (id >= _totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = _auctions[id];
         if (auction.state != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
 
-        uint256 tokenBalance = FractAsset(auction.asset).balanceOf(msg.sender);
+        uint256 tokenBalance = Asset(auction.asset).balanceOf(msg.sender);
         uint256 amount = tokenBalance * auction.price;
 
         if (amount > 0) {
-            FractAsset(auction.asset).burnBatch(msg.sender);
+            Asset(auction.asset).burnBatch(msg.sender);
         } else {
             revert Auctioner__InsufficientFunds();
         }
@@ -157,7 +154,7 @@ contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
     function getTokens(uint id, address owner) public view returns (uint) {
         Auction storage auction = _auctions[id];
 
-        return FractAsset(auction.asset).balanceOf(owner);
+        return Asset(auction.asset).balanceOf(owner);
     }
 
     /// @dev Auction Data Getter -> to be removed
