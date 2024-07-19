@@ -9,14 +9,23 @@ import {Asset} from "./Asset.sol";
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
 /// @notice Allows users to buy pieces, buyout asset, claim revenues and refund
-contract Auctioner is Ownable, ReentrancyGuard, IAuctioner {
-    /// @dev Libraries
-
+contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Variables
     uint256 private _totalAuctions;
 
     /// @dev Arrays
     uint256[] private _scheduledAuctions;
+
+    struct Auction {
+        address asset;
+        uint256 price;
+        uint256 pieces;
+        uint256 max;
+        uint256 openTs;
+        uint256 closeTs;
+        address recipient;
+        AuctionState state;
+    }
 
     /// @dev Mappings
     mapping(uint256 id => Auction) private _auctions;
