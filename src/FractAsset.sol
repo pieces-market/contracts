@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
-import "@ERC721A/contracts/ERC721A.sol";
-import {ERC721AVotes} from "./ERC721AVotes.sol";
-import "@ERC721A/contracts/extensions/ERC721ABurnable.sol";
-import "@ERC721A/contracts/extensions/ERC721AQueryable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/governance/utils/Votes.sol";
-import "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import {ERC721A} from "@ERC721A/contracts/ERC721A.sol";
+import {ERC721AQueryable} from "@ERC721A/contracts/extensions/ERC721AQueryable.sol";
+import {ERC721ABurnable} from "@ERC721A/contracts/extensions/ERC721ABurnable.sol";
+import "./extensions/ERC721AVotes.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @dev ERC404
+import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 /// @dev ERC721A version of Asset (NFT) contract with cheap multiple minting function
 contract FractAsset is ERC721A, ERC721AQueryable, ERC721ABurnable, EIP712, ERC721AVotes, Ownable {
