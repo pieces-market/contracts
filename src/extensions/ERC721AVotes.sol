@@ -7,8 +7,6 @@ import "@openzeppelin/contracts/governance/utils/Votes.sol";
 abstract contract ERC721AVotes is ERC721A, Votes {
     /// @dev See {ERC721A - _afterTokenTransfers}. Adjusts votes when tokens are transferred.
     /// @dev Emits a {IVotes-DelegateVotesChanged} event.
-    ///
-    /// @dev This function is corrupting burn
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual override {
         _transferVotingUnits(from, to, quantity);
         super._afterTokenTransfers(from, to, startTokenId, quantity);
