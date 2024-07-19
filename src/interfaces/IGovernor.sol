@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
-interface ICustomGovernor {
+interface IGovernor {
     error Governor__ProposalNotActive();
     error Governor__ProposalDoesNotExist();
     error Governor__TokenAlreadyUsedForVoting(uint proposalId, uint tokenId);

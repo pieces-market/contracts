@@ -4,14 +4,14 @@ pragma solidity ^0.8.25;
 import {Test, console} from "forge-std/Test.sol";
 import {Auctioner} from "../src/Auctioner.sol";
 import {Asset} from "../src/Asset.sol";
-import {CustomGovernor} from "../src/CustomGovernor.sol";
+import {Governor} from "../src/Governor.sol";
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
-import {ICustomGovernor} from "../src/interfaces/ICustomGovernor.sol";
+import {IGovernor} from "../src/interfaces/IGovernor.sol";
 
-contract CustomGovernorTest is Test {
+contract GovernorTest is Test {
     Auctioner public auctioner;
     Asset public asset;
-    CustomGovernor public governor;
+    Governor public governor;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
@@ -25,7 +25,7 @@ contract CustomGovernorTest is Test {
         console.log("Auctioner: ", address(auctioner));
         asset = new Asset("Asset", "AST", "https:", OWNER);
         console.log("Asset: ", address(asset));
-        governor = new CustomGovernor(address(auctioner));
+        governor = new Governor(address(auctioner));
         console.log("Governor: ", address(asset));
 
         deal(USER, STARTING_BALANCE);

@@ -3,11 +3,11 @@ pragma solidity ^0.8.25;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Asset} from "./Asset.sol";
-import {ICustomGovernor} from "./interfaces/ICustomGovernor.sol";
+import {IGovernor} from "./interfaces/IGovernor.sol";
 
 /// @dev This contract only will be allowed to execute buyout function from Auctioner
 /// @dev Make Auctioner owner -> so it can call execute here by Chainlink Keepers?
-contract CustomGovernor is Ownable, ICustomGovernor {
+contract Governor is Ownable, IGovernor {
     /// @dev FUNCTION quorum = 51%
 
     struct ProposalCore {
