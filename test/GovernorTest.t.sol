@@ -21,8 +21,6 @@ contract GovernorTest is Test {
     address private DEVIL = makeAddr("devil");
 
     function setUp() public {
-        deal(OWNER, STARTING_BALANCE);
-
         vm.startPrank(OWNER);
         auctioner = new Auctioner();
         asset = new Asset("Asset", "AST", "https:", OWNER);
@@ -33,6 +31,7 @@ contract GovernorTest is Test {
         console.log("Asset: ", address(asset));
         console.log("Governor: ", address(asset));
 
+        deal(OWNER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
