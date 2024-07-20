@@ -17,12 +17,11 @@ contract AuctionerTest is Test {
     address private DEVIL = makeAddr("devil");
 
     function setUp() public {
-        deal(OWNER, STARTING_BALANCE);
-
         vm.prank(OWNER);
         auctioner = new Auctioner();
         console.log("Auctioner: ", address(auctioner));
 
+        deal(OWNER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
