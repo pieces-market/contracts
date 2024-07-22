@@ -81,8 +81,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             auction.state = AuctionState.OPENED;
         }
 
-        emit StateChange(_totalAuctions, auction.state);
         emit Create(_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
+        emit StateChange(_totalAuctions, auction.state);
 
         _totalAuctions += 1;
     }
