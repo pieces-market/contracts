@@ -41,6 +41,7 @@ contract Governor is Ownable, IGovernor {
         proposal.state = ProposalState.Active;
 
         emit Propose(_totalProposals, asset, proposal.timeLeft, description);
+        emit StateChange(_totalProposals, ProposalState.Active);
 
         _totalProposals += 1;
     }
