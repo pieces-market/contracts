@@ -5,13 +5,14 @@ import {Test, console} from "forge-std/Test.sol";
 import {Auctioner} from "../src/Auctioner.sol";
 import {Asset} from "../src/Asset.sol";
 import {Governor} from "../src/Governor.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../src/interfaces/IGovernor.sol";
 
 contract GovernorTest is Test {
-    Auctioner public auctioner;
-    Asset public asset;
-    Governor public governor;
+    Auctioner private auctioner;
+    Asset private asset;
+    Governor private governor;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
@@ -37,5 +38,25 @@ contract GovernorTest is Test {
         deal(DEVIL, STARTING_BALANCE);
     }
 
-    function testSomething() public {}
+    function testCantMakeProposalIfNotOwner() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
+        vm.prank(DEVIL);
+        governor.propose(address(asset), "New buyout offer!");
+    }
+
+    function testCanMakeProposal() public proposalMade {
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.Propose(1, address(asset), block.timestamp + 1 days, "Buyout offer received!");
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(1, IGovernor.ProposalState.Active);
+        vm.prank(address(auctioner));
+        governor.propose(address(asset), "Buyout offer received!");
+    }
+
+    modifier proposalMade() {
+        vm.prank(address(auctioner));
+        governor.propose(address(asset), "New buyout offer!");
+
+        _;
+    }
 }
