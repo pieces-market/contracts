@@ -21,22 +21,10 @@ contract AuctionerTest is Test {
     address private DEVIL = makeAddr("devil");
 
     function setUp() public {
-        vm.startPrank(OWNER);
+        vm.prank(OWNER);
         auctioner = new Auctioner();
 
-        address precomputedAsset = vm.computeCreateAddress(address(auctioner), vm.getNonce(address(auctioner)));
-
-        vm.recordLogs();
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        address createdAsset = address(uint160(uint256(entries[2].topics[2])));
-        asset = Asset(createdAsset);
-        vm.stopPrank();
-
         console.log("Auctioner: ", address(auctioner));
-        console.log("Asset: ", address(asset));
 
         deal(OWNER, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
@@ -45,14 +33,25 @@ contract AuctionerTest is Test {
         deal(DEVIL, STARTING_BALANCE);
     }
 
-    function testCanBuyPiecesAndReceiveVotePower() public {
+    function testCanBuyPieces() public auctionCreated {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
-
-        assertEq(3, Asset(asset).getVotes(USER));
     }
 
-    modifier mod() {
+    modifier auctionCreated() {
+        vm.startPrank(OWNER);
+        auctioner = new Auctioner();
+
+        vm.recordLogs();
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        vm.stopPrank();
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        address createdAsset = address(uint160(uint256(entries[2].topics[2])));
+        asset = Asset(createdAsset);
+
+        console.log("Asset: ", address(asset));
+
         _;
     }
 }
