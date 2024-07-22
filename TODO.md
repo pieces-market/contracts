@@ -9,3 +9,15 @@
 # Gas Calculation
 
 transaction cost(Remix) \* https://etherscan.io/gastracker -> GWEI: convert GWEI https://eth-converter.com/ into USD
+
+Przyznanie poprawnej ilosci glowsow po zakupie pieces
+Korekcja ilosci glosow po sprzedazy pieces sprzedajacego i kupujacego
+Korekcja ilosci glosow po burnie / block burn?
+
+Korekcja ilosci glosow po oddaniu glosu
+
+Propose
+Execute
+Cancel
+castVote
+quorumCheck
