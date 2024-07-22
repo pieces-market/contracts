@@ -39,6 +39,14 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         }
     }
 
+    /// @dev DANGEROUS OVERRIDE
+    function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override(ERC721A, IERC721A) {
+        _delegate(to, to);
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    /// @dev IF ABOVE IS CORRECT THEN OVERRIDE 'safeTransferFrom' with data same way
+
     /// @dev The following functions are overrides required by Solidity
 
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual override(ERC721A, ERC721AVotes) {
@@ -56,3 +64,5 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         return interfaceId == type(IVotes).interfaceId || super.supportsInterface(interfaceId);
     }
 }
+
+/// @dev DO WE TRANSFER VOTES IMMEDIATELY ON TOKEN TRANSFER OR WE JUST ALLOW TO PICK UP VOTES BY BUYER?
