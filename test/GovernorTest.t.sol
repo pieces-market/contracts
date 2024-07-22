@@ -28,29 +28,20 @@ contract GovernorTest is Test {
         auctioner = new Auctioner();
         governor = new Governor(address(auctioner));
 
-        uint256 nonce = vm.getNonce(address(auctioner));
-
-        /// @dev This will only work for local test
-        //uint256 nonce = vm.getNonce(OWNER);
-        console.log("Nonce: ", nonce);
-        address lam = computeCreateAddress(address(auctioner), nonce);
-        console.log("Contract: ", lam);
-        address precomputedAsset = address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), address(auctioner), bytes1(0x01))))));
-        console.log("Precomuted Asset: ", precomputedAsset);
+        address precomputedAsset = vm.computeCreateAddress(address(auctioner), vm.getNonce(address(auctioner)));
 
         vm.recordLogs();
-        // vm.expectEmit(true, true, true, true, address(auctioner));
-        // emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        address createdAsset = address(uint160(uint256(entries[1].topics[2])));
+        address createdAsset = address(uint160(uint256(entries[2].topics[2])));
         asset = Asset(createdAsset);
         vm.stopPrank();
 
-        console.log("Created Asset: ", createdAsset);
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
-        console.log("Governor: ", address(asset));
+        console.log("Governor: ", address(governor));
 
         deal(OWNER, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
@@ -60,17 +51,17 @@ contract GovernorTest is Test {
     }
 
     function testCantMakeProposalIfNotOwner() public {
-        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
         vm.prank(DEVIL);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
         governor.propose(address(asset), "New buyout offer!");
     }
 
     function testCanMakeProposal() public proposalMade {
+        vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.Propose(1, address(asset), block.timestamp + 1 days, "Buyout offer received!");
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.Active);
-        vm.prank(address(auctioner));
         governor.propose(address(asset), "Buyout offer received!");
     }
 
