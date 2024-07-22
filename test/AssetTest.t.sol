@@ -53,6 +53,33 @@ contract AssetTest is Test {
         assertEq(3, Asset(asset).getVotes(USER));
     }
 
+    /// @dev TO BE FIXED -> Voting power not increased for buyer
+    function testCanTransferTokensAndAdjustVotingPower() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        assertEq(3, Asset(asset).balanceOf(USER));
+        assertEq(3, Asset(asset).getVotes(USER));
+
+        assertEq(0, Asset(asset).balanceOf(DEVIL));
+        assertEq(0, Asset(asset).getVotes(DEVIL));
+
+        assertEq(0, Asset(asset).getVotes(OWNER));
+
+        vm.startPrank(USER);
+        Asset(asset).safeTransferFrom(USER, DEVIL, 0);
+        Asset(asset).safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
+
+        assertEq(1, Asset(asset).balanceOf(USER));
+        assertEq(1, Asset(asset).getVotes(USER));
+
+        assertEq(2, Asset(asset).balanceOf(DEVIL));
+        assertEq(2, Asset(asset).getVotes(DEVIL));
+
+        assertEq(0, Asset(asset).getVotes(OWNER));
+    }
+
     modifier mod() {
         _;
     }
