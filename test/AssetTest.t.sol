@@ -30,10 +30,11 @@ contract AssetTest is Test {
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        vm.stopPrank();
+
         Vm.Log[] memory entries = vm.getRecordedLogs();
         address createdAsset = address(uint160(uint256(entries[2].topics[2])));
         asset = Asset(createdAsset);
-        vm.stopPrank();
 
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
@@ -45,7 +46,12 @@ contract AssetTest is Test {
         deal(DEVIL, STARTING_BALANCE);
     }
 
-    function testCanDoo() public {}
+    function testCanReceiveVotingPower() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        assertEq(3, Asset(asset).getVotes(USER));
+    }
 
     modifier mod() {
         _;
