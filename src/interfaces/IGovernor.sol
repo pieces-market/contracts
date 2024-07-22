@@ -19,5 +19,6 @@ interface IGovernor {
         Abstain
     }
 
+    event StateChange(uint indexed id, ProposalState);
     event Propose(uint indexed id, address indexed asset, uint indexed deadline, string description);
 }
