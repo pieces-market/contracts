@@ -54,9 +54,6 @@ contract Governor is Ownable, IGovernor {
         proposal.state = ProposalState.Failed;
     }
 
-    /// @dev This has to be in ERC721A
-    function delegate() external {}
-
     function castVote(uint proposalId, VoteType vote) external {
         if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
         ProposalCore storage proposal = _proposals[proposalId];
@@ -64,15 +61,15 @@ contract Governor is Ownable, IGovernor {
 
         /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
         /// @dev In ERC721A check if address has already voted, if so do not transfer voting power, if not transfer voting power accordingly
-        uint[] memory tokenIds = Asset(proposal.asset).tokensOfOwner(msg.sender);
-        uint voteCount = tokenIds.length;
+        //uint[] memory tokenIds = Asset(proposal.asset).tokensOfOwner(msg.sender);
+        uint voteCount = Asset(proposal.asset).getVotes(msg.sender);
 
         // Mark all tokens as used for voting
-        for (uint i; i < voteCount; i++) {
-            if (proposal.hasVoted[tokenIds[i]] == true) revert Governor__TokenAlreadyUsedForVoting(proposalId, tokenIds[i]);
+        // for (uint i; i < voteCount; i++) {
+        //     if (proposal.hasVoted[tokenIds[i]] == true) revert Governor__TokenAlreadyUsedForVoting(proposalId, tokenIds[i]);
 
-            proposal.hasVoted[tokenIds[i]] = true;
-        }
+        //     proposal.hasVoted[tokenIds[i]] = true;
+        // }
 
         if (vote == VoteType.For) proposal.forVotes += voteCount;
         if (vote == VoteType.Against) proposal.againstVotes += voteCount;
@@ -92,8 +89,10 @@ contract Governor is Ownable, IGovernor {
         return proposal.forVotes > proposal.againstVotes;
     }
 
-    /// @dev Getter
-    function getVotes() external {}
+    /// @dev Getter -> this fn is probably useless
+    function getVotes(address asset, address holder) external view returns (uint256) {
+        return Asset(asset).getVotes(holder);
+    }
 
     /// @dev Getter
     function votingPeriod(uint proposalId) external view returns (uint) {
