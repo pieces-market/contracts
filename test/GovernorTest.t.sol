@@ -33,7 +33,7 @@ contract GovernorTest is Test {
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        address createdAsset = address(uint160(uint256(entries[2].topics[2])));
+        address createdAsset = address(uint160(uint256(entries[1].topics[2])));
         asset = Asset(createdAsset);
 
         console.log("Auctioner: ", address(auctioner));
@@ -60,6 +60,21 @@ contract GovernorTest is Test {
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.Active);
         governor.propose(address(asset), "Buyout offer received!");
+    }
+
+    function testCantVoteMultipleTimes() public proposalMade {
+        assertEq(0, Asset(asset).balanceOf(USER));
+
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        // assertEq(3, Asset(asset).balanceOf(USER));
+        // assertEq(3, Asset(asset).getVotes(USER));
+
+        // assertEq(0, Asset(asset).balanceOf(DEVIL));
+        // assertEq(0, Asset(asset).getVotes(DEVIL));
+
+        // assertEq(0, Asset(asset).getVotes(OWNER));
     }
 
     modifier proposalMade() {
