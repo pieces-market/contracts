@@ -47,7 +47,7 @@ contract AuctionerTest is Test {
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        address createdAsset = address(uint160(uint256(entries[2].topics[2])));
+        address createdAsset = address(uint160(uint256(entries[1].topics[2])));
         asset = Asset(createdAsset);
 
         console.log("Asset: ", address(asset));
