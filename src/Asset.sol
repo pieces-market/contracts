@@ -41,8 +41,8 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
 
     /// @dev DANGEROUS OVERRIDE
     function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override(ERC721A, IERC721A) {
-        _delegate(to, to);
         super.safeTransferFrom(from, to, tokenId);
+        _delegate(to, to);
     }
 
     /// @dev IF ABOVE IS CORRECT THEN OVERRIDE 'safeTransferFrom' with data same way
