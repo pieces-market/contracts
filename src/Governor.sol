@@ -90,7 +90,7 @@ contract Governor is Ownable, IGovernor {
         return proposal.forVotes > proposal.againstVotes;
     }
 
-    /// @dev Getter -> this fn is probably useless
+    /// @dev Getter
     function getVotes(address asset, address holder) external view returns (uint256) {
         return Asset(asset).getVotes(holder);
     }
