@@ -53,7 +53,6 @@ contract AssetTest is Test {
         assertEq(3, Asset(asset).getVotes(USER));
     }
 
-    /// @dev TO BE FIXED -> Voting power not increased for buyer
     function testCanTransferTokensAndAdjustVotingPower() public {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
