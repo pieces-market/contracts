@@ -39,10 +39,16 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         }
     }
 
+    /// @dev Restrict below to onlyOwner?
+    function delegateVotes(address delegatee) external {
+        _delegate(delegatee, address(0));
+    }
+
     /// @dev DANGEROUS OVERRIDE
     function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override(ERC721A, IERC721A) {
         super.safeTransferFrom(from, to, tokenId);
-        _delegate(to, to);
+
+        if (getVotes(from) > 0) _delegate(to, to);
     }
 
     /// @dev IF ABOVE IS CORRECT THEN OVERRIDE 'safeTransferFrom' with data same way
