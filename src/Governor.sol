@@ -17,7 +17,7 @@ contract Governor is Ownable, IGovernor {
         uint256 forVotes;
         uint256 againstVotes;
         uint256 abstainVotes;
-        mapping(uint => bool) hasVoted;
+        mapping(address => bool) hasVoted; // useless
         ProposalState state;
     }
 
@@ -59,6 +59,8 @@ contract Governor is Ownable, IGovernor {
         if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
         ProposalCore storage proposal = _proposals[proposalId];
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
+        if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
+        if (Asset(proposal.asset).getVotes(msg.sender) == 0) revert Governor__ZeroVotingPower();
 
         /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
         /// @dev In ERC721A check if address has already voted, if so do not transfer voting power, if not transfer voting power accordingly
@@ -75,6 +77,9 @@ contract Governor is Ownable, IGovernor {
         if (vote == VoteType.For) proposal.forVotes += voteCount;
         if (vote == VoteType.Against) proposal.againstVotes += voteCount;
         if (vote == VoteType.Abstain) proposal.abstainVotes += voteCount;
+
+        Asset(proposal.asset).delegateVotes(msg.sender);
+        proposal.hasVoted[msg.sender] = true;
     }
 
     function quorumReached(uint256 proposalId) internal view returns (bool) {
