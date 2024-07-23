@@ -63,18 +63,64 @@ contract GovernorTest is Test {
     }
 
     function testCantVoteMultipleTimes() public proposalMade {
-        assertEq(0, Asset(asset).balanceOf(USER));
-
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
 
-        // assertEq(3, Asset(asset).balanceOf(USER));
-        // assertEq(3, Asset(asset).getVotes(USER));
+        assertEq(3, Asset(asset).balanceOf(USER));
+        assertEq(3, Asset(asset).getVotes(USER));
 
-        // assertEq(0, Asset(asset).balanceOf(DEVIL));
-        // assertEq(0, Asset(asset).getVotes(DEVIL));
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.For);
 
-        // assertEq(0, Asset(asset).getVotes(OWNER));
+        assertEq(3, Asset(asset).balanceOf(USER));
+        assertEq(0, Asset(asset).getVotes(USER));
+
+        /// @dev Transfer to Devil
+
+        vm.startPrank(USER);
+        Asset(asset).safeTransferFrom(USER, DEVIL, 0);
+        Asset(asset).safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
+
+        assertEq(2, Asset(asset).balanceOf(DEVIL));
+        assertEq(0, Asset(asset).getVotes(DEVIL));
+
+        vm.prank(DEVIL);
+        vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        governor.proposalData(0);
+    }
+
+    function testBuyerCanVote() public proposalMade {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        assertEq(3, Asset(asset).balanceOf(USER));
+        assertEq(3, Asset(asset).getVotes(USER));
+
+        /// @dev Transfer to Devil
+
+        vm.startPrank(USER);
+        Asset(asset).safeTransferFrom(USER, DEVIL, 0);
+        Asset(asset).safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
+
+        assertEq(1, Asset(asset).balanceOf(USER));
+        assertEq(1, Asset(asset).getVotes(USER));
+
+        assertEq(2, Asset(asset).balanceOf(DEVIL));
+        assertEq(2, Asset(asset).getVotes(DEVIL));
+
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        governor.proposalData(0);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        governor.proposalData(0);
     }
 
     modifier proposalMade() {
