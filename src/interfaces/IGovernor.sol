@@ -5,6 +5,8 @@ interface IGovernor {
     error Governor__ProposalNotActive();
     error Governor__ProposalDoesNotExist();
     error Governor__TokenAlreadyUsedForVoting(uint proposalId, uint tokenId);
+    error Governor__AlreadyVoted();
+    error Governor__ZeroVotingPower();
 
     enum ProposalState {
         Inactive,
