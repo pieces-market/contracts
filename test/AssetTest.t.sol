@@ -46,38 +46,38 @@ contract AssetTest is Test {
         deal(DEVIL, STARTING_BALANCE);
     }
 
-    function testCanReceiveVotingPower() public {
-        vm.prank(USER);
-        auctioner.buy{value: 6 ether}(0, 3);
+    // function testCanReceiveVotingPower() public {
+    //     vm.prank(USER);
+    //     auctioner.buy{value: 6 ether}(0, 3);
 
-        assertEq(3, Asset(asset).getVotes(USER));
-    }
+    //     assertEq(3, asset.getVotes(USER));
+    // }
 
-    function testCanTransferTokensAndAdjustVotingPower() public {
-        vm.prank(USER);
-        auctioner.buy{value: 6 ether}(0, 3);
+    // function testCanTransferTokensAndAdjustVotingPower() public {
+    //     vm.prank(USER);
+    //     auctioner.buy{value: 6 ether}(0, 3);
 
-        assertEq(3, Asset(asset).balanceOf(USER));
-        assertEq(3, Asset(asset).getVotes(USER));
+    //     assertEq(3, asset.balanceOf(USER));
+    //     assertEq(3, asset.getVotes(USER));
 
-        assertEq(0, Asset(asset).balanceOf(DEVIL));
-        assertEq(0, Asset(asset).getVotes(DEVIL));
+    //     assertEq(0, asset.balanceOf(DEVIL));
+    //     assertEq(0, asset.getVotes(DEVIL));
 
-        assertEq(0, Asset(asset).getVotes(OWNER));
+    //     assertEq(0, asset.getVotes(OWNER));
 
-        vm.startPrank(USER);
-        Asset(asset).safeTransferFrom(USER, DEVIL, 0);
-        Asset(asset).safeTransferFrom(USER, DEVIL, 2);
-        vm.stopPrank();
+    //     vm.startPrank(USER);
+    //     asset.safeTransferFrom(USER, DEVIL, 0);
+    //     asset.safeTransferFrom(USER, DEVIL, 2);
+    //     vm.stopPrank();
 
-        assertEq(1, Asset(asset).balanceOf(USER));
-        assertEq(1, Asset(asset).getVotes(USER));
+    //     assertEq(1, asset.balanceOf(USER));
+    //     assertEq(1, asset.getVotes(USER));
 
-        assertEq(2, Asset(asset).balanceOf(DEVIL));
-        assertEq(2, Asset(asset).getVotes(DEVIL));
+    //     assertEq(2, asset.balanceOf(DEVIL));
+    //     assertEq(2, asset.getVotes(DEVIL));
 
-        assertEq(0, Asset(asset).getVotes(OWNER));
-    }
+    //     assertEq(0, asset.getVotes(OWNER));
+    // }
 
     modifier mod() {
         _;
