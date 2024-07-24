@@ -1,0 +1,8 @@
+AssetTest:testCanReceiveVotingPower() (gas: 240853)
+AssetTest:testCanTransferTokensAndAdjustVotingPower() (gas: 437629)
+AuctionerTest:testCanBuyPieces() (gas: 6529173)
+GovernorTest:testBuyerCanVote() (gas: 611055)
+GovernorTest:testCanCountVotesForMultipleProposals() (gas: 530817)
+GovernorTest:testCanMakeProposal() (gas: 233277)
+GovernorTest:testCantMakeProposalIfNotOwner() (gas: 16329)
+GovernorTest:testCantVoteMultipleTimes() (gas: 517126)
