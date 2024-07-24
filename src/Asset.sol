@@ -27,9 +27,10 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @notice Multi-mint function to mint multiple tokens to a single user
     function safeBatchMint(address to, uint256 quantity) external onlyOwner {
         _safeMint(to, quantity);
-        _delegate(to, to);
+        //_delegate(to, to);
     }
 
+    /// @dev Very expensive function
     function burnBatch(address owner) external onlyOwner {
         uint256[] memory tokenIds = this.tokensOfOwner(owner);
 
@@ -41,6 +42,11 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
 
     /// @dev Restrict below to onlyOwner?
     function delegateVotes(address delegatee) external {
+        _delegate(delegatee, delegatee);
+    }
+
+    /// @dev Restrict below to onlyOwner?
+    function takeVotes(address delegatee) external {
         _delegate(delegatee, address(0));
     }
 
@@ -71,4 +77,4 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     }
 }
 
-/// @dev DO WE TRANSFER VOTES IMMEDIATELY ON TOKEN TRANSFER OR WE JUST ALLOW TO PICK UP VOTES BY BUYER?
+/// @dev STANDARD VOTES || CUSTOM VOTES
