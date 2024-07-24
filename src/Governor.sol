@@ -60,6 +60,8 @@ contract Governor is Ownable, IGovernor {
         ProposalCore storage proposal = _proposals[proposalId];
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
         if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
+
+        Asset(proposal.asset).delegateVotes(msg.sender);
         if (Asset(proposal.asset).getVotes(msg.sender) == 0) revert Governor__ZeroVotingPower();
 
         /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
@@ -78,7 +80,7 @@ contract Governor is Ownable, IGovernor {
         if (vote == VoteType.Against) proposal.againstVotes += voteCount;
         if (vote == VoteType.Abstain) proposal.abstainVotes += voteCount;
 
-        Asset(proposal.asset).delegateVotes(msg.sender);
+        Asset(proposal.asset).takeVotes(msg.sender);
         proposal.hasVoted[msg.sender] = true;
     }
 
@@ -108,7 +110,7 @@ contract Governor is Ownable, IGovernor {
     }
 
     /// @dev Getter
-    function proposalData(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
+    function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
         ProposalCore storage proposal = _proposals[proposalId];
 
         return (proposal.againstVotes, proposal.forVotes, proposal.abstainVotes);
