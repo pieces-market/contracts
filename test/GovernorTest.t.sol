@@ -63,98 +63,139 @@ contract GovernorTest is Test {
     }
 
     function testBuyerCanVote() public proposalMade {
-        console.log("Check Clock: ", asset.clock());
-
-        //vm.warp(block.timestamp + 1);
-        // vm.roll(block.number + 20);
-
+        /// @dev Buy mints and delegates votes in same timestamp as proposal is made, so votes are valid for voting
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
-        console.log("BLOCK NUM: ", block.number);
-        console.log("Check Clock 2: ", asset.clock());
 
-        vm.roll(block.number + 1);
+        vm.warp(block.timestamp + 1);
 
-        uint votes = asset.getPastVotes(USER, asset.clock() - 1);
+        uint snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
 
-        assertEq(votes, 3);
-
-        assertEq(3, asset.balanceOf(USER));
-        assertEq(3, asset.getVotes(USER));
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(USER), 3);
+        assertEq(asset.getVotes(USER), 3);
 
         vm.prank(USER);
         governor.castVote(0, IGovernor.VoteType.For);
-
-        /// @dev Transfer to Devil
-
-        // vm.startPrank(USER);
-        // asset.safeTransferFrom(USER, DEVIL, 0);
-        // asset.safeTransferFrom(USER, DEVIL, 2);
-        // vm.stopPrank();
-
-        // assertEq(1, asset.balanceOf(USER));
-        // //assertEq(1, asset.getVotes(USER));
-
-        // assertEq(2, asset.balanceOf(DEVIL));
-        // //assertEq(2, asset.getVotes(DEVIL));
-
-        // vm.prank(USER);
-        // governor.castVote(0, IGovernor.VoteType.For);
-
-        // governor.proposalVotes(0);
-
-        // vm.prank(DEVIL);
-        // governor.castVote(0, IGovernor.VoteType.For);
-
-        // governor.proposalVotes(0);
-
-        // assertEq(0, asset.getVotes(USER));
-        // assertEq(0, asset.getVotes(DEVIL));
-
-        /// @dev NEXT PROPOSAL
-        /// @notice USER vote power -> 1
-        /// @notice DEVIL vote power -> 2
-
-        // vm.prank(address(auctioner));
-        // governor.propose(address(asset), "New buyout offer!");
-
-        // vm.prank(USER);
-        // governor.castVote(1, IGovernor.VoteType.For);
-
-        // vm.prank(USER);
-        // vm.expectRevert(IGovernor.Governor__AlreadyVoted.selector);
-        // governor.castVote(1, IGovernor.VoteType.For);
-
-        // (uint against, uint fore, uint abstain) = governor.proposalVotes(1);
-        // console.log("Against 2 :", against);
-        // console.log("For 2 :", fore);
-        // console.log("Abstain 2 :", abstain);
     }
 
-    function testCantVoteMultipleTimes() public proposalMade {
+    function testAftermarketBuyerCanVote() public {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
 
-        assertEq(3, asset.balanceOf(USER));
-        assertEq(0, asset.getVotes(USER));
+        vm.warp(block.timestamp + 1);
 
-        vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.For);
+        uint snapshotVotes;
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
 
-        assertEq(3, asset.balanceOf(USER));
-        assertEq(0, asset.getVotes(USER));
-
-        /// @dev Transfer to Devil
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(USER), 3);
+        assertEq(asset.getVotes(USER), 3);
 
         vm.startPrank(USER);
         asset.safeTransferFrom(USER, DEVIL, 0);
         asset.safeTransferFrom(USER, DEVIL, 2);
         vm.stopPrank();
 
-        assertEq(2, asset.balanceOf(DEVIL));
-        assertEq(0, asset.getVotes(DEVIL));
+        vm.warp(block.timestamp + 1);
 
-        /// @dev ERROR!
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+        uint devilSnapshotVotes = asset.getPastVotes(DEVIL, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 1);
+        assertEq(asset.balanceOf(USER), 1);
+        assertEq(asset.getVotes(USER), 1);
+
+        assertEq(devilSnapshotVotes, 2);
+        assertEq(asset.balanceOf(DEVIL), 2);
+        assertEq(asset.getVotes(DEVIL), 2);
+
+        vm.warp(block.timestamp + 1);
+
+        /// @dev We create proposal when both DEVIL and USER got voting power, so they can vote
+        vm.prank(address(auctioner));
+        governor.propose(address(asset), "New buyout offer!");
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        governor.proposalVotes(0);
+    }
+
+    function testAftermarketBuyerCantVote() public proposalMade {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.warp(block.timestamp + 1);
+
+        uint snapshotVotes;
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(USER), 3);
+        assertEq(asset.getVotes(USER), 3);
+
+        vm.startPrank(USER);
+        asset.safeTransferFrom(USER, DEVIL, 0);
+        asset.safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + 1);
+
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+        uint devilSnapshotVotes = asset.getPastVotes(DEVIL, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 1);
+        assertEq(asset.balanceOf(USER), 1);
+        assertEq(asset.getVotes(USER), 1);
+
+        assertEq(devilSnapshotVotes, 2);
+        assertEq(asset.balanceOf(DEVIL), 2);
+        assertEq(asset.getVotes(DEVIL), 2);
+
+        vm.prank(DEVIL);
+        vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
+        governor.castVote(0, IGovernor.VoteType.For);
+    }
+
+    function testCantVoteMultipleTimes() public proposalMade {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.warp(block.timestamp + 1);
+
+        uint snapshotVotes;
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(USER), 3);
+        assertEq(asset.getVotes(USER), 3);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        vm.prank(USER);
+        vm.expectRevert(IGovernor.Governor__AlreadyVoted.selector);
+        governor.castVote(0, IGovernor.VoteType.For);
+
+        /// @dev Transfer To Devil
+        vm.startPrank(USER);
+        asset.safeTransferFrom(USER, DEVIL, 0);
+        asset.safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + 1);
+
+        snapshotVotes = asset.getPastVotes(DEVIL, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 2);
+        assertEq(asset.balanceOf(DEVIL), 2);
+        assertEq(asset.getVotes(DEVIL), 2);
 
         vm.prank(DEVIL);
         vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
@@ -167,17 +208,94 @@ contract GovernorTest is Test {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
 
+        vm.warp(block.timestamp + 1);
+
         vm.prank(address(auctioner));
         governor.propose(address(asset), "New buyout offer!");
+
+        vm.warp(block.timestamp + 1);
 
         vm.prank(USER);
         governor.castVote(0, IGovernor.VoteType.For);
 
-        assertEq(3, asset.balanceOf(USER));
-        assertEq(0, asset.getVotes(USER));
+        vm.warp(block.timestamp + 1);
+
+        uint snapshotVotes;
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(USER), 3);
+        assertEq(asset.getVotes(USER), 3);
+
+        vm.warp(block.timestamp + 1);
 
         vm.prank(USER);
-        governor.castVote(1, IGovernor.VoteType.For);
+        governor.castVote(1, IGovernor.VoteType.Abstain);
+
+        vm.warp(block.timestamp + 1);
+
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(USER), 3);
+        assertEq(asset.getVotes(USER), 3);
+
+        /// @dev We can move below vars to global, so it will be reusable for multiple tests
+        uint forVotes;
+        uint againstVotes;
+        uint abstainVotes;
+
+        (forVotes, againstVotes, abstainVotes) = governor.proposalVotes(0);
+        assertEq(forVotes, 3);
+        assertEq(againstVotes, 0);
+        assertEq(abstainVotes, 0);
+
+        (forVotes, againstVotes, abstainVotes) = governor.proposalVotes(1);
+        assertEq(forVotes, 0);
+        assertEq(againstVotes, 0);
+        assertEq(abstainVotes, 3);
+    }
+
+    function testPreviousTokenOwnerCantVote() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.warp(block.timestamp + 1);
+
+        /// @dev Transfer To Devil
+        vm.startPrank(USER);
+        asset.safeTransferFrom(USER, DEVIL, 0);
+        asset.safeTransferFrom(USER, DEVIL, 1);
+        asset.safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + 1);
+
+        uint snapshotVotes;
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 0);
+        assertEq(asset.balanceOf(USER), 0);
+        assertEq(asset.getVotes(USER), 0);
+
+        snapshotVotes = asset.getPastVotes(DEVIL, asset.clock() - 1);
+
+        assertEq(snapshotVotes, 3);
+        assertEq(asset.balanceOf(DEVIL), 3);
+        assertEq(asset.getVotes(DEVIL), 3);
+
+        /// @dev Creating proposal on updated votes
+        vm.prank(address(auctioner));
+        governor.propose(address(asset), "New buyout offer!");
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
+        governor.castVote(0, IGovernor.VoteType.Abstain);
+
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType.Abstain);
     }
 
     modifier proposalMade() {
