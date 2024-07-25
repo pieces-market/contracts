@@ -46,6 +46,19 @@ contract AssetTest is Test {
         deal(DEVIL, STARTING_BALANCE);
     }
 
+    function testCanGetPastVotes() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.roll(block.number + 1);
+
+        console.log("Clock: ", asset.clock());
+
+        uint votes = asset.getPastVotes(USER, 1);
+
+        assertEq(votes, 3);
+    }
+
     // function testCanReceiveVotingPower() public {
     //     vm.prank(USER);
     //     auctioner.buy{value: 6 ether}(0, 3);
