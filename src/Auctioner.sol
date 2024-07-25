@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
+import {Asset} from "./Asset.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
+
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
-import {Asset} from "./Asset.sol";
 
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
