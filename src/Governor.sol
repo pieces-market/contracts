@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Asset} from "./Asset.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 import {IGovernor} from "./interfaces/IGovernor.sol";
 
 /// @dev This contract only will be allowed to execute buyout function from Auctioner
@@ -37,7 +38,7 @@ contract Governor is Ownable, IGovernor {
 
         proposal.asset = asset;
         /// @dev To be confirmed -> how long will we give each proposal to live
-        proposal.voteStart = block.number;
+        proposal.voteStart = block.timestamp;
         proposal.voteEnd = block.timestamp + 1 days;
         proposal.description = description;
         proposal.state = ProposalState.Active;
