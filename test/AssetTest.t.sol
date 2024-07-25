@@ -46,51 +46,43 @@ contract AssetTest is Test {
         deal(DEVIL, STARTING_BALANCE);
     }
 
-    function testCanGetPastVotes() public {
+    function testCanReceiveVotingPower() public {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
 
-        vm.roll(block.number + 1);
+        /// @dev USE BELOW IF CLOCK() IS SET FOR TIMESTAMP
+        vm.warp(block.timestamp + 1);
+        /// @dev USE BELOW IF CLOCK() IS SET FOR BLOCK NUMBER
+        // vm.roll(block.number + 1);
 
-        console.log("Clock: ", asset.clock());
-
-        uint votes = asset.getPastVotes(USER, 1);
-
+        uint votes = asset.getPastVotes(USER, asset.clock() - 1);
         assertEq(votes, 3);
     }
 
-    // function testCanReceiveVotingPower() public {
-    //     vm.prank(USER);
-    //     auctioner.buy{value: 6 ether}(0, 3);
+    function testCanTransferTokensAndAdjustVotingPower() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
 
-    //     assertEq(3, asset.getVotes(USER));
-    // }
+        vm.warp(block.timestamp + 1);
 
-    // function testCanTransferTokensAndAdjustVotingPower() public {
-    //     vm.prank(USER);
-    //     auctioner.buy{value: 6 ether}(0, 3);
+        console.log("Clock: ", asset.clock());
 
-    //     assertEq(3, asset.balanceOf(USER));
-    //     assertEq(3, asset.getVotes(USER));
+        uint votes;
+        votes = asset.getPastVotes(USER, asset.clock() - 1);
+        assertEq(votes, 3);
 
-    //     assertEq(0, asset.balanceOf(DEVIL));
-    //     assertEq(0, asset.getVotes(DEVIL));
+        vm.startPrank(USER);
+        asset.safeTransferFrom(USER, DEVIL, 0);
+        asset.safeTransferFrom(USER, DEVIL, 2);
+        vm.stopPrank();
 
-    //     assertEq(0, asset.getVotes(OWNER));
+        vm.warp(block.timestamp + 1);
 
-    //     vm.startPrank(USER);
-    //     asset.safeTransferFrom(USER, DEVIL, 0);
-    //     asset.safeTransferFrom(USER, DEVIL, 2);
-    //     vm.stopPrank();
-
-    //     assertEq(1, asset.balanceOf(USER));
-    //     assertEq(1, asset.getVotes(USER));
-
-    //     assertEq(2, asset.balanceOf(DEVIL));
-    //     assertEq(2, asset.getVotes(DEVIL));
-
-    //     assertEq(0, asset.getVotes(OWNER));
-    // }
+        votes = asset.getPastVotes(USER, asset.clock() - 1);
+        assertEq(votes, 1);
+        votes = asset.getPastVotes(DEVIL, asset.clock() - 1);
+        assertEq(votes, 2);
+    }
 
     modifier mod() {
         _;
