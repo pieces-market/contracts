@@ -27,7 +27,7 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @notice Multi-mint function to mint multiple tokens to a single user
     function safeBatchMint(address to, uint256 quantity) external onlyOwner {
         _safeMint(to, quantity);
-        //_delegate(to, to);
+        _delegate(to, to);
     }
 
     /// @dev Very expensive function
