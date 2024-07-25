@@ -55,8 +55,8 @@ contract AssetTest is Test {
         /// @dev USE BELOW IF CLOCK() IS SET FOR BLOCK NUMBER
         // vm.roll(block.number + 1);
 
-        uint votes = asset.getPastVotes(USER, asset.clock() - 1);
-        assertEq(votes, 3);
+        uint snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+        assertEq(snapshotVotes, 3);
     }
 
     function testCanTransferTokensAndAdjustVotingPower() public {
@@ -67,9 +67,9 @@ contract AssetTest is Test {
 
         console.log("Clock: ", asset.clock());
 
-        uint votes;
-        votes = asset.getPastVotes(USER, asset.clock() - 1);
-        assertEq(votes, 3);
+        uint snapshotVotes;
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+        assertEq(snapshotVotes, 3);
 
         vm.startPrank(USER);
         asset.safeTransferFrom(USER, DEVIL, 0);
@@ -78,10 +78,10 @@ contract AssetTest is Test {
 
         vm.warp(block.timestamp + 1);
 
-        votes = asset.getPastVotes(USER, asset.clock() - 1);
-        assertEq(votes, 1);
-        votes = asset.getPastVotes(DEVIL, asset.clock() - 1);
-        assertEq(votes, 2);
+        snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
+        assertEq(snapshotVotes, 1);
+        snapshotVotes = asset.getPastVotes(DEVIL, asset.clock() - 1);
+        assertEq(snapshotVotes, 2);
     }
 
     modifier mod() {
