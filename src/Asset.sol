@@ -18,20 +18,6 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         baseURI = uri;
     }
 
-    /// @dev Override Vote functions
-    function clock() public view override returns (uint48) {
-        return Time.timestamp();
-    }
-
-    /// @dev Override Vote functions
-    function CLOCK_MODE() public view override returns (string memory) {
-        // Check that the clock was not modified
-        if (clock() != Time.timestamp()) {
-            revert ERC6372InconsistentClock();
-        }
-        return "mode=timestamp&from=default";
-    }
-
     /// @dev Override tokenURI to keep 1 URI for all tokens?
     // This will lead to Metadata, which will be unique for each token
     function _baseURI() internal view override returns (string memory) {
@@ -59,19 +45,12 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         _delegate(delegatee, delegatee);
     }
 
-    /// @dev Restrict below to onlyOwner?
-    function takeVotes(address delegatee) external {
-        _delegate(delegatee, address(0));
-    }
-
-    /// @dev DANGEROUS OVERRIDE
     function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override(ERC721A, IERC721A) {
         super.safeTransferFrom(from, to, tokenId);
-
-        if (getVotes(from) > 0) _delegate(to, to);
+        _delegate(to, to);
     }
 
-    /// @dev IF ABOVE IS CORRECT THEN OVERRIDE 'safeTransferFrom' with data same way
+    /// @dev IF ABOVE IS CORRECT THEN OVERRIDE 'safeTransferFrom' with data same way !!!!!!!!!!!
 
     /// @dev The following functions are overrides required by Solidity
 
@@ -88,6 +67,24 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @return True if the contract implements `interfaceId` or if `interfaceId` is the ERC-165 interface
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A) returns (bool) {
         return interfaceId == type(IVotes).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    ////////////////////////////////////
+    /// @dev VOTING MODULE OVERRIDE'S //
+    ////////////////////////////////////
+
+    /// @dev Override Vote functions
+    function clock() public view override returns (uint48) {
+        return Time.timestamp();
+    }
+
+    /// @dev Override Vote functions
+    function CLOCK_MODE() public view override returns (string memory) {
+        // Check that the clock was not modified
+        if (clock() != Time.timestamp()) {
+            revert ERC6372InconsistentClock();
+        }
+        return "mode=timestamp&from=default";
     }
 }
 
