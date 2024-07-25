@@ -18,6 +18,20 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         baseURI = uri;
     }
 
+    /// @dev Override Vote functions
+    function clock() public view override returns (uint48) {
+        return Time.timestamp();
+    }
+
+    /// @dev Override Vote functions
+    function CLOCK_MODE() public view override returns (string memory) {
+        // Check that the clock was not modified
+        if (clock() != Time.timestamp()) {
+            revert ERC6372InconsistentClock();
+        }
+        return "mode=timestamp&from=default";
+    }
+
     /// @dev Override tokenURI to keep 1 URI for all tokens?
     // This will lead to Metadata, which will be unique for each token
     function _baseURI() internal view override returns (string memory) {
