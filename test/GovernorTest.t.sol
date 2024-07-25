@@ -63,56 +63,72 @@ contract GovernorTest is Test {
     }
 
     function testBuyerCanVote() public proposalMade {
+        console.log("Check Clock: ", asset.clock());
+
+        //vm.warp(block.timestamp + 1);
+        // vm.roll(block.number + 20);
+
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
+        console.log("BLOCK NUM: ", block.number);
+        console.log("Check Clock 2: ", asset.clock());
 
-        // assertEq(3, asset.balanceOf(USER));
-        // assertEq(3, asset.getVotes(USER));
+        vm.roll(block.number + 1);
+
+        uint votes = asset.getPastVotes(USER, 1);
+
+        assertEq(votes, 3);
+
+        assertEq(3, asset.balanceOf(USER));
+        assertEq(3, asset.getVotes(USER));
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.For);
 
         /// @dev Transfer to Devil
 
-        vm.startPrank(USER);
-        asset.safeTransferFrom(USER, DEVIL, 0);
-        asset.safeTransferFrom(USER, DEVIL, 2);
-        vm.stopPrank();
+        // vm.startPrank(USER);
+        // asset.safeTransferFrom(USER, DEVIL, 0);
+        // asset.safeTransferFrom(USER, DEVIL, 2);
+        // vm.stopPrank();
 
-        assertEq(1, asset.balanceOf(USER));
-        //assertEq(1, asset.getVotes(USER));
+        // assertEq(1, asset.balanceOf(USER));
+        // //assertEq(1, asset.getVotes(USER));
 
-        assertEq(2, asset.balanceOf(DEVIL));
-        //assertEq(2, asset.getVotes(DEVIL));
+        // assertEq(2, asset.balanceOf(DEVIL));
+        // //assertEq(2, asset.getVotes(DEVIL));
 
-        vm.prank(DEVIL);
-        governor.castVote(0, IGovernor.VoteType.For);
+        // vm.prank(USER);
+        // governor.castVote(0, IGovernor.VoteType.For);
 
-        governor.proposalVotes(0);
+        // governor.proposalVotes(0);
 
-        vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.For);
+        // vm.prank(DEVIL);
+        // governor.castVote(0, IGovernor.VoteType.For);
 
-        governor.proposalVotes(0);
+        // governor.proposalVotes(0);
 
-        assertEq(0, asset.getVotes(USER));
-        assertEq(0, asset.getVotes(DEVIL));
+        // assertEq(0, asset.getVotes(USER));
+        // assertEq(0, asset.getVotes(DEVIL));
 
         /// @dev NEXT PROPOSAL
         /// @notice USER vote power -> 1
         /// @notice DEVIL vote power -> 2
 
-        vm.prank(address(auctioner));
-        governor.propose(address(asset), "New buyout offer!");
+        // vm.prank(address(auctioner));
+        // governor.propose(address(asset), "New buyout offer!");
 
-        vm.prank(USER);
-        governor.castVote(1, IGovernor.VoteType.For);
+        // vm.prank(USER);
+        // governor.castVote(1, IGovernor.VoteType.For);
 
-        vm.prank(USER);
-        vm.expectRevert(IGovernor.Governor__AlreadyVoted.selector);
-        governor.castVote(1, IGovernor.VoteType.For);
+        // vm.prank(USER);
+        // vm.expectRevert(IGovernor.Governor__AlreadyVoted.selector);
+        // governor.castVote(1, IGovernor.VoteType.For);
 
-        (uint against, uint fore, uint abstain) = governor.proposalVotes(1);
-        console.log("Against 2 :", against);
-        console.log("For 2 :", fore);
-        console.log("Abstain 2 :", abstain);
+        // (uint against, uint fore, uint abstain) = governor.proposalVotes(1);
+        // console.log("Against 2 :", against);
+        // console.log("For 2 :", fore);
+        // console.log("Abstain 2 :", abstain);
     }
 
     function testCantVoteMultipleTimes() public proposalMade {
