@@ -12,7 +12,8 @@ contract Governor is Ownable, IGovernor {
 
     struct ProposalCore {
         address asset;
-        uint256 timeLeft;
+        uint256 voteStart;
+        uint256 voteEnd;
         string description;
         uint256 forVotes;
         uint256 againstVotes;
@@ -36,11 +37,12 @@ contract Governor is Ownable, IGovernor {
 
         proposal.asset = asset;
         /// @dev To be confirmed -> how long will we give each proposal to live
-        proposal.timeLeft = block.timestamp + 1 days;
+        proposal.voteStart = block.number;
+        proposal.voteEnd = block.timestamp + 1 days;
         proposal.description = description;
         proposal.state = ProposalState.Active;
 
-        emit Propose(_totalProposals, asset, proposal.timeLeft, description);
+        emit Propose(_totalProposals, asset, proposal.voteEnd, description);
         emit StateChange(_totalProposals, ProposalState.Active);
 
         _totalProposals += 1;
@@ -61,13 +63,16 @@ contract Governor is Ownable, IGovernor {
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
         if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
 
-        Asset(proposal.asset).delegateVotes(msg.sender);
-        if (Asset(proposal.asset).getVotes(msg.sender) == 0) revert Governor__ZeroVotingPower();
+        // Asset(proposal.asset).delegateVotes(msg.sender);
+        // if (Asset(proposal.asset).getVotes(msg.sender) == 0) revert Governor__ZeroVotingPower();
+
+        uint256 votes = Asset(proposal.asset).getPastVotes(msg.sender, proposal.voteStart);
+        if (votes == 0) revert Governor__ZeroVotingPower();
 
         /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
         /// @dev In ERC721A check if address has already voted, if so do not transfer voting power, if not transfer voting power accordingly
         //uint[] memory tokenIds = Asset(proposal.asset).tokensOfOwner(msg.sender);
-        uint voteCount = Asset(proposal.asset).getVotes(msg.sender);
+        // uint voteCount = Asset(proposal.asset).getVotes(msg.sender);
 
         // Mark all tokens as used for voting
         // for (uint i; i < voteCount; i++) {
@@ -76,9 +81,9 @@ contract Governor is Ownable, IGovernor {
         //     proposal.hasVoted[tokenIds[i]] = true;
         // }
 
-        if (vote == VoteType.For) proposal.forVotes += voteCount;
-        if (vote == VoteType.Against) proposal.againstVotes += voteCount;
-        if (vote == VoteType.Abstain) proposal.abstainVotes += voteCount;
+        if (vote == VoteType.For) proposal.forVotes += votes;
+        if (vote == VoteType.Against) proposal.againstVotes += votes;
+        if (vote == VoteType.Abstain) proposal.abstainVotes += votes;
 
         Asset(proposal.asset).takeVotes(msg.sender);
         proposal.hasVoted[msg.sender] = true;
@@ -106,7 +111,7 @@ contract Governor is Ownable, IGovernor {
     function votingPeriod(uint proposalId) external view returns (uint) {
         ProposalCore storage proposal = _proposals[proposalId];
 
-        return (proposal.timeLeft < block.timestamp) ? 0 : (proposal.timeLeft - block.timestamp);
+        return (proposal.voteEnd < block.timestamp) ? 0 : (proposal.voteEnd - block.timestamp);
     }
 
     /// @dev Getter
