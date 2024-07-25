@@ -86,7 +86,6 @@ contract Governor is Ownable, IGovernor {
         if (vote == VoteType.Against) proposal.againstVotes += votes;
         if (vote == VoteType.Abstain) proposal.abstainVotes += votes;
 
-        Asset(proposal.asset).takeVotes(msg.sender);
         proposal.hasVoted[msg.sender] = true;
     }
 
@@ -119,7 +118,7 @@ contract Governor is Ownable, IGovernor {
     function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
         ProposalCore storage proposal = _proposals[proposalId];
 
-        return (proposal.againstVotes, proposal.forVotes, proposal.abstainVotes);
+        return (proposal.forVotes, proposal.againstVotes, proposal.abstainVotes);
     }
 
     /// @dev Getter
