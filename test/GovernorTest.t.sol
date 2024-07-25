@@ -75,7 +75,7 @@ contract GovernorTest is Test {
 
         vm.roll(block.number + 1);
 
-        uint votes = asset.getPastVotes(USER, 1);
+        uint votes = asset.getPastVotes(USER, asset.clock() - 1);
 
         assertEq(votes, 3);
 
