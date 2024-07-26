@@ -5,6 +5,7 @@ import {Asset} from "./Asset.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IGovernor} from "./interfaces/IGovernor.sol";
+import {IAuctioner} from "./interfaces/IAuctioner.sol";
 
 /// @dev This contract only will be allowed to execute buyout function from Auctioner
 /// @dev Make Auctioner owner -> so it can call execute here by Chainlink Keepers?
@@ -39,18 +40,22 @@ contract Governor is Ownable, IGovernor {
         proposal.asset = asset;
         /// @dev To be confirmed -> how long will we give each proposal to live
         proposal.voteStart = block.timestamp;
-        proposal.voteEnd = block.timestamp + 1 days;
+        proposal.voteEnd = block.timestamp + 7 days;
         proposal.description = description;
         proposal.state = ProposalState.Active;
 
-        emit Propose(_totalProposals, asset, proposal.voteEnd, description);
+        emit Propose(_totalProposals, asset, proposal.voteStart, proposal.voteEnd, description);
         emit StateChange(_totalProposals, ProposalState.Active);
 
         _totalProposals += 1;
     }
 
-    function execute() external onlyOwner {}
+    /// @dev Calling 'buyout' fn from Auctioner
+    function execute(uint auctionId) external onlyOwner {
+        IAuctioner(owner()).buyout(auctionId);
+    }
 
+    /// @dev Changes state of proposal to failed
     function cancel(uint proposalId) external onlyOwner {
         if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
         ProposalCore storage proposal = _proposals[proposalId];
@@ -89,6 +94,7 @@ contract Governor is Ownable, IGovernor {
         proposal.hasVoted[msg.sender] = true;
     }
 
+    // Minimum amount of users that voted for proposal to pass
     function quorumReached(uint256 proposalId) internal view returns (bool) {
         ProposalCore storage proposal = _proposals[proposalId];
 
