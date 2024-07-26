@@ -22,5 +22,5 @@ interface IGovernor {
     }
 
     event StateChange(uint indexed id, ProposalState);
-    event Propose(uint indexed id, address indexed asset, uint indexed deadline, string description);
+    event Propose(uint indexed id, address indexed asset, uint voteStart, uint indexed voteEnd, string description);
 }
