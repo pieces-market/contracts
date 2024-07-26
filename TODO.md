@@ -21,3 +21,11 @@ Execute
 Cancel
 castVote
 quorumCheck
+
+# Tweed:
+
+requirements:
+
+-   Our claimer needs to have a minter role in the contract.
+-   Aleph network not supported
+-   Gone are the days of purchasing crypto, going through KYC, and understanding gas fees!
