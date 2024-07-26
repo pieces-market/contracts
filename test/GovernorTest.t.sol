@@ -56,7 +56,7 @@ contract GovernorTest is Test {
     function testCanMakeProposal() public proposalMade {
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.Propose(1, address(asset), block.timestamp + 1 days, "Buyout offer received!");
+        emit IGovernor.Propose(1, address(asset), block.timestamp, block.timestamp + 7 days, "Buyout offer received!");
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.Active);
         governor.propose(address(asset), "Buyout offer received!");
