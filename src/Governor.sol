@@ -69,23 +69,8 @@ contract Governor is Ownable, IGovernor {
         if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
         if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
 
-        // Asset(proposal.asset).delegateVotes(msg.sender);
-        // if (Asset(proposal.asset).getVotes(msg.sender) == 0) revert Governor__ZeroVotingPower();
-
         uint256 votes = Asset(proposal.asset).getPastVotes(msg.sender, proposal.voteStart);
         if (votes == 0) revert Governor__ZeroVotingPower();
-
-        /// @dev This approach is very expensive -> try refactor to delegate votes only when tokens bought -> track mapping(address => bool)
-        /// @dev In ERC721A check if address has already voted, if so do not transfer voting power, if not transfer voting power accordingly
-        //uint[] memory tokenIds = Asset(proposal.asset).tokensOfOwner(msg.sender);
-        // uint voteCount = Asset(proposal.asset).getVotes(msg.sender);
-
-        // Mark all tokens as used for voting
-        // for (uint i; i < voteCount; i++) {
-        //     if (proposal.hasVoted[tokenIds[i]] == true) revert Governor__TokenAlreadyUsedForVoting(proposalId, tokenIds[i]);
-
-        //     proposal.hasVoted[tokenIds[i]] = true;
-        // }
 
         if (vote == VoteType.For) proposal.forVotes += votes;
         if (vote == VoteType.Against) proposal.againstVotes += votes;
