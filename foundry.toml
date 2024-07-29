@@ -3,6 +3,7 @@ src = "src"
 out = "out"
 libs = ["lib"]
 remappings = ['@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/', '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts', '@solmate=lib/solmate/src/', '@ERC721A/contracts=lib/ERC721A/contracts']
+gas_reports = ["Auctioner", "Asset", "Governor"]
 ffi = false
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
