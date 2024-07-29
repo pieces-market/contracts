@@ -40,17 +40,15 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         }
     }
 
-    /// @dev Restrict below to onlyOwner?
-    function delegateVotes(address delegatee) external {
-        _delegate(delegatee, delegatee);
-    }
-
     function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override(ERC721A, IERC721A) {
         super.safeTransferFrom(from, to, tokenId);
         _delegate(to, to);
     }
 
-    /// @dev IF ABOVE IS CORRECT THEN OVERRIDE 'safeTransferFrom' with data same way !!!!!!!!!!!
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public payable virtual override(ERC721A, IERC721A) {
+        super.safeTransferFrom(from, to, tokenId, _data);
+        _delegate(to, to);
+    }
 
     /// @dev The following functions are overrides required by Solidity
 
@@ -87,5 +85,3 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         return "mode=timestamp&from=default";
     }
 }
-
-/// @dev STANDARD VOTES || CUSTOM VOTES
