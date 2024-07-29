@@ -64,9 +64,13 @@ contract Governor is Ownable, IGovernor {
         uint256 votes = Asset(proposal.asset).getPastVotes(msg.sender, proposal.voteStart);
         if (votes == 0) revert Governor__ZeroVotingPower();
 
-        if (vote == VoteType.FOR) proposal.forVotes += votes;
-        if (vote == VoteType.AGAINST) proposal.againstVotes += votes;
-        if (vote == VoteType.ABSTAIN) proposal.abstainVotes += votes;
+        if (vote == VoteType.FOR) {
+            proposal.forVotes += votes;
+        } else if (vote == VoteType.AGAINST) {
+            proposal.againstVotes += votes;
+        } else if (vote == VoteType.ABSTAIN) {
+            proposal.abstainVotes += votes;
+        }
 
         proposal.hasVoted[msg.sender] = true;
     }
