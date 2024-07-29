@@ -58,7 +58,7 @@ contract GovernorTest is Test {
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.Propose(1, address(asset), block.timestamp, block.timestamp + 7 days, "Buyout offer received!");
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.StateChange(1, IGovernor.ProposalState.Active);
+        emit IGovernor.StateChange(1, IGovernor.ProposalState.ACTIVE);
         governor.propose(address(asset), "Buyout offer received!");
     }
 
@@ -76,7 +76,7 @@ contract GovernorTest is Test {
         assertEq(asset.getVotes(USER), 3);
 
         vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
     }
 
     function testAftermarketBuyerCanVote() public {
@@ -119,10 +119,10 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
 
         vm.prank(DEVIL);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
 
         governor.proposalVotes(0);
     }
@@ -160,7 +160,7 @@ contract GovernorTest is Test {
 
         vm.prank(DEVIL);
         vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
     }
 
     function testCantVoteMultipleTimes() public proposalMade {
@@ -177,11 +177,11 @@ contract GovernorTest is Test {
         assertEq(asset.getVotes(USER), 3);
 
         vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
 
         vm.prank(USER);
         vm.expectRevert(IGovernor.Governor__AlreadyVoted.selector);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
 
         /// @dev Transfer To Devil
         vm.startPrank(USER);
@@ -199,7 +199,7 @@ contract GovernorTest is Test {
 
         vm.prank(DEVIL);
         vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
 
         governor.proposalVotes(0);
     }
@@ -216,7 +216,7 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.For);
+        governor.castVote(0, IGovernor.VoteType.FOR);
 
         vm.warp(block.timestamp + 1);
 
@@ -230,7 +230,7 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(USER);
-        governor.castVote(1, IGovernor.VoteType.Abstain);
+        governor.castVote(1, IGovernor.VoteType.ABSTAIN);
 
         vm.warp(block.timestamp + 1);
 
@@ -292,10 +292,10 @@ contract GovernorTest is Test {
 
         vm.prank(USER);
         vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
-        governor.castVote(0, IGovernor.VoteType.Abstain);
+        governor.castVote(0, IGovernor.VoteType.ABSTAIN);
 
         vm.prank(DEVIL);
-        governor.castVote(0, IGovernor.VoteType.Abstain);
+        governor.castVote(0, IGovernor.VoteType.ABSTAIN);
     }
 
     modifier proposalMade() {
