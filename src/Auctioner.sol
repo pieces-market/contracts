@@ -35,7 +35,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     constructor() Ownable(msg.sender) {}
 
     /// @notice Creates new auction, mints NFT connected to auctioned asset
-    /// @dev Emits Create event
+    /// @dev Emits Create and StateChange events
     /// @param name Asset name, which is also NFT contract name
     /// @param symbol Asset symbol, which is also NFT contract symbol
     /// @param uri Asset uri, which points to metadata file containing associated NFT data
