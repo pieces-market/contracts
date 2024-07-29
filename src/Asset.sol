@@ -8,52 +8,48 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
-/// @dev ERC721A version of Asset (NFT) contract with cheap multiple minting function
+/// @title Asset Contract
+/// @notice ERC721A representation of Asset with cheap batch minting function
 contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
 
-    // We are getting 'name' and 'symbol' from Auctioner.sol -> Owner of this contract is Auctioner.sol
+    /// @dev Constructor
     constructor(string memory name, string memory symbol, string memory uri, address owner) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
         baseURI = uri;
     }
 
-    /// @dev Override tokenURI to keep 1 URI for all tokens?
-    // This will lead to Metadata, which will be unique for each token
+    /// @dev Consider rverriding tokenURI to keep 1 URI for all tokens
+    /// @notice Leads to Metadata, which is unique for each token
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
-    /// @notice Multi-mint function to mint multiple tokens to a single user
+    /// @notice Mints multiple tokens at once to a single user and instantly delegates votes to receiver
+    /// @param to Address of receiver of minted tokens
+    /// @param quantity Amount of tokens to be minted
     function safeBatchMint(address to, uint256 quantity) external onlyOwner {
         _safeMint(to, quantity);
-        _delegate(to, to);
     }
 
-    /// @dev Very expensive function
-    function burnBatch(address owner) external onlyOwner {
+    /// @dev Very expensive function -> consider refactoring it
+    /// @notice Burns all tokens owned by user
+    /// @param owner Address of tokens owner
+    function batchBurn(address owner) external onlyOwner {
         uint256[] memory tokenIds = this.tokensOfOwner(owner);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            // _transferVotingUnits(from, to, batchSize); -> to (address(0))
             _burn(tokenIds[i]);
         }
     }
 
-    function safeTransferFrom(address from, address to, uint256 tokenId) public payable virtual override(ERC721A, IERC721A) {
-        super.safeTransferFrom(from, to, tokenId);
-        _delegate(to, to);
-    }
-
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public payable virtual override(ERC721A, IERC721A) {
-        super.safeTransferFrom(from, to, tokenId, _data);
-        _delegate(to, to);
-    }
-
     /// @dev The following functions are overrides required by Solidity
 
+    /// @notice Override ERC721A and ERC721AVotes Function
+    /// @dev Additionally delegates vote to new token owner
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual override(ERC721A, ERC721AVotes) {
         super._afterTokenTransfers(from, to, startTokenId, quantity);
+        _delegate(to, to);
     }
 
     /// @dev Check if we indeed need this -> if ERC721AQueryable included override(ERC721A, IERC721A)
@@ -71,12 +67,14 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @dev VOTING MODULE OVERRIDE'S //
     ////////////////////////////////////
 
-    /// @dev Override Vote functions
+    /// @dev Override Vote Function
+    /// @notice Changes block.number into block.timestamp for snapshot
     function clock() public view override returns (uint48) {
         return Time.timestamp();
     }
 
-    /// @dev Override Vote functions
+    /// @dev Override Vote Function
+    /// @notice Changes block.number into block.timestamp for snapshot
     function CLOCK_MODE() public view override returns (string memory) {
         // Check that the clock was not modified
         if (clock() != Time.timestamp()) {
