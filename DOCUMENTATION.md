@@ -86,6 +86,7 @@
 -   **`uint256 forVotes:`** Number of votes in favor of the proposal
 -   **`uint256 againstVotes:`** Number of votes against the proposal
 -   **`uint256 abstainVotes:`** Number of abstaining votes
+-   **`mapping(address => bool) hasVoted:`** Mapping to track if an address has voted on the proposal
 -   **`ProposalState state:`** Current state of the proposal
 
 ### **Events**
