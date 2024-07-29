@@ -20,7 +20,7 @@ contract Governor is Ownable, IGovernor {
         uint256 forVotes;
         uint256 againstVotes;
         uint256 abstainVotes;
-        mapping(address => bool) hasVoted; // useless
+        mapping(address => bool) hasVoted;
         ProposalState state;
     }
 
