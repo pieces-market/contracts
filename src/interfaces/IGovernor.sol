@@ -8,18 +8,35 @@ interface IGovernor {
     error Governor__ZeroVotingPower();
 
     enum ProposalState {
-        Inactive,
-        Active,
-        Passed,
-        Failed
+        INACTIVE,
+        ACTIVE,
+        PASSED,
+        SUCCEEDED,
+        FAILED,
+        CANCELLED
     }
 
     enum VoteType {
-        For,
-        Against,
-        Abstain
+        FOR,
+        AGAINST,
+        ABSTAIN
     }
 
-    event StateChange(uint indexed id, ProposalState);
+    /// @notice Emitted when a new proposal is created
+    /// @param id The id of the proposal
+    /// @param asset Address of the asset linked to the proposal
+    /// @param voteStart The timestamp when the proposal voting starts
+    /// @param voteEnd The timestamp when the proposal voting ends
+    /// @param description Description of the proposal
     event Propose(uint indexed id, address indexed asset, uint voteStart, uint indexed voteEnd, string description);
+
+    /// @notice Emitted when the state of a proposal changes
+    /// @param id The id of the proposal
+    /// @param state The new state of the proposal
+    event StateChange(uint indexed id, ProposalState indexed state);
+
+    /// @notice Allows users to cast a vote on a proposal
+    /// @param proposalId The id of the proposal
+    /// @param vote Type of vote (For, Against, Abstain)
+    function castVote(uint proposalId, VoteType vote) external;
 }
