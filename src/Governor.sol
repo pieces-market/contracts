@@ -7,8 +7,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IGovernor} from "./interfaces/IGovernor.sol";
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
 
-/// @dev This contract only will be allowed to execute buyout function from Auctioner
-/// @dev Make Auctioner owner -> so it can call execute here by Chainlink Keepers?
+/// @title Governor Contract
+/// @notice Allows creation and management of proposals per given asset, executes passed proposals
 contract Governor is Ownable, IGovernor {
     /// @dev FUNCTION quorum = 51%
 
@@ -34,52 +34,46 @@ contract Governor is Ownable, IGovernor {
     constructor(address owner) Ownable(owner) {}
 
     /// @dev This function will be called by 'buyout()' fn from 'Auctioner.sol'
+
+    /// @notice Creates new proposal
+    /// @dev Emits Propose and StateChange events
+    /// @param asset Address of the asset linked to the proposal
+    /// @param description Description of the proposal
     function propose(address asset, string memory description) external onlyOwner {
         ProposalCore storage proposal = _proposals[_totalProposals];
 
         proposal.asset = asset;
-        /// @dev To be confirmed -> how long will we give each proposal to live
         proposal.voteStart = block.timestamp;
         proposal.voteEnd = block.timestamp + 7 days;
         proposal.description = description;
-        proposal.state = ProposalState.Active;
+        proposal.state = ProposalState.ACTIVE;
 
         emit Propose(_totalProposals, asset, proposal.voteStart, proposal.voteEnd, description);
-        emit StateChange(_totalProposals, ProposalState.Active);
+        emit StateChange(_totalProposals, ProposalState.ACTIVE);
 
         _totalProposals += 1;
     }
 
-    /// @dev Calling 'buyout' fn from Auctioner
-    function execute(uint auctionId) external onlyOwner {
-        IAuctioner(owner()).buyout(auctionId);
-    }
-
-    /// @dev Changes state of proposal to failed
-    function cancel(uint proposalId) external onlyOwner {
-        if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
-        ProposalCore storage proposal = _proposals[proposalId];
-
-        proposal.state = ProposalState.Failed;
-    }
-
+    /// @inheritdoc IGovernor
     function castVote(uint proposalId, VoteType vote) external {
         if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
         ProposalCore storage proposal = _proposals[proposalId];
-        if (proposal.state != ProposalState.Active) revert Governor__ProposalNotActive();
+        if (proposal.state != ProposalState.ACTIVE) revert Governor__ProposalNotActive();
         if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
 
         uint256 votes = Asset(proposal.asset).getPastVotes(msg.sender, proposal.voteStart);
         if (votes == 0) revert Governor__ZeroVotingPower();
 
-        if (vote == VoteType.For) proposal.forVotes += votes;
-        if (vote == VoteType.Against) proposal.againstVotes += votes;
-        if (vote == VoteType.Abstain) proposal.abstainVotes += votes;
+        if (vote == VoteType.FOR) proposal.forVotes += votes;
+        if (vote == VoteType.AGAINST) proposal.againstVotes += votes;
+        if (vote == VoteType.ABSTAIN) proposal.abstainVotes += votes;
 
         proposal.hasVoted[msg.sender] = true;
     }
 
     // Minimum amount of users that voted for proposal to pass
+    /// @notice Checks if the quorum for a proposal is reached
+    /// @param proposalId The id of the proposal
     function quorumReached(uint256 proposalId) internal view returns (bool) {
         ProposalCore storage proposal = _proposals[proposalId];
 
@@ -87,6 +81,28 @@ contract Governor is Ownable, IGovernor {
         return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
     }
 
+    /// @notice Calls 'buyout' function from Auctioner contract
+    /// @param auctionId The id of the auction
+    function execute(uint auctionId) external onlyOwner {
+        IAuctioner(owner()).buyout(auctionId);
+    }
+
+    /// @notice Cancels a proposal by setting its state to
+    /// @dev Emits StateChange event
+    /// @param proposalId The id of the proposal
+    function cancel(uint proposalId) external onlyOwner {
+        if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
+        ProposalCore storage proposal = _proposals[proposalId];
+
+        proposal.state = ProposalState.FAILED;
+
+        emit StateChange(proposalId, ProposalState.FAILED);
+    }
+
+    /// @dev Below functions probably to be removed
+
+    /// @notice Checks if a proposal has succeeded based on the votes
+    /// @param proposalId The id of the proposal
     function voteSucceeded(uint256 proposalId) internal view returns (bool) {
         ProposalCore storage proposal = _proposals[proposalId];
 
