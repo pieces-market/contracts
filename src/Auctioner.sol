@@ -14,6 +14,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Variables
     uint256 private _totalAuctions;
 
+    /// @dev CONSIDER REMOVING BELOW
     /// @dev Arrays
     uint256[] private _scheduledAuctions;
 
