@@ -3,6 +3,7 @@
 0. Documentation for Governor
 1. Write buyout function and connect it with Governor contract
 2. Consider Auctioer automation by Chainlink or RedStone?
+3. Implement fees on buy and buyout
 
 # Gas Calculation
 
