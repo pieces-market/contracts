@@ -25,13 +25,13 @@ contract Governor is Ownable, IGovernor {
     }
 
     /// @dev Variables
-    uint256 private _totalProposals;
+    uint256 private s_totalProposals;
 
     /// @dev Mappings
-    mapping(uint256 proposalId => ProposalCore) private _proposals;
+    mapping(uint256 proposalId => ProposalCore) private s_proposals;
 
     /// @dev Constructor
-    constructor(address owner) Ownable(owner) {}
+    constructor() Ownable(msg.sender) {}
 
     /// @dev This function will be called by 'buyout()' fn from 'Auctioner.sol'
 
@@ -40,7 +40,7 @@ contract Governor is Ownable, IGovernor {
     /// @param asset Address of the asset linked to the proposal
     /// @param description Description of the proposal
     function propose(address asset, string memory description) external onlyOwner {
-        ProposalCore storage proposal = _proposals[_totalProposals];
+        ProposalCore storage proposal = s_proposals[s_totalProposals];
 
         proposal.asset = asset;
         proposal.voteStart = block.timestamp;
@@ -48,16 +48,16 @@ contract Governor is Ownable, IGovernor {
         proposal.description = description;
         proposal.state = ProposalState.ACTIVE;
 
-        emit Propose(_totalProposals, asset, proposal.voteStart, proposal.voteEnd, description);
-        emit StateChange(_totalProposals, ProposalState.ACTIVE);
+        emit Propose(s_totalProposals, asset, proposal.voteStart, proposal.voteEnd, description);
+        emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
-        _totalProposals += 1;
+        s_totalProposals += 1;
     }
 
     /// @inheritdoc IGovernor
     function castVote(uint proposalId, VoteType vote) external {
-        if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
-        ProposalCore storage proposal = _proposals[proposalId];
+        if (proposalId >= s_totalProposals) revert Governor__ProposalDoesNotExist();
+        ProposalCore storage proposal = s_proposals[proposalId];
         if (proposal.state != ProposalState.ACTIVE) revert Governor__ProposalNotActive();
         if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
 
@@ -79,7 +79,7 @@ contract Governor is Ownable, IGovernor {
     /// @notice Checks if the quorum for a proposal is reached
     /// @param proposalId The id of the proposal
     function quorumReached(uint256 proposalId) internal view returns (bool) {
-        ProposalCore storage proposal = _proposals[proposalId];
+        ProposalCore storage proposal = s_proposals[proposalId];
 
         /// @dev total available votes (tokens minted so far per asset) <=
         return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
@@ -88,15 +88,15 @@ contract Governor is Ownable, IGovernor {
     /// @notice Calls 'buyout' function from Auctioner contract
     /// @param auctionId The id of the auction
     function execute(uint auctionId) external onlyOwner {
-        IAuctioner(owner()).buyout(auctionId);
+        //IAuctioner(owner()).buyout(auctionId);
     }
 
     /// @notice Cancels a proposal by setting its state to
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
     function cancel(uint proposalId) external onlyOwner {
-        if (proposalId >= _totalProposals) revert Governor__ProposalDoesNotExist();
-        ProposalCore storage proposal = _proposals[proposalId];
+        if (proposalId >= s_totalProposals) revert Governor__ProposalDoesNotExist();
+        ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
 
@@ -108,7 +108,7 @@ contract Governor is Ownable, IGovernor {
     /// @notice Checks if a proposal has succeeded based on the votes
     /// @param proposalId The id of the proposal
     function voteSucceeded(uint256 proposalId) internal view returns (bool) {
-        ProposalCore storage proposal = _proposals[proposalId];
+        ProposalCore storage proposal = s_proposals[proposalId];
 
         return proposal.forVotes > proposal.againstVotes;
     }
@@ -120,21 +120,21 @@ contract Governor is Ownable, IGovernor {
 
     /// @dev Getter
     function votingPeriod(uint proposalId) external view returns (uint) {
-        ProposalCore storage proposal = _proposals[proposalId];
+        ProposalCore storage proposal = s_proposals[proposalId];
 
         return (proposal.voteEnd < block.timestamp) ? 0 : (proposal.voteEnd - block.timestamp);
     }
 
     /// @dev Getter
     function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
-        ProposalCore storage proposal = _proposals[proposalId];
+        ProposalCore storage proposal = s_proposals[proposalId];
 
         return (proposal.forVotes, proposal.againstVotes, proposal.abstainVotes);
     }
 
     /// @dev Getter
     function totalVotes(uint256 proposalId) internal view returns (uint256) {
-        ProposalCore storage proposal = _proposals[proposalId];
+        ProposalCore storage proposal = s_proposals[proposalId];
 
         return proposal.forVotes + proposal.againstVotes + proposal.abstainVotes;
     }
