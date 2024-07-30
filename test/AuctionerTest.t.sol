@@ -4,13 +4,16 @@ pragma solidity ^0.8.25;
 import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Auctioner} from "../src/Auctioner.sol";
+import {Governor} from "../src/Governor.sol";
 import {Asset} from "../src/Asset.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 
 contract AuctionerTest is Test {
     Auctioner private auctioner;
     Asset private asset;
+    Governor private governor;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
@@ -21,8 +24,11 @@ contract AuctionerTest is Test {
     address private DEVIL = makeAddr("devil");
 
     function setUp() public {
-        vm.prank(OWNER);
-        auctioner = new Auctioner();
+        vm.startPrank(OWNER);
+        governor = new Governor();
+        auctioner = new Auctioner(address(governor));
+        governor.transferOwnership(address(auctioner));
+        vm.stopPrank();
 
         console.log("Auctioner: ", address(auctioner));
 
@@ -40,7 +46,7 @@ contract AuctionerTest is Test {
 
     modifier auctionCreated() {
         vm.startPrank(OWNER);
-        auctioner = new Auctioner();
+        auctioner = new Auctioner(address(governor));
 
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
