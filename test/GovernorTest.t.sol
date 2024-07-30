@@ -7,6 +7,7 @@ import {Auctioner} from "../src/Auctioner.sol";
 import {Asset} from "../src/Asset.sol";
 import {Governor} from "../src/Governor.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../src/interfaces/IGovernor.sol";
 
@@ -25,8 +26,9 @@ contract GovernorTest is Test {
 
     function setUp() public {
         vm.startPrank(OWNER);
-        auctioner = new Auctioner();
-        governor = new Governor(address(auctioner));
+        governor = new Governor();
+        auctioner = new Auctioner(address(governor));
+        governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
