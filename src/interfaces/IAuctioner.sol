@@ -80,9 +80,11 @@ interface IAuctioner {
     /// @dev Emits Purchase event and TransferToBroker event if last piece has been bought
     function buy(uint256 id, uint256 pieces) external payable;
 
-    /// @notice Allows making an offer to buy a certain asset auctioned by broker instantly
+    /// @notice Makes an offer to modify auction assumptions
+    /// @dev Creates proposal by calling Governor contract
     /// @param id Auction id that we want to interact with
-    function buyout(uint256 id) external payable;
+    /// @param description Auction id that we want to interact with
+    function makeOffer(uint256 id, string memory description) external payable;
 
     /// @notice Allows claiming revenue from pieces bought by buyers if auction closed successfully
     /// @param id Auction id that we want to interact with
