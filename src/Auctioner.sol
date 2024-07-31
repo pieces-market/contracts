@@ -144,7 +144,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (auction.proposalActive) revert Auctioner__ProposalInProgress();
         if (msg.value < (Asset(auction.asset).totalSupply() * auction.price)) revert Auctioner__InsufficientFunds();
 
-        bool success = i_governor.propose(auction.asset, description);
+        bool success = i_governor.propose(id, auction.asset, description);
         if (!success) revert Auctioner__FunctionCallFailed();
 
         auction.proposalActive = true;
@@ -155,23 +155,23 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Offer(id, msg.value, msg.sender);
     }
 
+    /// @notice Called by Governor if the proposal succeeds
+    /// @param id Auction id that we want to interact with
+    function acceptOffer(uint256 id) external {
+        if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
+        Auction storage auction = s_auctions[id];
+
+        auction.proposalActive = false;
+    }
+
     /// @notice Called by Governor if the proposal fails
     /// @param id Auction id that we want to interact with
     function rejectOffer(uint256 id) external {
-        // Governor Address as caller allowed only
+        if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
         auction.proposalActive = false;
         auction.withdrawAllowed[auction.offerer] = true;
-    }
-
-    /// @notice Called by Governor if the proposal succeeds
-    /// @param id Auction id that we want to interact with
-    function acceptOffer(uint256 id) external {
-        // Governor Address as caller allowed only
-        Auction storage auction = s_auctions[id];
-
-        auction.proposalActive = false;
     }
 
     /// @inheritdoc IAuctioner
@@ -218,7 +218,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function claim(uint256 id) external override {
+    function claim(uint256 id) external override nonReentrant {
         // emit Claim();
     }
 
