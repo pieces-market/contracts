@@ -56,9 +56,21 @@ contract TmpCostTest is Test {
     }
 
     function testMakeOfferCost() external {
+        auctioner.stateHack(0, 3);
+
         vm.prank(DEVIL);
         auctioner.makeOffer(0, "buyout offer");
 
         // cost snapshot: 157_681
+    }
+
+    function testRefundCost() external {
+        vm.prank(DEVIL);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        auctioner.stateHack(0, 4);
+
+        vm.prank(DEVIL);
+        auctioner.refund(0);
     }
 }
