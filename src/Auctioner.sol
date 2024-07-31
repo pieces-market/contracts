@@ -101,7 +101,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
-        if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
+        //if (pieces < 1) revert Auctioner__ZeroValueNotAllowed(); -> MintZeroQuantity error from minter
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
         /// @dev Implement fee's
         if ((Asset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
@@ -111,7 +111,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.value > cost) revert Auctioner__Overpayment();
 
         auction.pieces -= pieces;
-        //s_funderToFunds[msg.sender] += msg.value;
 
         /// @notice Mint pieces and immediately delegate votes to the buyer
         Asset(auction.asset).safeBatchMint(msg.sender, pieces);
