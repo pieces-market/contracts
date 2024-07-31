@@ -39,7 +39,7 @@ contract Governor is Ownable, IGovernor {
     /// @dev Emits Propose and StateChange events
     /// @param asset Address of the asset linked to the proposal
     /// @param description Description of the proposal
-    function propose(address asset, string memory description) external onlyOwner {
+    function propose(address asset, string memory description) external onlyOwner returns (bool) {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
 
         proposal.asset = asset;
@@ -52,6 +52,9 @@ contract Governor is Ownable, IGovernor {
         emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
         s_totalProposals += 1;
+
+        /// @dev returns true if everything pass | check gas costs | check if it is even necessary
+        return true;
     }
 
     /// @inheritdoc IGovernor
