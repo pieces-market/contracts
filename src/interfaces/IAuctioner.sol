@@ -15,6 +15,7 @@ interface IAuctioner {
     error Auctioner__ZeroAddressNotAllowed();
     error Auctioner__Overpayment();
     error Auctioner__BuyLimitExceeded();
+    error Auctioner__FunctionCallFailed();
 
     enum AuctionState {
         UNINITIALIZED,
