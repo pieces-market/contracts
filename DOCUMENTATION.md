@@ -23,7 +23,7 @@
 -   **`SCHEDULED:`** Auction has been initialized and awaits its start date
 -   **`OPENED:`** Auction ready to get orders for asset pieces
 -   **`CLOSED:`** Auction finished positively - all asset pieces sold
--   **`FAILED:`** Auction finished negatively - not all asset pieces bought in given time, buyers can refund
+-   **`FAILED:`** Auction finished negatively - not all asset pieces sold in given time, buyers can refund
 -   **`VOTING:`** Active buyout offer, buyers vote to accept or decline this offer
 -   **`FINISHED:`** All funds gathered from closed auction have been transferred to broker and broker transferred revenues to contract, buyers can claim revenues
 -   **`ARCHIVED:`** Everyone claimed their revenues, investment ultimately closed
