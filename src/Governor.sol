@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
-import {Asset} from "./Asset.sol";
+import {Auctioner} from "./Auctioner.sol";
+import {Asset} from "./Asset.sol"; // change it to interface
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IGovernor} from "./interfaces/IGovernor.sol";
-import {IAuctioner} from "./interfaces/IAuctioner.sol";
 
 /// @title Governor Contract
 /// @notice Allows creation and management of proposals per given asset, executes passed proposals
@@ -13,6 +13,7 @@ contract Governor is Ownable, IGovernor {
     /// @dev FUNCTION quorum = 51%
 
     struct ProposalCore {
+        uint256 auctionId;
         address asset;
         uint256 voteStart;
         uint256 voteEnd;
@@ -39,16 +40,18 @@ contract Governor is Ownable, IGovernor {
     /// @dev Emits Propose and StateChange events
     /// @param asset Address of the asset linked to the proposal
     /// @param description Description of the proposal
-    function propose(address asset, string memory description) external onlyOwner returns (bool) {
+    function propose(uint256 auctionId, address asset, string memory description) external onlyOwner returns (bool) {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
 
+        /// @dev Here we can take asset from Auctioner by calling getter -> compare costs (same for id)
+        proposal.auctionId = auctionId;
         proposal.asset = asset;
         proposal.voteStart = block.timestamp;
         proposal.voteEnd = block.timestamp + 7 days;
         proposal.description = description;
         proposal.state = ProposalState.ACTIVE;
 
-        emit Propose(s_totalProposals, asset, proposal.voteStart, proposal.voteEnd, description);
+        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, description);
         emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
         s_totalProposals += 1;
@@ -88,20 +91,26 @@ contract Governor is Ownable, IGovernor {
         return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
     }
 
-    /// @notice Calls 'buyout' function from Auctioner contract
-    /// @param auctionId The id of the auction
-    function execute(uint auctionId) external onlyOwner {
-        //IAuctioner(owner()).buyout(auctionId);
+    /// @dev THIS FUNCTION SHOULD BE CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
+    /// @notice Calls 'acceptOffer()' function from Auctioner contract
+    /// @param proposalId The id of the proposal
+    function execute(uint proposalId) external onlyOwner {
+        ProposalCore storage proposal = s_proposals[proposalId];
+
+        Auctioner(owner()).acceptOffer(proposal.auctionId);
+
+        /// @dev Add emit
     }
 
-    /// @notice Cancels a proposal by setting its state to
+    /// @dev THIS FUNCTION SHOULD BE CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
+    /// @notice Cancels a proposal by changing it's state and calls 'rejectOffer()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
     function cancel(uint proposalId) external onlyOwner {
-        if (proposalId >= s_totalProposals) revert Governor__ProposalDoesNotExist();
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
+        Auctioner(owner()).rejectOffer(proposal.auctionId);
 
         emit StateChange(proposalId, ProposalState.FAILED);
     }
