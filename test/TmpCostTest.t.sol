@@ -82,6 +82,7 @@ contract TmpCostTest is Test {
         vm.prank(DEVIL);
         auctioner.makeOffer{value: 12 ether}(0, "buyout offer");
 
+        vm.prank(address(governor));
         auctioner.rejectOffer(0);
 
         vm.prank(DEVIL);
