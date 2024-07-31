@@ -17,6 +17,7 @@ interface IAuctioner {
     error Auctioner__BuyLimitExceeded();
     error Auctioner__FunctionCallFailed();
     error Auctioner__ProposalInProgress();
+    error Auctioner__UnauthorizedCaller();
 
     enum AuctionState {
         UNINITIALIZED,
