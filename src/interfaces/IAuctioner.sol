@@ -16,6 +16,7 @@ interface IAuctioner {
     error Auctioner__Overpayment();
     error Auctioner__BuyLimitExceeded();
     error Auctioner__FunctionCallFailed();
+    error Auctioner__ProposalInProgress();
 
     enum AuctionState {
         UNINITIALIZED,
@@ -23,7 +24,6 @@ interface IAuctioner {
         OPENED,
         CLOSED,
         FAILED,
-        VOTING, // Rethink this while developing Governor
         FINISHED,
         ARCHIVED
     }
@@ -50,20 +50,28 @@ interface IAuctioner {
     /// @param buyer The address of the buyer
     event Purchase(uint256 indexed id, uint256 indexed pieces, address buyer);
 
+    /// @param id The id of the auction
+    /// @param amount The amount of the offer transferred to contract
+    /// @param offerer The address of the user that made offer
+    event Offer(uint256 indexed id, uint256 indexed amount, address indexed offerer);
+
     /// @notice Emitted when an early buyout offer is made for an auction
     event Buyout();
 
     /// @notice Emitted when revenue is claimed from an auction
     event Claim();
 
-    /// @notice Emitted when a refund is requested for an auction
+    /// @notice Emitted when a refund has been executed
     /// @param id The id of the auction
     /// @param amount The amount refunded
     /// @param user The address of the user requesting the refund
     event Refund(uint256 indexed id, uint256 indexed amount, address indexed user);
 
-    /// @notice Emitted when a vote is cast for a buyout offer
-    event Vote(); // Check if event is available in gov
+    /// @notice Emitted when a withdraw has been executed
+    /// @param id The id of the auction
+    /// @param amount The amount withdrew
+    /// @param offerer The address of the user requesting the withdrawal
+    event Withdraw(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
     /// @notice Emitted when all pieces has been sold and funds are transferred to the broker
     /// @param id The id of the auction
