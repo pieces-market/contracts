@@ -16,7 +16,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     uint256 private s_totalAuctions;
     Governor private immutable i_governor;
 
-    /// @dev CONSIDER REMOVING BELOW
+    /// @dev CONSIDER CHANGING BELOW INTO MAPPING !!!
     /// @dev Arrays
     uint256[] private s_scheduledAuctions;
 
@@ -28,11 +28,12 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 openTs;
         uint256 closeTs;
         address recipient;
+        mapping(address offerer => uint amount) offer; // new -> update docs
         AuctionState state;
     }
 
     /// @dev Mappings
-    mapping(uint256 id => Auction) private _auctions;
+    mapping(uint256 id => Auction) private s_auctions;
 
     /// @dev Constructor
     constructor(address governor) Ownable(msg.sender) {
@@ -61,7 +62,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 span,
         address recipient
     ) external onlyOwner {
-        Auction storage auction = _auctions[s_totalAuctions];
+        Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
         if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
@@ -96,7 +97,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @inheritdoc IAuctioner
     function buy(uint256 id, uint256 pieces) external payable override nonReentrant {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
-        Auction storage auction = _auctions[id];
+        Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (pieces < 1) revert Auctioner__ZeroValueNotAllowed();
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
@@ -132,10 +133,20 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function makeOffer(uint256 id, string memory description) external payable override {
-        Auction storage auction = _auctions[id];
+        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
+        Auction storage auction = s_auctions[id];
+        if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
+        // RESTRICTION: MINIMUM VALUE TO PAY
+        // PREVENT CREATION OF ANOTHER OFFER IF OFFER ACTIVE FOR USER
+
+        auction.offer[msg.sender] += msg.value;
+
         /// @dev make it payable, and store input somewhere
         i_governor.propose(auction.asset, description);
     }
+
+    /// @dev Called by Governor if proposal fails
+    function rejectOffer() external {}
 
     function buyout(uint256 id) internal {
         // Only Governor can call it
@@ -150,7 +161,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @inheritdoc IAuctioner
     function refund(uint256 id) external override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
-        Auction storage auction = _auctions[id];
+        Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
 
         uint256 tokenBalance = Asset(auction.asset).balanceOf(msg.sender);
@@ -175,14 +186,14 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev Tokens Owned By Address Getter -> to be removed
     function getTokens(uint id, address owner) public view returns (uint) {
-        Auction storage auction = _auctions[id];
+        Auction storage auction = s_auctions[id];
 
         return Asset(auction.asset).balanceOf(owner);
     }
 
     /// @dev Auction Data Getter -> to be removed
     function getData(uint256 id) public view returns (address, uint, uint, uint, uint, uint, address, AuctionState) {
-        Auction storage auction = _auctions[id];
+        Auction storage auction = s_auctions[id];
 
         return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.state);
     }
@@ -191,28 +202,30 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     function errorHack(uint256 errorType) public pure {
         // 0 - Auctioner__AuctionDoesNotExist
         // 1 - Auctioner__AuctionNotOpened
-        // 2 - Auctioner__InsufficientPieces
-        // 3 - Auctioner__NotEnoughFunds
-        // 4 - Auctioner__TransferFailed
+        // 2 - Auctioner__AuctionNotClosed
+        // 3 - Auctioner__AuctionNotFailed
+        // 4 - Auctioner__InsufficientPieces
+        // 5 - Auctioner__InsufficientFunds
         // ...
 
         if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
         if (errorType == 1) revert Auctioner__AuctionNotOpened();
-        if (errorType == 2) revert Auctioner__AuctionNotFailed();
-        if (errorType == 3) revert Auctioner__InsufficientPieces();
-        if (errorType == 4) revert Auctioner__InsufficientFunds();
-        if (errorType == 5) revert Auctioner__TransferFailed();
-        if (errorType == 6) revert Auctioner__AuctionAlreadyInitialized();
-        if (errorType == 7) revert Auctioner__ZeroValueNotAllowed();
-        if (errorType == 8) revert Auctioner__IncorrectTimestamp();
-        if (errorType == 9) revert Auctioner__ZeroAddressNotAllowed();
-        if (errorType == 10) revert Auctioner__Overpayment();
-        if (errorType == 11) revert Auctioner__BuyLimitExceeded();
+        if (errorType == 2) revert Auctioner__AuctionNotClosed();
+        if (errorType == 3) revert Auctioner__AuctionNotFailed();
+        if (errorType == 4) revert Auctioner__InsufficientPieces();
+        if (errorType == 5) revert Auctioner__InsufficientFunds();
+        if (errorType == 6) revert Auctioner__TransferFailed();
+        if (errorType == 7) revert Auctioner__AuctionAlreadyInitialized();
+        if (errorType == 8) revert Auctioner__ZeroValueNotAllowed();
+        if (errorType == 9) revert Auctioner__IncorrectTimestamp();
+        if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
+        if (errorType == 11) revert Auctioner__Overpayment();
+        if (errorType == 12) revert Auctioner__BuyLimitExceeded();
     }
 
     /// @dev HELPER DEV ONLY
     function stateHack(uint256 id, uint256 state) public {
-        Auction storage auction = _auctions[id];
+        Auction storage auction = s_auctions[id];
 
         // 0 - UNINITIALIZED
         // 1 - SCHEDULED
