@@ -19,6 +19,7 @@
 -   **`BuyLimitExceeded:`** Error thrown when the buy limit of pieces for an auction is exceeded
 -   **`FunctionCallFailed:`** Error thrown when a function call fails
 -   **`ProposalInProgress:`** Error thrown when there is a proposal in progress
+-   **`UnauthorizedCaller:`** Error thrown when function called by unauthorized address
 
 ### **Auction States**
 
@@ -86,6 +87,7 @@
 
 ### **Proposal Structure**
 
+-   **`uint256 auctionId:`** The id of the auction that received offer
 -   **`address asset:`** Address of the asset linked to the proposal
 -   **`uint256 voteStart:`** Timestamp when voting starts
 -   **`uint256 voteEnd:`** Timestamp when voting ends
