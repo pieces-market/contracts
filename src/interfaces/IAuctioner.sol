@@ -96,11 +96,15 @@ interface IAuctioner {
     /// @param description Auction id that we want to interact with
     function makeOffer(uint256 id, string memory description) external payable;
 
-    /// @notice Allows claiming revenue from pieces bought by buyers if auction closed successfully
+    /// @notice Allows withdrawing funds transferred with offer if proposal fails
     /// @param id Auction id that we want to interact with
-    function claim(uint256 id) external;
+    function withdrawOffer(uint256 id) external;
 
     /// @notice Allows withdrawing funds by buyers if auction failed selling all pieces in given time period
     /// @param id Auction id that we want to interact with
     function refund(uint256 id) external;
+
+    /// @notice Allows claiming revenue from pieces bought by buyers if auction closed successfully
+    /// @param id Auction id that we want to interact with
+    function claim(uint256 id) external;
 }
