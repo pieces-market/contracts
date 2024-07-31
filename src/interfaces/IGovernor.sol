@@ -24,11 +24,12 @@ interface IGovernor {
 
     /// @notice Emitted when a new proposal is created
     /// @param id The id of the proposal
+    /// @param auctionId The id of the auction that received offer
     /// @param asset Address of the asset linked to the proposal
     /// @param voteStart The timestamp when the proposal voting starts
     /// @param voteEnd The timestamp when the proposal voting ends
     /// @param description Description of the proposal
-    event Propose(uint indexed id, address indexed asset, uint voteStart, uint indexed voteEnd, string description);
+    event Propose(uint indexed id, uint indexed auctionId, address indexed asset, uint voteStart, uint voteEnd, string description);
 
     /// @notice Emitted when the state of a proposal changes
     /// @param id The id of the proposal
