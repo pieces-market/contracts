@@ -49,7 +49,7 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @dev Additionally delegates vote to new token owner
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual override(ERC721A, ERC721AVotes) {
         super._afterTokenTransfers(from, to, startTokenId, quantity);
-        _delegate(to, to);
+        if (to != address(0)) _delegate(to, to);
     }
 
     /// @dev Check if we indeed need this -> if ERC721AQueryable included override(ERC721A, IERC721A)
