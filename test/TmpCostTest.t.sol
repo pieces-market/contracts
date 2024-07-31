@@ -50,18 +50,44 @@ contract TmpCostTest is Test {
     }
 
     function testDeployAuctionerCost() external {
-        auctioner = new Auctioner(address(governor));
+        new Auctioner(address(governor));
 
-        // cost snapshot: 3_749_332
+        // cost snapshot: 3_906_500
+    }
+
+    function testDeployAssetCost() external {
+        new Asset("Asset", "AST", "https:", address(auctioner));
+
+        // cost snapshot: 2_352_889
     }
 
     function testMakeOfferCost() external {
+        vm.prank(BUYER);
+        auctioner.buy{value: 6 ether}(0, 3);
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 1 ether}(0, "buyout offer");
+        auctioner.makeOffer{value: 12 ether}(0, "buyout offer");
 
-        // cost snapshot: 168_485
+        // cost snapshot: 568_288
+    }
+
+    function testWithdrawOfferCost() external {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+        auctioner.stateHack(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.makeOffer{value: 12 ether}(0, "buyout offer");
+
+        auctioner.rejectOffer(0);
+
+        vm.prank(DEVIL);
+        auctioner.withdrawOffer(0);
+
+        // cost snapshot: 418_206
     }
 
     function testBuyCost() external {
