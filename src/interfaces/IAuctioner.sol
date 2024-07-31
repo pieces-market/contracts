@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 interface IAuctioner {
     error Auctioner__AuctionDoesNotExist();
     error Auctioner__AuctionNotOpened();
+    error Auctioner__AuctionNotClosed();
     error Auctioner__AuctionNotFailed();
     error Auctioner__InsufficientPieces();
     error Auctioner__InsufficientFunds();
@@ -58,7 +59,7 @@ interface IAuctioner {
     /// @param id The id of the auction
     /// @param amount The amount refunded
     /// @param user The address of the user requesting the refund
-    event Refund(uint256 id, uint256 amount, address user);
+    event Refund(uint256 indexed id, uint256 indexed amount, address indexed user);
 
     /// @notice Emitted when a vote is cast for a buyout offer
     event Vote(); // Check if event is available in gov
