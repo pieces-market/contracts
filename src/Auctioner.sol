@@ -35,6 +35,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Mappings
     mapping(uint256 id => Auction) private s_auctions;
 
+    //mapping(address => uint) private s_funderToFunds;
+
     /// @dev Constructor
     constructor(address governor) Ownable(msg.sender) {
         i_governor = Governor(governor);
@@ -109,6 +111,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.value > cost) revert Auctioner__Overpayment();
 
         auction.pieces -= pieces;
+        //s_funderToFunds[msg.sender] += msg.value;
 
         /// @notice Mint pieces and immediately delegate votes to the buyer
         Asset(auction.asset).safeBatchMint(msg.sender, pieces);
@@ -137,20 +140,43 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
         // RESTRICTION: MINIMUM VALUE TO PAY
+        if (msg.value < auction.price) revert Auctioner__InsufficientFunds();
         // PREVENT CREATION OF ANOTHER OFFER IF OFFER ACTIVE FOR USER
 
         auction.offer[msg.sender] += msg.value;
 
-        /// @dev make it payable, and store input somewhere
-        i_governor.propose(auction.asset, description);
+        bool success = i_governor.propose(auction.asset, description);
+        if (!success) revert Auctioner__FunctionCallFailed();
     }
 
     /// @dev Called by Governor if proposal fails
-    function rejectOffer() external {}
+    function rejectOffer() internal {
+        // Set offerer withdrawal and changes auction state
+    }
 
-    function buyout(uint256 id) internal {
-        // Only Governor can call it
+    function acceptOffer(uint256 id) internal {
+        // Only Governor can call it if proposal pass
         // emit Buyout();
+    }
+
+    /// @dev Called by user to withdraw offer he made -> move to IAuctioner
+    function withdrawOffer(uint256 id) external nonReentrant {
+        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
+        Auction storage auction = s_auctions[id];
+
+        uint amount = auction.offer[msg.sender];
+
+        if (amount > 0) {
+            auction.offer[msg.sender] = 0;
+        } else {
+            revert Auctioner__InsufficientFunds();
+        }
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+        if (!success) revert Auctioner__TransferFailed();
+
+        /// @dev Consider add another event
+        emit Refund(id, amount, msg.sender);
     }
 
     /// @inheritdoc IAuctioner
@@ -159,7 +185,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function refund(uint256 id) external override {
+    function refund(uint256 id) external override nonReentrant {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
@@ -174,7 +200,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         }
 
         (bool success, ) = msg.sender.call{value: amount}("");
-        /// @dev If this revert will take place check if tokens were not burnt
+
+        /// @dev IF THIS REVERT WILL TAKE PLACE CHECK IF TOKENS WERE NOT BURNT
         if (!success) revert Auctioner__TransferFailed();
 
         emit Refund(id, amount, msg.sender);
@@ -221,6 +248,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
         if (errorType == 11) revert Auctioner__Overpayment();
         if (errorType == 12) revert Auctioner__BuyLimitExceeded();
+        if (errorType == 13) revert Auctioner__FunctionCallFailed();
     }
 
     /// @dev HELPER DEV ONLY
