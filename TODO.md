@@ -29,7 +29,4 @@ Use Cases:
 
 # CALL:
 
--   makeOffer -> minimalna wplata, kara jesli proposal passed i offerer nie wplaci reszty w okreslonym terminie
--   makeOffer -> restrykcja czyli 1 offer w danym czasie?
--   propose -> typy zamiast description (np buyout, change price, change time etc.)
--   withdrawOffer -> osobny withdraw dla offerera
+-   propose -> typy zamiast description (np buyout, change price, change time etc.) ---> glosowanie o prog wejscia
