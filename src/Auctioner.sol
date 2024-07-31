@@ -155,22 +155,26 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Offer(id, msg.value, msg.sender);
     }
 
-    /// @dev Called by Governor if proposal fails
+    /// @notice Called by Governor if the proposal fails
+    /// @param id Auction id that we want to interact with
     function rejectOffer(uint256 id) external {
+        // Governor Address as caller allowed only
         Auction storage auction = s_auctions[id];
 
         auction.proposalActive = false;
         auction.withdrawAllowed[auction.offerer] = true;
     }
 
-    function acceptOffer(uint256 id) internal {
+    /// @notice Called by Governor if the proposal succeeds
+    /// @param id Auction id that we want to interact with
+    function acceptOffer(uint256 id) external {
+        // Governor Address as caller allowed only
         Auction storage auction = s_auctions[id];
-        // Only Governor can call it if proposal pass
 
         auction.proposalActive = false;
     }
 
-    /// @dev Called by user to withdraw offer he made -> move to IAuctioner
+    /// @inheritdoc IAuctioner
     function withdrawOffer(uint256 id) external nonReentrant {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
@@ -188,11 +192,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (!success) revert Auctioner__TransferFailed();
 
         emit Withdraw(id, amount, msg.sender);
-    }
-
-    /// @inheritdoc IAuctioner
-    function claim(uint256 id) external override {
-        // emit Claim();
     }
 
     /// @inheritdoc IAuctioner
@@ -216,6 +215,11 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (!success) revert Auctioner__TransferFailed();
 
         emit Refund(id, amount, msg.sender);
+    }
+
+    /// @inheritdoc IAuctioner
+    function claim(uint256 id) external override {
+        // emit Claim();
     }
 
     // =========================================
