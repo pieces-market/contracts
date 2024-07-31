@@ -28,7 +28,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 openTs;
         uint256 closeTs;
         address recipient;
-        mapping(address offerer => uint amount) offer; // new -> update docs
+        bool proposalActive;
+        address offerer;
+        mapping(address offerer => bool) withdrawAllowed;
+        mapping(address offerer => uint amount) offer;
         AuctionState state;
     }
 
@@ -138,30 +141,40 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
-        // RESTRICTION: MINIMUM VALUE TO PAY
-        if (msg.value < auction.price) revert Auctioner__InsufficientFunds();
-        // PREVENT CREATION OF ANOTHER OFFER IF OFFER ACTIVE FOR USER
-
-        auction.offer[msg.sender] += msg.value;
+        if (auction.proposalActive) revert Auctioner__ProposalInProgress();
+        if (msg.value < (Asset(auction.asset).totalSupply() * auction.price)) revert Auctioner__InsufficientFunds();
 
         bool success = i_governor.propose(auction.asset, description);
         if (!success) revert Auctioner__FunctionCallFailed();
+
+        auction.proposalActive = true;
+        auction.offerer = msg.sender;
+        if (auction.withdrawAllowed[msg.sender]) auction.withdrawAllowed[msg.sender] = false;
+        auction.offer[msg.sender] += msg.value;
+
+        emit Offer(id, msg.value, msg.sender);
     }
 
     /// @dev Called by Governor if proposal fails
-    function rejectOffer() internal {
-        // Set offerer withdrawal and changes auction state
+    function rejectOffer(uint256 id) external {
+        Auction storage auction = s_auctions[id];
+
+        auction.proposalActive = false;
+        auction.withdrawAllowed[auction.offerer] = true;
     }
 
     function acceptOffer(uint256 id) internal {
+        Auction storage auction = s_auctions[id];
         // Only Governor can call it if proposal pass
-        // emit Buyout();
+
+        auction.proposalActive = false;
     }
 
     /// @dev Called by user to withdraw offer he made -> move to IAuctioner
     function withdrawOffer(uint256 id) external nonReentrant {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
+        if (!auction.withdrawAllowed[msg.sender]) revert Auctioner__ProposalInProgress();
 
         uint amount = auction.offer[msg.sender];
 
@@ -174,8 +187,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         (bool success, ) = msg.sender.call{value: amount}("");
         if (!success) revert Auctioner__TransferFailed();
 
-        /// @dev Consider add another event
-        emit Refund(id, amount, msg.sender);
+        emit Withdraw(id, amount, msg.sender);
     }
 
     /// @inheritdoc IAuctioner
@@ -248,6 +260,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 11) revert Auctioner__Overpayment();
         if (errorType == 12) revert Auctioner__BuyLimitExceeded();
         if (errorType == 13) revert Auctioner__FunctionCallFailed();
+        if (errorType == 14) revert Auctioner__ProposalInProgress();
     }
 
     /// @dev HELPER DEV ONLY
@@ -259,9 +272,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         // 2 - OPENED
         // 3 - CLOSED
         // 4 - FAILED
-        // 5 - VOTING
-        // 6 - FINISHED
-        // 7 - ARCHIVED
+        // 5 - FINISHED
+        // 6 - ARCHIVED
 
         auction.state = AuctionState(state);
     }
@@ -271,12 +283,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         // 0 - Create event
         // 1 - Schedule event
         // 2 - Purchase event
-        // 3 - Buyout event
-        // 4 - Claim event
-        // 5 - Refund event
-        // 6 - Vote event
-        // 7 - TransferToBroker event
-        // 8 - StateChange event
+        // ...
 
         if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
         if (eventId == 1) emit Schedule(0, 0);
@@ -284,8 +291,9 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (eventId == 3) emit Buyout();
         if (eventId == 4) emit Claim();
         if (eventId == 5) emit Refund(0, 0, address(0));
-        if (eventId == 6) emit Vote();
-        if (eventId == 7) emit TransferToBroker(0, address(0), 0);
-        if (eventId == 8) emit StateChange(0, AuctionState.UNINITIALIZED);
+        if (eventId == 6) emit Withdraw(0, 0, address(0));
+        if (eventId == 7) emit Offer(0, 0, address(0));
+        if (eventId == 8) emit TransferToBroker(0, address(0), 0);
+        if (eventId == 9) emit StateChange(0, AuctionState.UNINITIALIZED);
     }
 }
