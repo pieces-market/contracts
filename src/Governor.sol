@@ -22,7 +22,7 @@ contract Governor is Ownable, IGovernor {
         uint256 againstVotes;
         uint256 abstainVotes;
         mapping(address => bool) hasVoted;
-        ProposalType proposalType; /// @dev Update docs
+        ProposalType proposalType;
         ProposalState state;
     }
 
@@ -40,8 +40,8 @@ contract Governor is Ownable, IGovernor {
     /// @notice Creates new proposal
     /// @dev Emits Propose and StateChange events
     /// @param asset Address of the asset linked to the proposal
-    /// @param proposalType Description of the proposal
-    function propose(uint256 auctionId, address asset, ProposalType proposalType) external onlyOwner returns (bool) {
+    /// @param proposalOption Type of the proposal
+    function propose(uint256 auctionId, address asset, ProposalType proposalOption) external onlyOwner returns (bool) {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
 
         /// @dev Here we can take asset from Auctioner by calling getter -> compare costs (same for id)
@@ -51,14 +51,14 @@ contract Governor is Ownable, IGovernor {
         proposal.voteEnd = block.timestamp + 7 days;
 
         string memory description;
-        if (proposalType == ProposalType.BUYOUT) description = "Buyout offer!";
-        if (proposalType == ProposalType.OFFER) description = "Minimum offer value change";
+        if (proposalOption == ProposalType.BUYOUT) description = "Buyout offer!";
+        if (proposalOption == ProposalType.OFFER) description = "Minimum offer value change";
         proposal.description = description; /// @dev Assign desc per type? Consider if we keep description or not
 
-        proposal.proposalType = proposalType;
+        proposal.proposalType = proposalOption;
         proposal.state = ProposalState.ACTIVE;
 
-        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, proposalType);
+        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, proposalOption);
         emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
         s_totalProposals += 1;
