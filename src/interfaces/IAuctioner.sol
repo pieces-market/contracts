@@ -18,6 +18,7 @@ interface IAuctioner {
     error Auctioner__FunctionCallFailed();
     error Auctioner__ProposalInProgress();
     error Auctioner__UnauthorizedCaller();
+    error Auctioner__InvalidProposalType();
 
     enum AuctionState {
         UNINITIALIZED,
@@ -94,8 +95,8 @@ interface IAuctioner {
     /// @notice Makes an offer to modify auction assumptions
     /// @dev Creates proposal by calling Governor contract
     /// @param id Auction id that we want to interact with
-    /// @param description Auction id that we want to interact with
-    function makeOffer(uint256 id, string memory description) external payable;
+    /// @param proposal Type of the proposal (0 - BUYOUT, 1 - OFFER)
+    function makeOffer(uint256 id, uint256 proposal) external payable;
 
     /// @notice Allows withdrawing funds transferred with offer if proposal fails
     /// @param id Auction id that we want to interact with
