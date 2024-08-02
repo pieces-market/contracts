@@ -7,6 +7,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
+import {IGovernor} from "./interfaces/IGovernor.sol";
 
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
@@ -137,14 +138,16 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     /// @inheritdoc IAuctioner
-    function makeOffer(uint256 id, string memory description) external payable override {
+    function makeOffer(uint256 id, uint256 proposalType) external payable override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
         if (auction.proposalActive) revert Auctioner__ProposalInProgress();
-        if (msg.value < (Asset(auction.asset).totalSupply() * auction.price)) revert Auctioner__InsufficientFunds();
+        if (proposalType > 1) revert Auctioner__InvalidProposalType();
+        if ((proposalType == uint256(IGovernor.ProposalType(0))) && (msg.value < (Asset(auction.asset).totalSupply() * auction.price)))
+            revert Auctioner__InsufficientFunds();
 
-        bool success = i_governor.propose(id, auction.asset, description);
+        bool success = i_governor.propose(id, auction.asset, IGovernor.ProposalType(proposalType));
         if (!success) revert Auctioner__FunctionCallFailed();
 
         auction.proposalActive = true;
@@ -265,6 +268,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 12) revert Auctioner__BuyLimitExceeded();
         if (errorType == 13) revert Auctioner__FunctionCallFailed();
         if (errorType == 14) revert Auctioner__ProposalInProgress();
+        if (errorType == 15) revert Auctioner__InvalidProposalType();
     }
 
     /// @dev HELPER DEV ONLY
