@@ -69,7 +69,7 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, "buyout offer");
+        auctioner.makeOffer{value: 12 ether}(0, 0);
 
         // cost snapshot: 568_288
     }
@@ -80,7 +80,7 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, "buyout offer");
+        auctioner.makeOffer{value: 12 ether}(0, 0);
 
         vm.prank(address(governor));
         auctioner.rejectOffer(0);
