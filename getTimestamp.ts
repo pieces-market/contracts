@@ -4,4 +4,4 @@ function getUnixTimestamp(year: number, month: number, day: number, hour: number
     return Math.floor(date.getTime() / 1000)
 }
 
-console.log(`Timestamp: ${getUnixTimestamp(2024, 7, 8, 0, 0, 0)}`)
+console.log(`Timestamp: ${getUnixTimestamp(2024, 8, 2, 0, 0, 0)}`)
