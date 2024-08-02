@@ -3,7 +3,11 @@
 ## 🚀 **Deployments**
 
 -   **Aleph Zero Testnet:** 0x4b8907e0e9ad03650e6f734d4bbb2ce65a3dc27d
--   **Sepolia:** 0x5bbdCB1cA918FB54Ef2f42fd7550F37273C43534
+    -   **Auctioner:** To Be Deployed...
+    -   **Governor:** To Be Deployed...
+-   **Sepolia:**
+    -   **Auctioner:** 0x068dbcC909D4A4Fd7924cAe962b16bfc9FF7606D
+    -   **Governor:** 0x03a445ee9B1d9C58c008C7610EA0583A188ddd51
 
 ## 👷‍♂️ **To Implement**
 
