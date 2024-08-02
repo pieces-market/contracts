@@ -52,16 +52,16 @@ contract GovernorTest is Test {
     function testCantMakeProposalIfNotOwner() public {
         vm.prank(DEVIL);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
-        governor.propose(0, address(asset), "New buyout offer!");
+        governor.propose(0, address(asset), IGovernor.ProposalType.BUYOUT);
     }
 
     function testCanMakeProposal() public proposalMade {
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 7 days, "Buyout offer received!");
+        emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 7 days, IGovernor.ProposalType.BUYOUT);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.ACTIVE);
-        governor.propose(0, address(asset), "Buyout offer received!");
+        governor.propose(0, address(asset), IGovernor.ProposalType.BUYOUT);
     }
 
     function testBuyerCanVote() public proposalMade {
@@ -116,7 +116,7 @@ contract GovernorTest is Test {
 
         /// @dev We create proposal when both DEVIL and USER got voting power, so they can vote
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "New buyout offer!");
+        governor.propose(0, address(asset), IGovernor.ProposalType.BUYOUT);
 
         vm.warp(block.timestamp + 1);
 
@@ -213,7 +213,7 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "New buyout offer!");
+        governor.propose(0, address(asset), IGovernor.ProposalType.BUYOUT);
 
         vm.warp(block.timestamp + 1);
 
@@ -288,7 +288,7 @@ contract GovernorTest is Test {
 
         /// @dev Creating proposal on updated votes
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "New buyout offer!");
+        governor.propose(0, address(asset), IGovernor.ProposalType.BUYOUT);
 
         vm.warp(block.timestamp + 1);
 
@@ -302,7 +302,7 @@ contract GovernorTest is Test {
 
     modifier proposalMade() {
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "New buyout offer!");
+        governor.propose(0, address(asset), IGovernor.ProposalType.BUYOUT);
 
         _;
     }
