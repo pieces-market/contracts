@@ -84,8 +84,11 @@ ifeq ($(findstring --network alepht,$(ARGS)),--network alepht)
 	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --verify --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
 endif
 
-deployAuc:
+deployAuctionerToSepolia:
+	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
+
+deployAuctionerToAleph:
 	@forge create Auctioner $(NETWORK_ARGS)
 
-verifyContract:
+verifyAlephContract:
 	@forge verify-contract $(AUCTIONER_ADDRESS) Auctioner --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
