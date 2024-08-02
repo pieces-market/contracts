@@ -20,6 +20,7 @@
 -   **`FunctionCallFailed:`** Error thrown when a function call fails
 -   **`ProposalInProgress:`** Error thrown when there is a proposal in progress
 -   **`UnauthorizedCaller:`** Error thrown when function called by unauthorized address
+-   **`InvalidProposalType:`** Error thrown when function called with incorrect proposal type
 
 ### **Auction States**
 
@@ -79,6 +80,11 @@
 -   **`FAILED:`** Proposal did not pass and awaits cancellation
 -   **`CANCELLED:`** Proposal did not pass and has been cancelled
 
+### **Proposal Types**
+
+-   **`BUYOUT:`** Proposal option to buy the entire asset instantly for a specified amount
+-   **`OFFER:`** Proposal option to change the minimum amount for the buyout offer
+
 ### **Vote Types**
 
 -   **`FOR:`** Indicates a vote in favor of the proposal
@@ -96,6 +102,7 @@
 -   **`uint256 againstVotes:`** Number of votes against the proposal
 -   **`uint256 abstainVotes:`** Number of abstaining votes
 -   **`mapping(address => bool) hasVoted:`** Mapping to track if an address has voted on the proposal
+-   **`ProposalType proposalType:`** Type of the proposal (0 - BUYOUT, 1 - OFFER)
 -   **`ProposalState state:`** Current state of the proposal
 
 ### **Events**
