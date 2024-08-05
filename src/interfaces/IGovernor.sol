@@ -6,6 +6,7 @@ interface IGovernor {
     error Governor__ProposalDoesNotExist();
     error Governor__AlreadyVoted();
     error Governor__ZeroVotingPower();
+    error Governor__ExecuteFailed();
 
     enum ProposalState {
         INACTIVE,
