@@ -18,6 +18,7 @@ contract Governor is Ownable, IGovernor {
         uint256 voteStart;
         uint256 voteEnd;
         string description;
+        bytes encodedFunction; // update docs
         uint256 forVotes;
         uint256 againstVotes;
         uint256 abstainVotes;
@@ -41,7 +42,7 @@ contract Governor is Ownable, IGovernor {
     /// @dev Emits Propose and StateChange events
     /// @param asset Address of the asset linked to the proposal
     /// @param proposalOption Type of the proposal
-    function propose(uint256 auctionId, address asset, ProposalType proposalOption) external onlyOwner returns (bool) {
+    function propose(uint256 auctionId, address asset, ProposalType proposalOption, uint256 value) external onlyOwner returns (bool) {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
 
         /// @dev Here we can take asset from Auctioner by calling getter -> compare costs (same for id)
@@ -50,10 +51,19 @@ contract Governor is Ownable, IGovernor {
         proposal.voteStart = block.timestamp;
         proposal.voteEnd = block.timestamp + 7 days;
 
+        /// @dev TO DISCUSS ==========================================================================================
         string memory description;
         if (proposalOption == ProposalType.BUYOUT) description = "Buyout offer!";
         if (proposalOption == ProposalType.OFFER) description = "Minimum offer value change";
         proposal.description = description; /// @dev Assign desc per type? Consider if we keep description or not
+        // ===========================================================================================================
+
+        /// @dev THIS SHOULD ALREADY COME FROM AUCTIONER
+        if (proposalOption == ProposalType.BUYOUT) {
+            proposal.encodedFunction = abi.encodeWithSignature("buyout(uint256)", auctionId);
+        } else if (proposalOption == ProposalType.OFFER) {
+            proposal.encodedFunction = abi.encodeWithSignature("offer(uint256,uint256)", auctionId, value);
+        }
 
         proposal.proposalType = proposalOption;
         proposal.state = ProposalState.ACTIVE;
@@ -98,26 +108,28 @@ contract Governor is Ownable, IGovernor {
         return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
     }
 
-    /// @dev THIS FUNCTION SHOULD BE CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
+    /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
     /// @notice Calls 'acceptOffer()' function from Auctioner contract
     /// @param proposalId The id of the proposal
-    function execute(uint proposalId) external onlyOwner {
+    function execute(uint proposalId) external {
         ProposalCore storage proposal = s_proposals[proposalId];
 
-        Auctioner(owner()).acceptOffer(proposal.auctionId);
+        proposal.state = ProposalState.SUCCEEDED;
+        (bool success, ) = owner().call(proposal.encodedFunction);
+        if (!success) revert Governor__ExecuteFailed(); // add to docs
 
-        /// @dev Add emit
+        emit StateChange(proposalId, ProposalState.SUCCEEDED);
     }
 
-    /// @dev THIS FUNCTION SHOULD BE CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
+    /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
     /// @notice Cancels a proposal by changing it's state and calls 'rejectOffer()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
-    function cancel(uint proposalId) external onlyOwner {
+    function cancel(uint proposalId) external {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
-        Auctioner(owner()).rejectOffer(proposal.auctionId);
+        Auctioner(owner()).rejectProposal(proposal.auctionId);
 
         emit StateChange(proposalId, ProposalState.FAILED);
     }
