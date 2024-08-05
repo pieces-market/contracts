@@ -81,6 +81,13 @@ interface IAuctioner {
     /// @param amount The amount transferred
     event TransferToBroker(uint256 indexed id, address indexed wallet, uint256 indexed amount);
 
+    /// @notice Emitted when proposal passes for buyout offer
+    /// @param id The id of the auction
+    /// @param wallet The wallet address of the broker
+    /// @param offerer The wallet address of the offerer
+    /// @param amount The amount transferred
+    event Buyout(uint256 indexed id, address wallet, address indexed offerer, uint256 indexed amount);
+
     /// @notice Emitted when the state of an auction changes
     /// @param id The id of the auction
     /// @param state The new state of the auction
@@ -96,7 +103,8 @@ interface IAuctioner {
     /// @dev Creates proposal by calling Governor contract
     /// @param id Auction id that we want to interact with
     /// @param proposal Type of the proposal (0 - BUYOUT, 1 - OFFER)
-    function makeOffer(uint256 id, uint256 proposal) external payable;
+    /// @param value New auction parameter value to update
+    function makeOffer(uint256 id, uint256 proposal, uint256 value) external payable;
 
     /// @notice Allows withdrawing funds transferred with offer if proposal fails
     /// @param id Auction id that we want to interact with
