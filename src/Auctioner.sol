@@ -137,17 +137,23 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         }
     }
 
+    /// @dev REFACTOR REMOVE proposalType AND CHANGE IT INTO CALLDATA
+    /// @dev WE CAN ACTUALLY CALL PROPOSE ON GOVERNOR?
     /// @inheritdoc IAuctioner
-    function makeOffer(uint256 id, uint256 proposalType) external payable override {
+    function makeOffer(uint256 id, uint256 proposalType, uint256 value) external payable override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
         if (auction.proposalActive) revert Auctioner__ProposalInProgress();
         if (proposalType > 1) revert Auctioner__InvalidProposalType();
+
+        /// @dev REFACTOR NEEDED !!!
         if ((proposalType == uint256(IGovernor.ProposalType(0))) && (msg.value < (Asset(auction.asset).totalSupply() * auction.price)))
             revert Auctioner__InsufficientFunds();
+        /// @dev Consider who would be able to make such offer, what would be new value allowed etc.
+        if ((proposalType == uint256(IGovernor.ProposalType(1))) && (value == 0)) revert Auctioner__ZeroValueNotAllowed();
 
-        bool success = i_governor.propose(id, auction.asset, IGovernor.ProposalType(proposalType));
+        bool success = i_governor.propose(id, auction.asset, IGovernor.ProposalType(proposalType), value);
         if (!success) revert Auctioner__FunctionCallFailed();
 
         auction.proposalActive = true;
@@ -158,18 +164,43 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Offer(id, msg.value, msg.sender);
     }
 
-    /// @notice Called by Governor if the proposal succeeds
+    /// @notice Called by Governor if the 'buyout' proposal succeeds
     /// @param id Auction id that we want to interact with
-    function acceptOffer(uint256 id) external {
+    function buyout(uint256 id) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
+        uint256 amount = auction.offer[auction.offerer];
+
+        if (amount > 0) {
+            auction.offer[auction.offerer] = 0;
+        } else {
+            revert Auctioner__InsufficientFunds();
+        }
+
+        (bool success, ) = auction.recipient.call{value: amount}("");
+        if (!success) revert Auctioner__TransferFailed();
+
+        // Updated price will reevaluate total asset value, so new buyout offer will need to be higher
+        auction.price = amount / Asset(auction.asset).totalSupply();
         auction.proposalActive = false;
+
+        emit Buyout(id, auction.recipient, auction.offerer, amount);
+    }
+
+    /// @notice Called by Governor if the 'offer' proposal succeeds
+    /// @param id Auction id that we want to interact with
+    function offer(uint256 id, uint256 value) external {
+        if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
+        Auction storage auction = s_auctions[id];
+
+        /// @dev CHECK IF STARTING PRICE WILL BE 1 WEI AND WE WOULD LIKE TO UPDATE VALUE TO FOR EXAMPLE 50%
+        auction.price = value / Asset(auction.asset).totalSupply();
     }
 
     /// @notice Called by Governor if the proposal fails
     /// @param id Auction id that we want to interact with
-    function rejectOffer(uint256 id) external {
+    function rejectProposal(uint256 id) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
