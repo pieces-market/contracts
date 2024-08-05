@@ -52,7 +52,7 @@ contract TmpCostTest is Test {
     function testDeployAuctionerCost() external {
         new Auctioner(address(governor));
 
-        // cost snapshot: 3_906_500
+        // cost snapshot: 4_166_437
     }
 
     function testDeployAssetCost() external {
@@ -69,9 +69,36 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, 0);
+        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
 
         // cost snapshot: 568_288
+    }
+
+    function testExecuteCost() external {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+        auctioner.stateHack(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
+
+        vm.prank(address(governor));
+        governor.execute(0);
+    }
+
+    function testCancelCost() external {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+        auctioner.stateHack(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
+
+        vm.prank(address(governor));
+        governor.cancel(0);
+
+        // cost snapshot: 525_906
+        // 526_146
     }
 
     function testWithdrawOfferCost() external {
@@ -80,10 +107,10 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, 0);
+        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
 
         vm.prank(address(governor));
-        auctioner.rejectOffer(0);
+        auctioner.rejectProposal(0);
 
         vm.prank(DEVIL);
         auctioner.withdrawOffer(0);
