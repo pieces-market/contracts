@@ -10,15 +10,13 @@ import {IGovernor} from "./interfaces/IGovernor.sol";
 /// @title Governor Contract
 /// @notice Allows creation and management of proposals per given asset, executes passed proposals
 contract Governor is Ownable, IGovernor {
-    /// @dev FUNCTION quorum = 51%
-
     struct ProposalCore {
         uint256 auctionId;
         address asset;
         uint256 voteStart;
         uint256 voteEnd;
         string description;
-        bytes encodedFunction; // update docs
+        bytes encodedFunction;
         uint256 forVotes;
         uint256 againstVotes;
         uint256 abstainVotes;
@@ -35,13 +33,11 @@ contract Governor is Ownable, IGovernor {
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
 
-    /// @dev This function will be called by 'buyout()' fn from 'Auctioner.sol'
-
     /// @notice Creates new proposal
     /// @dev Emits Propose and StateChange events
     /// @param auctionId The id of the auction that received offer
     /// @param asset Address of the asset linked to the proposal
-    /// @param description x
+    /// @param description Proposal description
     /// @param encodedFunction Function to be called on execution expressed in bytes
     function propose(uint256 auctionId, address asset, string memory description, bytes memory encodedFunction) external onlyOwner returns (bool) {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
@@ -85,6 +81,7 @@ contract Governor is Ownable, IGovernor {
         proposal.hasVoted[msg.sender] = true;
     }
 
+    /// @dev FUNCTION quorum = 51%
     // Minimum amount of users that voted for proposal to pass
     /// @notice Checks if the quorum for a proposal is reached
     /// @param proposalId The id of the proposal
@@ -96,20 +93,20 @@ contract Governor is Ownable, IGovernor {
     }
 
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
-    /// @notice Calls 'acceptOffer()' function from Auctioner contract
+    /// @notice Calls proper function from Auctioner contract
     /// @param proposalId The id of the proposal
     function execute(uint proposalId) external {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.SUCCEEDED;
         (bool success, ) = owner().call(proposal.encodedFunction);
-        if (!success) revert Governor__ExecuteFailed(); // add to docs
+        if (!success) revert Governor__ExecuteFailed();
 
         emit StateChange(proposalId, ProposalState.SUCCEEDED);
     }
 
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
-    /// @notice Cancels a proposal by changing it's state and calls 'rejectOffer()' function from Auctioner contract
+    /// @notice Cancels a proposal by changing it's state and calls 'rejectProposal()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
     function cancel(uint proposalId) external {
