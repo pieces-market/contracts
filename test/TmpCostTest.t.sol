@@ -69,10 +69,13 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
+        auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         // cost snapshot: 568_288
     }
+
+    /// @dev TODO
+    function testStringSize() external {}
 
     function testExecuteCost() external {
         vm.prank(USER);
@@ -80,7 +83,7 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
+        auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         vm.prank(address(governor));
         governor.execute(0);
@@ -92,7 +95,7 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
+        auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         vm.prank(address(governor));
         governor.cancel(0);
@@ -107,7 +110,7 @@ contract TmpCostTest is Test {
         auctioner.stateHack(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.makeOffer{value: 12 ether}(0, 0, 0);
+        auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         vm.prank(address(governor));
         auctioner.rejectProposal(0);
