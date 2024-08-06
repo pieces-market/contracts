@@ -23,7 +23,6 @@ contract Governor is Ownable, IGovernor {
         uint256 againstVotes;
         uint256 abstainVotes;
         mapping(address => bool) hasVoted;
-        ProposalType proposalType;
         ProposalState state;
     }
 
@@ -40,9 +39,11 @@ contract Governor is Ownable, IGovernor {
 
     /// @notice Creates new proposal
     /// @dev Emits Propose and StateChange events
+    /// @param auctionId The id of the auction that received offer
     /// @param asset Address of the asset linked to the proposal
-    /// @param proposalOption Type of the proposal
-    function propose(uint256 auctionId, address asset, ProposalType proposalOption, uint256 value) external onlyOwner returns (bool) {
+    /// @param description x
+    /// @param encodedFunction Function to be called on execution expressed in bytes
+    function propose(uint256 auctionId, address asset, string memory description, bytes memory encodedFunction) external onlyOwner returns (bool) {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
 
         /// @dev Here we can take asset from Auctioner by calling getter -> compare costs (same for id)
@@ -50,25 +51,11 @@ contract Governor is Ownable, IGovernor {
         proposal.asset = asset;
         proposal.voteStart = block.timestamp;
         proposal.voteEnd = block.timestamp + 7 days;
-
-        /// @dev TO DISCUSS ==========================================================================================
-        string memory description;
-        if (proposalOption == ProposalType.BUYOUT) description = "Buyout offer!";
-        if (proposalOption == ProposalType.OFFER) description = "Minimum offer value change";
-        proposal.description = description; /// @dev Assign desc per type? Consider if we keep description or not
-        // ===========================================================================================================
-
-        /// @dev THIS SHOULD ALREADY COME FROM AUCTIONER
-        if (proposalOption == ProposalType.BUYOUT) {
-            proposal.encodedFunction = abi.encodeWithSignature("buyout(uint256)", auctionId);
-        } else if (proposalOption == ProposalType.OFFER) {
-            proposal.encodedFunction = abi.encodeWithSignature("offer(uint256,uint256)", auctionId, value);
-        }
-
-        proposal.proposalType = proposalOption;
+        proposal.description = description;
+        proposal.encodedFunction = encodedFunction;
         proposal.state = ProposalState.ACTIVE;
 
-        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, proposalOption);
+        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, description);
         emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
         s_totalProposals += 1;
