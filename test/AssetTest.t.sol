@@ -22,6 +22,7 @@ contract AssetTest is Test {
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
+    address private FUNDATION = makeAddr("fundation");
 
     function setUp() public {
         vm.startPrank(OWNER);
@@ -49,6 +50,7 @@ contract AssetTest is Test {
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
+        deal(FUNDATION, STARTING_BALANCE);
     }
 
     function testCanReceiveVotingPower() public {
