@@ -17,11 +17,6 @@ interface IGovernor {
         CANCELLED
     }
 
-    enum ProposalType {
-        BUYOUT,
-        OFFER
-    }
-
     enum VoteType {
         FOR,
         AGAINST,
@@ -34,8 +29,8 @@ interface IGovernor {
     /// @param asset Address of the asset linked to the proposal
     /// @param voteStart The timestamp when the proposal voting starts
     /// @param voteEnd The timestamp when the proposal voting ends
-    /// @param proposal Type of the proposal
-    event Propose(uint indexed id, uint indexed auctionId, address indexed asset, uint voteStart, uint voteEnd, ProposalType proposal);
+    /// @param description Function to be called on execution expressed in bytes
+    event Propose(uint indexed id, uint indexed auctionId, address indexed asset, uint voteStart, uint voteEnd, string description);
 
     /// @notice Emitted when the state of a proposal changes
     /// @param id The id of the proposal
