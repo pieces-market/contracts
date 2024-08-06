@@ -139,21 +139,29 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev REFACTOR REMOVE proposalType AND CHANGE IT INTO CALLDATA
     /// @dev WE CAN ACTUALLY CALL PROPOSE ON GOVERNOR?
+    /// @dev encodedFunction should take number
     /// @inheritdoc IAuctioner
-    function makeOffer(uint256 id, uint256 proposalType, uint256 value) external payable override {
+    function propose(uint256 id, string memory description, ProposalType proposal) external payable override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
         if (auction.proposalActive) revert Auctioner__ProposalInProgress();
-        if (proposalType > 1) revert Auctioner__InvalidProposalType();
+        // Check below error
+        if (uint(proposal) > 1) revert Auctioner__InvalidProposalType();
 
-        /// @dev REFACTOR NEEDED !!!
-        if ((proposalType == uint256(IGovernor.ProposalType(0))) && (msg.value < (Asset(auction.asset).totalSupply() * auction.price)))
-            revert Auctioner__InsufficientFunds();
-        /// @dev Consider who would be able to make such offer, what would be new value allowed etc.
-        if ((proposalType == uint256(IGovernor.ProposalType(1))) && (value == 0)) revert Auctioner__ZeroValueNotAllowed();
+        // check cost memory vs none
+        bytes memory encodedFunction;
 
-        bool success = i_governor.propose(id, auction.asset, IGovernor.ProposalType(proposalType), value);
+        if (proposal == ProposalType.BUYOUT) {
+            if (msg.value < (Asset(auction.asset).totalSupply() * auction.price)) revert Auctioner__InsufficientFunds();
+            encodedFunction = abi.encodeWithSignature("buyout(uint256)", id);
+        } else {
+            /// @dev Check string size
+            if (bytes(description).length == 0 || bytes(description).length > 100) revert Auctioner__IncorrectDescriptionSize();
+            encodedFunction = abi.encodeWithSignature("descriptor(uint256,string)", id, description);
+        }
+
+        bool success = i_governor.propose(id, auction.asset, description, encodedFunction);
         if (!success) revert Auctioner__FunctionCallFailed();
 
         auction.proposalActive = true;
@@ -161,15 +169,18 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (auction.withdrawAllowed[msg.sender]) auction.withdrawAllowed[msg.sender] = false;
         auction.offer[msg.sender] += msg.value;
 
+        // consider emits
         emit Offer(id, msg.value, msg.sender);
     }
 
+    /// @dev REFACTOR NEEDED
     /// @notice Called by Governor if the 'buyout' proposal succeeds
     /// @param id Auction id that we want to interact with
     function buyout(uint256 id) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
+        auction.state = AuctionState.FINISHED;
         uint256 amount = auction.offer[auction.offerer];
 
         if (amount > 0) {
@@ -178,19 +189,24 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             revert Auctioner__InsufficientFunds();
         }
 
+        // redystrybucja kasy do userow
         (bool success, ) = auction.recipient.call{value: amount}("");
         if (!success) revert Auctioner__TransferFailed();
 
+        //
         // Updated price will reevaluate total asset value, so new buyout offer will need to be higher
         auction.price = amount / Asset(auction.asset).totalSupply();
         auction.proposalActive = false;
 
         emit Buyout(id, auction.recipient, auction.offerer, amount);
+        emit StateChange(s_totalAuctions, auction.state);
     }
 
+    /// @dev THIS FUNCTION IS PURE THEORETICAL - refactor it to take description proposal, konto fundacji(nasze) tylko moze triggerowac ta funkcje
+    /// @dev consider moving this fn into governor
     /// @notice Called by Governor if the 'offer' proposal succeeds
     /// @param id Auction id that we want to interact with
-    function offer(uint256 id, uint256 value) external {
+    function descriptor(uint256 id, uint256 value) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
