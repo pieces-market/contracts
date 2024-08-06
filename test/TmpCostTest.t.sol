@@ -23,6 +23,7 @@ contract TmpCostTest is Test {
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
+    address private FUNDATION = makeAddr("fundation");
 
     function setUp() public {
         vm.startPrank(OWNER);
@@ -47,6 +48,7 @@ contract TmpCostTest is Test {
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
+        deal(FUNDATION, STARTING_BALANCE);
     }
 
     function testDeployAuctionerCost() external {
@@ -72,6 +74,18 @@ contract TmpCostTest is Test {
         auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         // cost snapshot: 568_288
+    }
+
+    function testProposalCost() external {
+        auctioner.stateHack(0, 3);
+
+        string memory lama = "xdsftl vftpod";
+        console.log("String Size: ", bytes(lama).length);
+
+        vm.prank(FUNDATION);
+        auctioner.propose(0, lama, IAuctioner.ProposalType(1));
+
+        // cost snapshot; 281849
     }
 
     /// @dev TODO
