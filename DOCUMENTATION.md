@@ -32,6 +32,11 @@
 -   **`FINISHED:`** All funds gathered from closed auction have been transferred to broker and broker transferred revenues to contract, buyers can claim revenues
 -   **`ARCHIVED:`** Everyone claimed their revenues, investment ultimately closed
 
+### **Proposal Types**
+
+-   **`BUYOUT:`** Proposal option to buy the entire asset instantly for a specified amount
+-   **`DESCRIPTOR:`** Proposal option for anything typed in description
+
 ### **Auction Structure**
 
 -   **`address asset:`** Address of NFT related to auctioned asset
@@ -70,6 +75,7 @@
 -   **`ProposalNotActive:`** Error thrown when attempting to vote on a non-active proposal
 -   **`AlreadyVoted:`** Error thrown when attempting to vote more than once
 -   **`ZeroVotingPower:`** Error thrown when a user with zero voting power attempts to vote
+-   **`ExecuteFailed:`** Error thrown if execute function revert
 
 ### **Proposal States**
 
@@ -79,11 +85,6 @@
 -   **`SUCCEEDED:`** Proposal successfully executed
 -   **`FAILED:`** Proposal did not pass and awaits cancellation
 -   **`CANCELLED:`** Proposal did not pass and has been cancelled
-
-### **Proposal Types**
-
--   **`BUYOUT:`** Proposal option to buy the entire asset instantly for a specified amount
--   **`OFFER:`** Proposal option to change the minimum amount for the buyout offer
 
 ### **Vote Types**
 
@@ -98,6 +99,7 @@
 -   **`uint256 voteStart:`** Timestamp when voting starts
 -   **`uint256 voteEnd:`** Timestamp when voting ends
 -   **`string description:`** Description of the proposal
+-   **`bytes encodedFunction:`** Function to be called on execution expressed in bytes
 -   **`uint256 forVotes:`** Number of votes in favor of the proposal
 -   **`uint256 againstVotes:`** Number of votes against the proposal
 -   **`uint256 abstainVotes:`** Number of abstaining votes
