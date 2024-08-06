@@ -19,6 +19,7 @@ interface IAuctioner {
     error Auctioner__ProposalInProgress();
     error Auctioner__UnauthorizedCaller();
     error Auctioner__InvalidProposalType();
+    error Auctioner__IncorrectDescriptionSize();
 
     enum AuctionState {
         UNINITIALIZED,
@@ -28,6 +29,11 @@ interface IAuctioner {
         FAILED,
         FINISHED,
         ARCHIVED
+    }
+
+    enum ProposalType {
+        BUYOUT,
+        DESCRIPTOR
     }
 
     /// @notice Emitted when an auction is created
@@ -99,12 +105,11 @@ interface IAuctioner {
     /// @dev Emits Purchase event and TransferToBroker event if last piece has been bought
     function buy(uint256 id, uint256 pieces) external payable;
 
-    /// @notice Makes an offer to modify auction assumptions
-    /// @dev Creates proposal by calling Governor contract
+    /// @notice Creates proposal by calling Governor contract
     /// @param id Auction id that we want to interact with
-    /// @param proposal Type of the proposal (0 - BUYOUT, 1 - OFFER)
-    /// @param value New auction parameter value to update
-    function makeOffer(uint256 id, uint256 proposal, uint256 value) external payable;
+    /// @param description Description of proposal
+    /// @param proposal Type of the proposal (0 - BUYOUT, 1 - DESCRIPTOR)
+    function propose(uint256 id, string memory description, ProposalType proposal) external payable;
 
     /// @notice Allows withdrawing funds transferred with offer if proposal fails
     /// @param id Auction id that we want to interact with
