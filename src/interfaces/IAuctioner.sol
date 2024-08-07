@@ -61,10 +61,7 @@ interface IAuctioner {
     /// @param id The id of the auction
     /// @param amount The amount of the offer transferred to contract
     /// @param offerer The address of the user that made offer
-    event Offer(uint256 indexed id, uint256 indexed amount, address indexed offerer);
-
-    /// @notice Emitted when an early buyout offer is made for an auction
-    event Buyout();
+    event Propose(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
     /// @notice Emitted when revenue is claimed from an auction
     event Claim();
@@ -85,14 +82,13 @@ interface IAuctioner {
     /// @param id The id of the auction
     /// @param wallet The wallet address of the broker
     /// @param amount The amount transferred
-    event TransferToBroker(uint256 indexed id, address indexed wallet, uint256 indexed amount);
+    event TransferToBroker(uint256 indexed id, uint256 indexed amount, address indexed wallet);
 
     /// @notice Emitted when proposal passes for buyout offer
     /// @param id The id of the auction
-    /// @param wallet The wallet address of the broker
     /// @param offerer The wallet address of the offerer
-    /// @param amount The amount transferred
-    event Buyout(uint256 indexed id, address wallet, address indexed offerer, uint256 indexed amount);
+    /// @param amount The amount paid
+    event Buyout(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
     /// @notice Emitted when the state of an auction changes
     /// @param id The id of the auction
