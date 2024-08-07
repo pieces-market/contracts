@@ -10,14 +10,6 @@
 `forge test --gas-report`
 transaction cost(Remix) \* https://etherscan.io/gastracker -> GWEI: convert GWEI https://eth-converter.com/ into USD
 
-# Tweed:
-
-Requirements:
-
--   Our claimer needs to have a minter role in the contract.
--   Aleph network not supported
--   Gone are the days of purchasing crypto, going through KYC, and understanding gas fees!
-
 # Vlayer
 
 Use Cases:
@@ -26,6 +18,7 @@ Use Cases:
 2. Calculation And Check -> Liczenie i przemieszczanie sie po innych chainach zeby porownac dane (laczy sie z time travel) otrzymac je na nowo.
 3. Cryptography -> Dowod kryptograficzny na maila lub inne poswiadczenia.
 
-# CALL:
+# Tweed:
 
--   propose -> typy zamiast description (np buyout, change price, change time etc.) ---> glosowanie o prog wejscia
+1. Paytweed contract will be calling our and we must give them permission for minting.
+2. Funds will stay on their contract and NFT will be on user wallet, so we would need to refactor whole code
