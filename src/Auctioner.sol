@@ -18,6 +18,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     Governor private immutable i_governor;
 
     /// @dev CONSIDER CHANGING BELOW INTO MAPPING !!!
+    /// @dev THIS WILL BE NEEDED LATER ON FOR AUTOMATION COSTS SHORTAGE
     /// @dev Arrays
     uint256[] private s_scheduledAuctions;
 
@@ -31,8 +32,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         address recipient;
         bool proposalActive;
         address offerer;
-        mapping(address offerer => bool) withdrawAllowed;
         mapping(address offerer => uint amount) offer;
+        mapping(address offerer => bool) withdrawAllowed;
         AuctionState state;
     }
 
@@ -112,6 +113,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if ((Asset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
 
         uint256 cost = auction.price * pieces;
+        /// @dev Consider changing below into 'if (msg.value != cost) revert Auctioner__IncorrectFundsTransfer();'"
         if (msg.value < cost) revert Auctioner__InsufficientFunds();
         if (msg.value > cost) revert Auctioner__Overpayment();
 
@@ -129,7 +131,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             emit StateChange(id, auction.state);
 
             /// @notice Transfer funds to the broker
-            uint256 payment = Asset(auction.asset).totalSupply() * auction.price;
+            uint256 payment = Asset(auction.asset).totalMinted() * auction.price;
 
             (bool success, ) = auction.recipient.call{value: payment}("");
             if (!success) revert Auctioner__TransferFailed();
@@ -150,12 +152,12 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         bytes memory encodedFunction;
 
         if (proposal == ProposalType.BUYOUT) {
-            if (msg.value < (Asset(auction.asset).totalSupply() * auction.price)) revert Auctioner__InsufficientFunds();
-            /// @dev Consider this override
+            if (msg.value < (Asset(auction.asset).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
+            /// @dev Consider this override -> call
             description = "Buyout proposal";
             encodedFunction = abi.encodeWithSignature("buyout(uint256)", id);
         } else {
-            /// @dev Fundation address hardcoded for now
+            /// @dev Fundation address hardcoded for now -> call
             address fundation = 0x82eeb0E7c7CF20812f02D830AA4DAEa3e15Ce237;
             if (msg.sender != fundation) revert Auctioner__UnauthorizedCaller();
             if (msg.value > 0) revert Auctioner__Overpayment();
@@ -174,29 +176,18 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Propose(id, msg.value, msg.sender);
     }
 
-    /// @dev REFACTOR NEEDED
     /// @notice Called by Governor if the 'buyout' proposal succeeds
     /// @param id Auction id that we want to interact with
     function buyout(uint256 id) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
-        uint256 amount = auction.offer[auction.offerer];
-
-        if (amount > 0) {
-            auction.offer[auction.offerer] = 0;
-        } else {
-            revert Auctioner__InsufficientFunds();
-        }
-
-        // redystrybucja kasy do userow
-        (bool success, ) = auction.recipient.call{value: amount}("");
-        if (!success) revert Auctioner__TransferFailed();
-
+        /// @dev We probably do not need to change 'proposalActive' into false here as auction will be in FINISHED state already
+        // we do not also allow 'descriptor' proposal if this one passes -> call
         auction.proposalActive = false;
         auction.state = AuctionState.FINISHED;
 
-        emit Buyout(id, amount, auction.offerer);
+        emit Buyout(id, auction.offer[auction.offerer], auction.offerer);
         emit StateChange(s_totalAuctions, auction.state);
     }
 
@@ -205,27 +196,31 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     function descriptor(uint256 id, string memory description) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
 
+        /// @dev TESTING PURPOSES ONLY -> TO BE REMOVED
         /// @dev CHECK IF STARTING PRICE WILL BE 1 WEI AND WE WOULD LIKE TO UPDATE VALUE TO FOR EXAMPLE 50%
         //auction.price = value / Asset(auction.asset).totalSupply();
 
-        /// @dev Consider only EMIT - add emit anyway?
+        /// @dev DO WE ALLOW MULTIPLE DESCRIPTOR PROPOSALS OR JUST ONE AS IT IS FOR BUYOUT?
+
+        /// @dev Consider only EMIT - add emit anyway? -> call
+        /// @dev Add flag change for proposalActive
         passedProposals[id].push(description);
     }
 
     /// @notice Called by Governor if the proposal fails
     /// @param id Auction id that we want to interact with
-    function rejectProposal(uint256 id) external {
+    function reject(uint256 id) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
         auction.proposalActive = false;
         auction.withdrawAllowed[auction.offerer] = true;
 
-        // add emit
+        emit Reject(id);
     }
 
     /// @inheritdoc IAuctioner
-    function withdrawOffer(uint256 id) external nonReentrant {
+    function withdraw(uint256 id) external nonReentrant {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (!auction.withdrawAllowed[msg.sender]) revert Auctioner__ProposalInProgress();
@@ -260,7 +255,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         }
 
         (bool success, ) = msg.sender.call{value: amount}("");
-
         /// @dev IF THIS REVERT WILL TAKE PLACE CHECK IF TOKENS WERE NOT BURNT
         if (!success) revert Auctioner__TransferFailed();
 
@@ -269,7 +263,21 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function claim(uint256 id) external override nonReentrant {
+        if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
+        Auction storage auction = s_auctions[id];
+        if (auction.state != AuctionState.FINISHED) revert Auctioner__AuctionNotFinished();
+
+        //uint256 gathered = auction.offer[auction.offerer];
+        //uint256 supply = Asset(auction.asset).totalMinted();
+        //uint256 tokenBalance = Asset(auction.asset).balanceOf(msg.sender);
+
+        //uint256 amount = tokenBalance * auction.price;
+
+        /// @dev WE WILL NEED FUNCTION FOR ONLY BROKER ALLOWED TO CALL TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE BROKER WILL SELL ASSET
+        // this function will just override 'auction.oferrer' address and 'auction.offer[auction.oferrer]' value -> name of fn: brokerage?
         // emit Claim();
+
+        /// @dev Add logic for last balance claimed to archive auction
     }
 
     // =========================================
@@ -304,18 +312,19 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 1) revert Auctioner__AuctionNotOpened();
         if (errorType == 2) revert Auctioner__AuctionNotClosed();
         if (errorType == 3) revert Auctioner__AuctionNotFailed();
-        if (errorType == 4) revert Auctioner__InsufficientPieces();
-        if (errorType == 5) revert Auctioner__InsufficientFunds();
-        if (errorType == 6) revert Auctioner__TransferFailed();
-        if (errorType == 7) revert Auctioner__AuctionAlreadyInitialized();
-        if (errorType == 8) revert Auctioner__ZeroValueNotAllowed();
-        if (errorType == 9) revert Auctioner__IncorrectTimestamp();
-        if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
-        if (errorType == 11) revert Auctioner__Overpayment();
-        if (errorType == 12) revert Auctioner__BuyLimitExceeded();
-        if (errorType == 13) revert Auctioner__FunctionCallFailed();
-        if (errorType == 14) revert Auctioner__ProposalInProgress();
-        if (errorType == 15) revert Auctioner__InvalidProposalType();
+        if (errorType == 4) revert Auctioner__AuctionNotFinished();
+        if (errorType == 5) revert Auctioner__InsufficientPieces();
+        if (errorType == 6) revert Auctioner__InsufficientFunds();
+        if (errorType == 7) revert Auctioner__TransferFailed();
+        if (errorType == 8) revert Auctioner__AuctionAlreadyInitialized();
+        if (errorType == 9) revert Auctioner__ZeroValueNotAllowed();
+        if (errorType == 10) revert Auctioner__IncorrectTimestamp();
+        if (errorType == 11) revert Auctioner__ZeroAddressNotAllowed();
+        if (errorType == 12) revert Auctioner__Overpayment();
+        if (errorType == 13) revert Auctioner__BuyLimitExceeded();
+        if (errorType == 14) revert Auctioner__FunctionCallFailed();
+        if (errorType == 15) revert Auctioner__ProposalInProgress();
+        if (errorType == 16) revert Auctioner__InvalidProposalType();
     }
 
     /// @dev HELPER DEV ONLY
