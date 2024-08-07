@@ -134,7 +134,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             (bool success, ) = auction.recipient.call{value: payment}("");
             if (!success) revert Auctioner__TransferFailed();
 
-            emit TransferToBroker(id, auction.recipient, payment);
+            emit TransferToBroker(id, payment, auction.recipient);
         }
     }
 
@@ -151,9 +151,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         if (proposal == ProposalType.BUYOUT) {
             if (msg.value < (Asset(auction.asset).totalSupply() * auction.price)) revert Auctioner__InsufficientFunds();
+            /// @dev Consider this override
+            description = "Buyout proposal";
             encodedFunction = abi.encodeWithSignature("buyout(uint256)", id);
         } else {
-            /// @dev Check string size
             /// @dev Fundation address hardcoded for now
             address fundation = 0x82eeb0E7c7CF20812f02D830AA4DAEa3e15Ce237;
             if (msg.sender != fundation) revert Auctioner__UnauthorizedCaller();
@@ -170,8 +171,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (auction.withdrawAllowed[msg.sender]) auction.withdrawAllowed[msg.sender] = false;
         auction.offer[msg.sender] += msg.value;
 
-        /// @dev CONSIDER PROPOER EMIT HERE
-        emit Offer(id, msg.value, msg.sender);
+        emit Propose(id, msg.value, msg.sender);
     }
 
     /// @dev REFACTOR NEEDED
@@ -181,7 +181,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
-        auction.state = AuctionState.FINISHED;
         uint256 amount = auction.offer[auction.offerer];
 
         if (amount > 0) {
@@ -194,11 +193,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         (bool success, ) = auction.recipient.call{value: amount}("");
         if (!success) revert Auctioner__TransferFailed();
 
-        // Updated price will reevaluate total asset value, so new buyout offer will need to be higher
-        auction.price = amount / Asset(auction.asset).totalSupply();
         auction.proposalActive = false;
+        auction.state = AuctionState.FINISHED;
 
-        emit Buyout(id, auction.recipient, auction.offerer, amount);
+        emit Buyout(id, amount, auction.offerer);
         emit StateChange(s_totalAuctions, auction.state);
     }
 
@@ -222,6 +220,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         auction.proposalActive = false;
         auction.withdrawAllowed[auction.offerer] = true;
+
+        // add emit
     }
 
     /// @inheritdoc IAuctioner
@@ -343,12 +343,12 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
         if (eventId == 1) emit Schedule(0, 0);
         if (eventId == 2) emit Purchase(0, 0, address(0));
-        if (eventId == 3) emit Buyout();
+        if (eventId == 3) emit Buyout(0, 0, address(0));
         if (eventId == 4) emit Claim();
         if (eventId == 5) emit Refund(0, 0, address(0));
         if (eventId == 6) emit Withdraw(0, 0, address(0));
-        if (eventId == 7) emit Offer(0, 0, address(0));
-        if (eventId == 8) emit TransferToBroker(0, address(0), 0);
+        if (eventId == 7) emit Propose(0, 0, address(0));
+        if (eventId == 8) emit TransferToBroker(0, 0, address(0));
         if (eventId == 9) emit StateChange(0, AuctionState.UNINITIALIZED);
     }
 }
