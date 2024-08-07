@@ -8,6 +8,7 @@
 -   **`AuctionNotOpened:`** Error thrown when attempting to perform an action on an auction that hasn't opened yet
 -   **`AuctionNotClosed:`** Error thrown when attempting to perform an action on an auction that hasn't closed yet
 -   **`AuctionNotFailed:`** Error thrown when user tries to refund but auction is not in failed state
+-   **`AuctionNotFinished:`** Error thrown when user tries to claim but auction is not in finished state
 -   **`InsufficientPieces`**: Error thrown when there aren't enough pieces left to fulfill an order
 -   **`InsufficientFunds:`** Error thrown when there are insufficient funds for an action
 -   **`TransferFailed:`** Error thrown when a fund transfer operation fails
