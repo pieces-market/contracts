@@ -66,7 +66,10 @@ interface IAuctioner {
     event Propose(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
     /// @notice Emitted when revenue is claimed from an auction
-    event Claim();
+    /// @param id The id of the auction
+    /// @param amount The amount claimed
+    /// @param user The address of the user requesting the claim
+    event Claim(uint256 indexed id, uint256 indexed amount, address indexed user);
 
     /// @notice Emitted when a refund has been executed
     /// @param id The id of the auction
