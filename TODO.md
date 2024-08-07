@@ -1,10 +1,9 @@
 # Todo
 
-0. Documentation for Governor
+0. Search '-> call' for code to discuss on pieces call
 1. Write buyout function and connect it with Governor contract
-2. Consider Auctioer automation by Chainlink or RedStone?
+2. Consider Auctioner automation by Chainlink or RedStone?
 3. Implement fees on buy and buyout
-4. Restrict string inputs to certain size
 
 # Gas Calculation
 
