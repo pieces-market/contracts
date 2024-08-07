@@ -267,11 +267,24 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.FINISHED) revert Auctioner__AuctionNotFinished();
 
-        //uint256 gathered = auction.offer[auction.offerer];
-        //uint256 supply = Asset(auction.asset).totalMinted();
-        //uint256 tokenBalance = Asset(auction.asset).balanceOf(msg.sender);
+        uint256 funds = auction.offer[auction.offerer];
+        uint256 supply = Asset(auction.asset).totalMinted();
+        if (supply == 0) revert Auctioner__ZeroValueNotAllowed();
+        uint256 tokens = Asset(auction.asset).balanceOf(msg.sender);
 
-        //uint256 amount = tokenBalance * auction.price;
+        uint256 amount = (funds / supply) * tokens;
+
+        if (amount > 0) {
+            Asset(auction.asset).batchBurn(msg.sender);
+        } else {
+            revert Auctioner__InsufficientFunds();
+        }
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+        /// @dev IF THIS REVERT WILL TAKE PLACE CHECK IF TOKENS WERE NOT BURNT
+        if (!success) revert Auctioner__TransferFailed();
+
+        emit Claim(id, amount, msg.sender);
 
         /// @dev WE WILL NEED FUNCTION FOR ONLY BROKER ALLOWED TO CALL TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE BROKER WILL SELL ASSET
         // this function will just override 'auction.oferrer' address and 'auction.offer[auction.oferrer]' value -> name of fn: brokerage?
@@ -353,7 +366,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (eventId == 1) emit Schedule(0, 0);
         if (eventId == 2) emit Purchase(0, 0, address(0));
         if (eventId == 3) emit Buyout(0, 0, address(0));
-        if (eventId == 4) emit Claim();
+        if (eventId == 4) emit Claim(0, 0, address(0));
         if (eventId == 5) emit Refund(0, 0, address(0));
         if (eventId == 6) emit Withdraw(0, 0, address(0));
         if (eventId == 7) emit Propose(0, 0, address(0));
