@@ -2,10 +2,12 @@
 pragma solidity ^0.8.25;
 
 interface IAuctioner {
+    /// @dev Consider merging errors for state into AuctionIncorrectState
     error Auctioner__AuctionDoesNotExist();
     error Auctioner__AuctionNotOpened();
     error Auctioner__AuctionNotClosed();
     error Auctioner__AuctionNotFailed();
+    error Auctioner__AuctionNotFinished();
     error Auctioner__InsufficientPieces();
     error Auctioner__InsufficientFunds();
     error Auctioner__TransferFailed();
@@ -90,6 +92,10 @@ interface IAuctioner {
     /// @param amount The amount paid
     event Buyout(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
+    /// @notice Emitted when proposal fails
+    /// @param id The id of the auction
+    event Reject(uint256 indexed id);
+
     /// @notice Emitted when the state of an auction changes
     /// @param id The id of the auction
     /// @param state The new state of the auction
@@ -109,7 +115,7 @@ interface IAuctioner {
 
     /// @notice Allows withdrawing funds transferred with offer if proposal fails
     /// @param id Auction id that we want to interact with
-    function withdrawOffer(uint256 id) external;
+    function withdraw(uint256 id) external;
 
     /// @notice Allows withdrawing funds by buyers if auction failed selling all pieces in given time period
     /// @param id Auction id that we want to interact with
