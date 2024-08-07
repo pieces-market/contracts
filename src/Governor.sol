@@ -85,9 +85,10 @@ contract Governor is Ownable, IGovernor {
     // Minimum amount of users that voted for proposal to pass
     /// @notice Checks if the quorum for a proposal is reached
     /// @param proposalId The id of the proposal
-    function quorumReached(uint256 proposalId) internal view returns (bool) {
+    function _quorumReached(uint256 proposalId) internal view returns (bool) {
         ProposalCore storage proposal = s_proposals[proposalId];
 
+        /// @dev We can get past votesSupply from Asset
         /// @dev total available votes (tokens minted so far per asset) <=
         return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
     }
@@ -113,7 +114,8 @@ contract Governor is Ownable, IGovernor {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
-        Auctioner(owner()).rejectProposal(proposal.auctionId);
+        /// @dev Consider adding return into rejectProposal -> to check if call failed or not
+        Auctioner(owner()).reject(proposal.auctionId);
 
         emit StateChange(proposalId, ProposalState.FAILED);
     }
@@ -122,7 +124,7 @@ contract Governor is Ownable, IGovernor {
 
     /// @notice Checks if a proposal has succeeded based on the votes
     /// @param proposalId The id of the proposal
-    function voteSucceeded(uint256 proposalId) internal view returns (bool) {
+    function _voteSucceeded(uint256 proposalId) internal view returns (bool) {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         return proposal.forVotes > proposal.againstVotes;
