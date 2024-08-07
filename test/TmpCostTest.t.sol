@@ -63,7 +63,7 @@ contract TmpCostTest is Test {
         // cost snapshot: 2_352_889
     }
 
-    function testMakeOfferCost() external {
+    function testBuyoutProposeCost() external {
         vm.prank(BUYER);
         auctioner.buy{value: 6 ether}(0, 3);
         vm.prank(USER);
@@ -73,10 +73,10 @@ contract TmpCostTest is Test {
         vm.prank(DEVIL);
         auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
-        // cost snapshot: 568_288
+        // cost snapshot: 645444 | 643405
     }
 
-    function testProposalCost() external {
+    function testDescriptorProposeCost() external {
         auctioner.stateHack(0, 3);
 
         string memory lama = "xdsftl vftpod";
@@ -127,10 +127,10 @@ contract TmpCostTest is Test {
         auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         vm.prank(address(governor));
-        auctioner.rejectProposal(0);
+        auctioner.reject(0);
 
         vm.prank(DEVIL);
-        auctioner.withdrawOffer(0);
+        auctioner.withdraw(0);
 
         // cost snapshot: 418_206
     }
