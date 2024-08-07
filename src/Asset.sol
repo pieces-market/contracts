@@ -25,6 +25,13 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         return baseURI;
     }
 
+    /// @notice Returns total minted tokens amount ignoring performed burns
+    /// @dev Call 'totalSupply()' function for amount corrected by burned tokens amount
+    /// @dev Consider just overriding 'totalSupply()' if we do not need corrected amount ever
+    function totalMinted() external view returns (uint256) {
+        return super._totalMinted();
+    }
+
     /// @notice Mints multiple tokens at once to a single user and instantly delegates votes to receiver
     /// @param to Address of receiver of minted tokens
     /// @param quantity Amount of tokens to be minted
