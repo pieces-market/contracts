@@ -49,8 +49,8 @@
 -   **`address recipient:`** Wallet address where funds from asset sale will be transferred
 -   **`bool proposalActive:`** Boolean indicating if there is a proposal in progress
 -   **`address offerer:`** Wallet address of the offerer
--   **`mapping(address offerer => bool) withdrawAllowed:`** Mapping to track if the offerer is allowed to withdraw the offer
 -   **`mapping(address offerer => uint amount) offer:`** Mapping to track the amount that has been offered
+-   **`mapping(address offerer => bool) withdrawAllowed:`** Mapping to track if the offerer is allowed to withdraw the offer
 -   **`AuctionState state:`** Current state of the auction
 
 ### **Events**
