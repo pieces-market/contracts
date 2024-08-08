@@ -30,7 +30,7 @@ contract GovernorTest is Test {
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(address(governor));
+        auctioner = new Auctioner(FUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
