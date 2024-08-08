@@ -192,10 +192,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
-        /// @dev TESTING PURPOSES ONLY -> TO BE REMOVED
-        /// @dev CHECK IF STARTING PRICE WILL BE 1 WEI AND WE WOULD LIKE TO UPDATE VALUE TO FOR EXAMPLE 50%
-        //auction.price = value / Asset(auction.asset).totalSupply();
-
         auction.proposalActive = false;
         passedProposals[id].push(description);
 
@@ -281,7 +277,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         emit Claim(id, amount, msg.sender);
 
-        /// @dev WE WILL NEED FUNCTION FOR ONLY BROKER ALLOWED TO CALL TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE BROKER WILL SELL ASSET -> call
+        /// @dev WE WILL NEED FUNCTION: BROKER ALLOWED ONLY TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE 3rd party WILL SELL ASSET -> call
         // this function will just override 'auction.oferrer' address and 'auction.offer[auction.oferrer]' value -> name of fn: brokerage?
         // emit Claim();
 
