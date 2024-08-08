@@ -27,7 +27,7 @@ contract AuctionerTest is Test {
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(address(governor));
+        auctioner = new Auctioner(FUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
         vm.stopPrank();
 
@@ -48,7 +48,7 @@ contract AuctionerTest is Test {
 
     modifier auctionCreated() {
         vm.startPrank(OWNER);
-        auctioner = new Auctioner(address(governor));
+        auctioner = new Auctioner(FUNDATION, address(governor));
 
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
