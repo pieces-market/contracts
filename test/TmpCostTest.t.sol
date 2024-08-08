@@ -28,7 +28,7 @@ contract TmpCostTest is Test {
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(address(governor));
+        auctioner = new Auctioner(FUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
@@ -51,10 +51,11 @@ contract TmpCostTest is Test {
         deal(FUNDATION, STARTING_BALANCE);
     }
 
+    // test
     function testDeployAuctionerCost() external {
-        new Auctioner(address(governor));
+        new Auctioner(FUNDATION, address(governor));
 
-        // cost snapshot: 4_166_437
+        // cost snapshot: 4432211 | 4426082
     }
 
     function testDeployAssetCost() external {
@@ -76,7 +77,8 @@ contract TmpCostTest is Test {
         // cost snapshot: 645444 | 643405
     }
 
-    function testDescriptorProposeCost() external {
+    // test
+    function testDescriptProposeCost() external {
         auctioner.stateHack(0, 3);
 
         string memory lama = "xdsftl vftpod";
@@ -85,7 +87,7 @@ contract TmpCostTest is Test {
         vm.prank(FUNDATION);
         auctioner.propose(0, lama, IAuctioner.ProposalType(1));
 
-        // cost snapshot; 281849
+        // cost snapshot; 301446 | 301433
     }
 
     /// @dev TODO
