@@ -2,8 +2,8 @@
 pragma solidity ^0.8.25;
 
 interface IGovernor {
-    error Governor__ProposalNotActive();
     error Governor__ProposalDoesNotExist();
+    error Governor__ProposalNotActive();
     error Governor__AlreadyVoted();
     error Governor__ZeroVotingPower();
     error Governor__ExecuteFailed();
