@@ -27,7 +27,7 @@ contract AssetTest is Test {
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(address(governor));
+        auctioner = new Auctioner(FUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
 
         address precomputedAsset = vm.computeCreateAddress(address(auctioner), vm.getNonce(address(auctioner)));
