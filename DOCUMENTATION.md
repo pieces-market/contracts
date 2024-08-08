@@ -22,6 +22,7 @@
 -   **`ProposalInProgress:`** Error thrown when there is a proposal in progress
 -   **`UnauthorizedCaller:`** Error thrown when function called by unauthorized address
 -   **`InvalidProposalType:`** Error thrown when function called with incorrect proposal type
+-   **`IncorrectDescriptionSize:`** Error thrown when proposal description provided is too short or too long
 
 ### **Auction States**
 
@@ -36,7 +37,7 @@
 ### **Proposal Types**
 
 -   **`BUYOUT:`** Proposal option to buy the entire asset instantly for a specified amount
--   **`DESCRIPTOR:`** Proposal option for anything typed in description
+-   **`DESCRIPT:`** Proposal option for anything typed in description
 
 ### **Auction Structure**
 
@@ -58,11 +59,13 @@
 -   **`Create:`** Emitted when a new auction is created
 -   **`Schedule:`** Emitted when auction is created with open timestamp in future
 -   **`Purchase:`** Emitted when pieces of an auction are bought
--   **`Offer:`** Emitted when new offer has been placed
--   **`Buyout:`** Emitted when a buyout offer is made for an auction
--   **`Claim:`** Emitted when revenue is claimed from an auction
+-   **`Propose:`** Emitted when proposal request has been sent to Governor contract
+-   **`Reject:`** Emitted when proposal fails
+-   **`Buyout:`** Emitted when voting passes for buyout proposal
+-   **`Descript:`** Emitted when voting passes for descript proposal
 -   **`Refund:`** Emitted when a refund has been executed
 -   **`Withdraw:`** Emitted when a withdraw has been executed
+-   **`Claim:`** Emitted when revenue is claimed from an auction
 -   **`TransferToBroker:`** Emitted when funds are transferred to the broker
 -   **`StateChange:`** Emitted when the state of an auction changes
 
@@ -105,7 +108,6 @@
 -   **`uint256 againstVotes:`** Number of votes against the proposal
 -   **`uint256 abstainVotes:`** Number of abstaining votes
 -   **`mapping(address => bool) hasVoted:`** Mapping to track if an address has voted on the proposal
--   **`ProposalType proposalType:`** Type of the proposal (0 - BUYOUT, 1 - OFFER)
 -   **`ProposalState state:`** Current state of the proposal
 
 ### **Events**
