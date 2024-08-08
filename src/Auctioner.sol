@@ -183,7 +183,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         auction.state = AuctionState.FINISHED;
 
         emit Buyout(id, auction.offer[auction.offerer], auction.offerer);
-        emit StateChange(s_totalAuctions, auction.state);
+        emit StateChange(id, auction.state);
     }
 
     /// @notice Called by Governor if the 'descript' proposal succeeds
@@ -279,11 +279,15 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         /// @dev WE WILL NEED FUNCTION: BROKER ALLOWED ONLY TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE 3rd party WILL SELL ASSET -> call
         // this function will just override 'auction.oferrer' address and 'auction.offer[auction.oferrer]' value -> name of fn: brokerage?
-        // emit Claim();
-
-        // Jak to zautomatyzowac ???
+        // How to automate this ???
 
         /// @dev Add logic for last balance claimed to archive auction
+        if (Asset(auction.asset).totalSupply() == 0) {
+            auction.state = AuctionState.ARCHIVED;
+
+            // Do we emit something like EverythingClaimed here? -> call
+            emit StateChange(s_totalAuctions, auction.state);
+        }
     }
 
     // =========================================
