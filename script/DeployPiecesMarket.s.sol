@@ -14,7 +14,7 @@ contract DeployPiecesMarket is Script {
         console.log("Governor Deployed:", address(governor));
         console.log("Owner: ", governor.owner());
 
-        Auctioner auctioner = new Auctioner(address(governor));
+        Auctioner auctioner = new Auctioner(address(0), address(governor));
         console.log("Auctioner Deployed:", address(auctioner));
         console.log("Owner: ", auctioner.owner());
 
