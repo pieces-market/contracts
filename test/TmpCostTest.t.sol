@@ -81,11 +81,11 @@ contract TmpCostTest is Test {
     function testDescriptProposeCost() external {
         auctioner.stateHack(0, 3);
 
-        string memory lama = "xdsftl vftpod";
-        console.log("String Size: ", bytes(lama).length);
+        string memory desc = "xdsftl vftpod";
+        console.log("String Size: ", bytes(desc).length);
 
         vm.prank(FUNDATION);
-        auctioner.propose(0, lama, IAuctioner.ProposalType(1));
+        auctioner.propose(0, desc, IAuctioner.ProposalType(1));
 
         // cost snapshot; 301446 | 301433
     }
