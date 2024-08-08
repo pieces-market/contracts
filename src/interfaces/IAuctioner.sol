@@ -35,7 +35,7 @@ interface IAuctioner {
 
     enum ProposalType {
         BUYOUT,
-        DESCRIPTOR
+        DESCRIPT
     }
 
     /// @notice Emitted when an auction is created
@@ -58,18 +58,28 @@ interface IAuctioner {
     /// @param id The id of the auction
     /// @param pieces The number of pieces bought
     /// @param buyer The address of the buyer
-    event Purchase(uint256 indexed id, uint256 indexed pieces, address buyer);
+    event Purchase(uint256 indexed id, uint256 indexed pieces, address indexed buyer);
 
+    /// @notice Emitted when proposal request has been sent to Governor contract
     /// @param id The id of the auction
     /// @param amount The amount of the offer transferred to contract
     /// @param offerer The address of the user that made offer
     event Propose(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
-    /// @notice Emitted when revenue is claimed from an auction
+    /// @notice Emitted when proposal fails
     /// @param id The id of the auction
-    /// @param amount The amount claimed
-    /// @param user The address of the user requesting the claim
-    event Claim(uint256 indexed id, uint256 indexed amount, address indexed user);
+    event Reject(uint256 indexed id);
+
+    /// @notice Emitted when voting passes for buyout proposal
+    /// @param id The id of the auction
+    /// @param offerer The wallet address of the offerer
+    /// @param amount The amount paid
+    event Buyout(uint256 indexed id, uint256 indexed amount, address indexed offerer);
+
+    /// @notice Emitted when voting passes for descript proposal
+    /// @param id The id of the auction
+    /// @param description Description of the proposal
+    event Descript(uint256 indexed id, string description);
 
     /// @notice Emitted when a refund has been executed
     /// @param id The id of the auction
@@ -83,21 +93,17 @@ interface IAuctioner {
     /// @param offerer The address of the user requesting the withdrawal
     event Withdraw(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
+    /// @notice Emitted when revenue is claimed from an auction
+    /// @param id The id of the auction
+    /// @param amount The amount claimed
+    /// @param user The address of the user requesting the claim
+    event Claim(uint256 indexed id, uint256 indexed amount, address indexed user);
+
     /// @notice Emitted when all pieces has been sold and funds are transferred to the broker
     /// @param id The id of the auction
     /// @param wallet The wallet address of the broker
     /// @param amount The amount transferred
     event TransferToBroker(uint256 indexed id, uint256 indexed amount, address indexed wallet);
-
-    /// @notice Emitted when proposal passes for buyout offer
-    /// @param id The id of the auction
-    /// @param offerer The wallet address of the offerer
-    /// @param amount The amount paid
-    event Buyout(uint256 indexed id, uint256 indexed amount, address indexed offerer);
-
-    /// @notice Emitted when proposal fails
-    /// @param id The id of the auction
-    event Reject(uint256 indexed id);
 
     /// @notice Emitted when the state of an auction changes
     /// @param id The id of the auction
@@ -112,17 +118,17 @@ interface IAuctioner {
 
     /// @notice Creates proposal by calling Governor contract
     /// @param id Auction id that we want to interact with
-    /// @param description Description of proposal
-    /// @param proposal Type of the proposal (0 - BUYOUT, 1 - DESCRIPTOR)
+    /// @param description Description of the proposal
+    /// @param proposal Type of the proposal (0 - BUYOUT, 1 - DESCRIPT)
     function propose(uint256 id, string memory description, ProposalType proposal) external payable;
-
-    /// @notice Allows withdrawing funds transferred with offer if proposal fails
-    /// @param id Auction id that we want to interact with
-    function withdraw(uint256 id) external;
 
     /// @notice Allows withdrawing funds by buyers if auction failed selling all pieces in given time period
     /// @param id Auction id that we want to interact with
     function refund(uint256 id) external;
+
+    /// @notice Allows withdrawing funds transferred with offer if proposal fails
+    /// @param id Auction id that we want to interact with
+    function withdraw(uint256 id) external;
 
     /// @notice Allows claiming revenue from pieces bought by buyers if auction closed successfully
     /// @param id Auction id that we want to interact with
