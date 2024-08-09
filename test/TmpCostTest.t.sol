@@ -129,7 +129,7 @@ contract TmpCostTest is Test {
         auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         vm.prank(address(governor));
-        auctioner.reject(0);
+        auctioner.reject(0, abi.encodeWithSignature("buyout(uint256)", 0));
 
         vm.prank(DEVIL);
         auctioner.withdraw(0);
