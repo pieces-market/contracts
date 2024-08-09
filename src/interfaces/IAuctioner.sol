@@ -130,6 +130,10 @@ interface IAuctioner {
     /// @param id Auction id that we want to interact with
     function withdraw(uint256 id) external;
 
+    /// @notice Fulfills agreement details allowing investors to claim
+    /// @param id Auction id that we want to interact with
+    function fulfill(uint256 id) external payable;
+
     /// @notice Allows claiming revenue from pieces bought by buyers if auction closed successfully
     /// @param id Auction id that we want to interact with
     function claim(uint256 id) external;
