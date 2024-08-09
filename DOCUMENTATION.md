@@ -48,7 +48,8 @@
 -   **`uint256 openTs:`** Timestamp when the auction opens
 -   **`uint256 closeTs:`** Timestamp when the auction ends
 -   **`address recipient:`** Wallet address where funds from asset sale will be transferred
--   **`bool proposalActive:`** Boolean indicating if there is a proposal in progress
+-   **`bool buyoutProposalActive:`** Boolean indicating if there is a buyout proposal in progress
+-   **`bool descriptProposalActive:`** Boolean indicating if there is a descript proposal in progress
 -   **`address offerer:`** Wallet address of the offerer
 -   **`mapping(address offerer => uint amount) offer:`** Mapping to track the amount that has been offered
 -   **`mapping(address offerer => bool) withdrawAllowed:`** Mapping to track if the offerer is allowed to withdraw the offer
