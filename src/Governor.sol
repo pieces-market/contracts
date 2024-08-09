@@ -107,7 +107,7 @@ contract Governor is Ownable, IGovernor {
     }
 
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
-    /// @notice Cancels a proposal by changing it's state and calls 'rejectProposal()' function from Auctioner contract
+    /// @notice Cancels a proposal by changing it's state and calls 'reject()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
     function cancel(uint proposalId) external {
@@ -115,7 +115,7 @@ contract Governor is Ownable, IGovernor {
 
         proposal.state = ProposalState.FAILED;
         /// @dev Consider adding return into rejectProposal -> to check if call failed or not
-        Auctioner(owner()).reject(proposal.auctionId);
+        Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
 
         emit StateChange(proposalId, ProposalState.FAILED);
     }
