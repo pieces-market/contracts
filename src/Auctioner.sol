@@ -322,6 +322,12 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.state);
     }
 
+    function getProposals(uint id) public view returns (bool, bool) {
+        Auction storage auction = s_auctions[id];
+
+        return (auction.buyoutProposalActive, auction.descriptProposalActive);
+    }
+
     /// @dev HELPER DEV ONLY
     function errorHack(uint256 errorType) public pure {
         // 0 - Auctioner__AuctionDoesNotExist
