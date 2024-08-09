@@ -32,7 +32,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 openTs;
         uint256 closeTs;
         address recipient;
-        bool proposalActive;
+        bool buyoutProposalActive;
+        bool descriptProposalActive;
         address offerer;
         mapping(address offerer => uint amount) offer;
         mapping(address offerer => bool) withdrawAllowed;
@@ -146,30 +147,31 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
-        if (auction.proposalActive) revert Auctioner__ProposalInProgress();
         /// @dev BELOW ERROR IS USELESS AS WE ARE UNABLE TO PASS OUT OF SCOPE INDEX FOR TYPE
         // if (uint(proposal) > 1) revert Auctioner__InvalidProposalType();
 
         bytes memory encodedFunction;
 
         if (proposal == ProposalType.BUYOUT) {
+            if (auction.buyoutProposalActive) revert Auctioner__ProposalInProgress();
             if (msg.value < (Asset(auction.asset).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
 
+            auction.buyoutProposalActive = true;
+            auction.offerer = msg.sender;
+            auction.offer[msg.sender] += msg.value;
             encodedFunction = abi.encodeWithSignature("buyout(uint256)", id);
         } else {
             if (msg.sender != s_fundation) revert Auctioner__UnauthorizedCaller();
+            if (auction.descriptProposalActive) revert Auctioner__ProposalInProgress();
             if (msg.value > 0) revert Auctioner__Overpayment();
             if (bytes(description).length == 0 || bytes(description).length > 500) revert Auctioner__IncorrectDescriptionSize();
+
+            auction.descriptProposalActive = true;
             encodedFunction = abi.encodeWithSignature("descript(uint256,string)", id, description);
         }
 
         bool success = i_governor.propose(id, auction.asset, description, encodedFunction);
         if (!success) revert Auctioner__FunctionCallFailed();
-
-        auction.proposalActive = true;
-        auction.offerer = msg.sender;
-        if (auction.withdrawAllowed[msg.sender]) auction.withdrawAllowed[msg.sender] = false;
-        auction.offer[msg.sender] += msg.value;
 
         emit Propose(id, msg.value, msg.sender);
     }
@@ -192,20 +194,24 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
-        auction.proposalActive = false;
         passedProposals[id].push(description);
+        auction.descriptProposalActive = false;
 
         emit Descript(id, description);
     }
 
     /// @notice Called by Governor if the proposal fails
     /// @param id Auction id that we want to interact with
-    function reject(uint256 id) external {
+    function reject(uint256 id, bytes memory encodedFunction) external {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
-        auction.proposalActive = false;
-        auction.withdrawAllowed[auction.offerer] = true;
+        if (keccak256(encodedFunction) == keccak256(abi.encodeWithSignature("buyout(uint256)", id))) {
+            auction.buyoutProposalActive = false;
+            auction.withdrawAllowed[auction.offerer] = true;
+        } else {
+            auction.descriptProposalActive = false;
+        }
 
         emit Reject(id);
     }
@@ -252,6 +258,19 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Refund(id, amount, msg.sender);
     }
 
+    /// @dev 3RD PARTY ALLOWED ONLY TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE 3RD PARTY WILL SELL ASSET -> call
+    // HOW CAN WE AUTOMATE IT AND KEEP DECENTRALIZED?
+    function fulfill(uint256 id) external payable override {
+        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
+        /// @dev Below address(0) is tmp only, we need to get proper caller address
+        if (msg.sender != address(0)) revert Auctioner__UnauthorizedCaller();
+        Auction storage auction = s_auctions[id];
+        if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
+
+        auction.offerer = address(0);
+        auction.offer[address(0)] = msg.value;
+    }
+
     /// @inheritdoc IAuctioner
     function claim(uint256 id) external override nonReentrant {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
@@ -277,11 +296,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         emit Claim(id, amount, msg.sender);
 
-        /// @dev WE WILL NEED FUNCTION: BROKER ALLOWED ONLY TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE 3rd party WILL SELL ASSET -> call
-        // this function will just override 'auction.oferrer' address and 'auction.offer[auction.oferrer]' value -> name of fn: brokerage?
-        // How to automate this ???
-
-        /// @dev Add logic for last balance claimed to archive auction
         if (Asset(auction.asset).totalSupply() == 0) {
             auction.state = AuctionState.ARCHIVED;
 
