@@ -306,6 +306,34 @@ contract GovernorTest is Test {
         governor.castVote(0, IGovernor.VoteType.ABSTAIN);
     }
 
+    function testQuorumCheckWorksAsIntended() public {
+        vm.prank(BUYER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 8 ether}(0, 4);
+
+        vm.prank(USER);
+        auctioner.buy{value: 4 ether}(0, 2);
+
+        /// @dev Creating proposal on updated votes
+        vm.prank(address(auctioner));
+        governor.propose(0, address(asset), "buyout!", encodedFunction);
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(BUYER);
+        governor.castVote(0, IGovernor.VoteType.AGAINST);
+
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.ABSTAIN);
+
+        assertEq(true, governor.quorumReached(0));
+    }
+
     modifier proposalMade() {
         vm.prank(address(auctioner));
         governor.propose(0, address(asset), "buyout!", encodedFunction);
