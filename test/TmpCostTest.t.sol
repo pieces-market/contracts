@@ -23,12 +23,12 @@ contract TmpCostTest is Test {
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
-    address private FUNDATION = makeAddr("fundation");
+    address private FOUNDATION = makeAddr("foundation");
 
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(FUNDATION, address(governor));
+        auctioner = new Auctioner(FOUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
@@ -48,12 +48,12 @@ contract TmpCostTest is Test {
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
-        deal(FUNDATION, STARTING_BALANCE);
+        deal(FOUNDATION, STARTING_BALANCE);
     }
 
     // test
     function testDeployAuctionerCost() external {
-        new Auctioner(FUNDATION, address(governor));
+        new Auctioner(FOUNDATION, address(governor));
 
         // cost snapshot: 4585430 | 4588048
     }
@@ -84,7 +84,7 @@ contract TmpCostTest is Test {
         string memory desc = "xdsftl vftpod";
         console.log("String Size: ", bytes(desc).length);
 
-        vm.prank(FUNDATION);
+        vm.prank(FOUNDATION);
         auctioner.propose(0, desc, IAuctioner.ProposalType(1));
 
         // cost snapshot; 301446 | 301433
@@ -113,7 +113,7 @@ contract TmpCostTest is Test {
         vm.prank(DEVIL);
         auctioner.propose{value: 12 ether}(0, "", IAuctioner.ProposalType(0));
 
-        vm.prank(FUNDATION);
+        vm.prank(FOUNDATION);
         auctioner.propose(0, "buyout", IAuctioner.ProposalType(1));
 
         (bool buyoutt, bool descriptt) = auctioner.getProposals(0);
