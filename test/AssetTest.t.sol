@@ -22,12 +22,12 @@ contract AssetTest is Test {
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
-    address private FUNDATION = makeAddr("fundation");
+    address private FOUNDATION = makeAddr("foundation");
 
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(FUNDATION, address(governor));
+        auctioner = new Auctioner(FOUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
 
         address precomputedAsset = vm.computeCreateAddress(address(auctioner), vm.getNonce(address(auctioner)));
@@ -50,7 +50,7 @@ contract AssetTest is Test {
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
-        deal(FUNDATION, STARTING_BALANCE);
+        deal(FOUNDATION, STARTING_BALANCE);
     }
 
     function testCanReceiveVotingPower() public {
