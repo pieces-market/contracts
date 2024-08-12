@@ -81,16 +81,18 @@ contract Governor is Ownable, IGovernor {
         proposal.hasVoted[msg.sender] = true;
     }
 
-    /// @dev FUNCTION quorum = 51%
     // Minimum amount of users that voted for proposal to pass
     /// @notice Checks if the quorum for a proposal is reached
+    /// @dev This check should be moved into automation part where execute | cancel will be performed based on votes and time
     /// @param proposalId The id of the proposal
-    function _quorumReached(uint256 proposalId) internal view returns (bool) {
+    function quorumReached(uint256 proposalId) external view returns (bool) {
         ProposalCore storage proposal = s_proposals[proposalId];
+        /// @dev Add time restriction
 
-        /// @dev We can get past votesSupply from Asset
-        /// @dev total available votes (tokens minted so far per asset) <=
-        return totalVotes(proposalId) <= proposal.forVotes + proposal.abstainVotes;
+        /// @dev Consider if we should count votes that exist but were unused (we should add those votes to proposal.abstain).
+        /// @dev Consider adding logic that if voting fails we add time, if it fails 3 time proposal fails or if it fails once we cancel proposal.
+        return ((Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.abstainVotes) &&
+            (proposal.forVotes > proposal.againstVotes));
     }
 
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
@@ -121,14 +123,6 @@ contract Governor is Ownable, IGovernor {
     }
 
     /// @dev Below functions probably to be removed
-
-    /// @notice Checks if a proposal has succeeded based on the votes
-    /// @param proposalId The id of the proposal
-    function _voteSucceeded(uint256 proposalId) internal view returns (bool) {
-        ProposalCore storage proposal = s_proposals[proposalId];
-
-        return proposal.forVotes > proposal.againstVotes;
-    }
 
     /// @dev Getter
     function getVotes(address asset, address holder) external view returns (uint256) {
