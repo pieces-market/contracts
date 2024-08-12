@@ -16,7 +16,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Variables
     uint256 private s_totalAuctions;
     /// @dev Consider adding fn to change this or if we leave it as immutable -> hardcode it in 'propose' function
-    address private immutable s_fundation;
+    address private immutable s_foundation;
     Governor private immutable i_governor;
 
     /// @dev CONSIDER CHANGING BELOW INTO MAPPING !!!
@@ -42,11 +42,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev Mappings
     mapping(uint256 id => Auction) private s_auctions;
-    mapping(uint256 id => string[]) private passedProposals; // consider this mapping
 
     /// @dev Constructor
-    constructor(address fundation, address governor) Ownable(msg.sender) {
-        s_fundation = fundation;
+    constructor(address foundation, address governor) Ownable(msg.sender) {
+        s_foundation = foundation;
         i_governor = Governor(governor);
     }
 
@@ -115,9 +114,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if ((Asset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
 
         uint256 cost = auction.price * pieces;
-        /// @dev Consider changing below into 'if (msg.value != cost) revert Auctioner__IncorrectFundsTransfer();'" -> call
-        if (msg.value < cost) revert Auctioner__InsufficientFunds();
-        if (msg.value > cost) revert Auctioner__Overpayment();
+
+        if (msg.value != cost) revert Auctioner__IncorrectFundsTransfer();
 
         auction.pieces -= pieces;
 
@@ -161,7 +159,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             auction.offer[msg.sender] += msg.value;
             encodedFunction = abi.encodeWithSignature("buyout(uint256)", id);
         } else {
-            if (msg.sender != s_fundation) revert Auctioner__UnauthorizedCaller();
+            if (msg.sender != s_foundation) revert Auctioner__UnauthorizedCaller();
             if (auction.descriptProposalActive) revert Auctioner__ProposalInProgress();
             if (msg.value > 0) revert Auctioner__Overpayment();
             if (bytes(description).length == 0 || bytes(description).length > 500) revert Auctioner__IncorrectDescriptionSize();
@@ -194,7 +192,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
 
-        passedProposals[id].push(description);
         auction.descriptProposalActive = false;
 
         emit Descript(id, description);
@@ -258,8 +255,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Refund(id, amount, msg.sender);
     }
 
-    /// @dev 3RD PARTY ALLOWED ONLY TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE 3RD PARTY WILL SELL ASSET -> call
-    // HOW CAN WE AUTOMATE IT AND KEEP DECENTRALIZED?
+    /// @dev 3RD PARTY ALLOWED ONLY TO TRIGGER DISTRIBUTION OF FUNDS AMONG ASSET INVESTORS ONCE 3RD PARTY WILL SELL ASSET
+    /// @notice HOW CAN WE AUTOMATE IT AND KEEP DECENTRALIZED? We MAY GET CALLS FROM FOUNDATION ONLY -> TO CONSIDER
+    /// @notice WE CAN USE 'VLAYER' TO TRIGGER THIS FUNCTION BASED ON SOME MAIL.
+    // WE CAN ALSO DECLARE THAT THIS CONFIRMATION MAIL WILL COME FROM 'SOME' ADDRESS -> THIS SHOULD BE FOR EXAMPLE DECLARED BY BROKER ON AUCTION CREATION OR LATER ON.
     function fulfill(uint256 id) external payable override {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         /// @dev Below address(0) is tmp only, we need to get proper caller address
@@ -299,7 +298,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (Asset(auction.asset).totalSupply() == 0) {
             auction.state = AuctionState.ARCHIVED;
 
-            // Do we emit something like EverythingClaimed here? -> call
             emit StateChange(s_totalAuctions, auction.state);
         }
     }
@@ -355,6 +353,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 14) revert Auctioner__FunctionCallFailed();
         if (errorType == 15) revert Auctioner__ProposalInProgress();
         if (errorType == 16) revert Auctioner__InvalidProposalType();
+        if (errorType == 17) revert Auctioner__IncorrectFundsTransfer();
     }
 
     /// @dev HELPER DEV ONLY
