@@ -22,6 +22,7 @@ interface IAuctioner {
     error Auctioner__UnauthorizedCaller();
     error Auctioner__InvalidProposalType();
     error Auctioner__IncorrectDescriptionSize();
+    error Auctioner__IncorrectFundsTransfer();
 
     enum AuctionState {
         UNINITIALIZED,
