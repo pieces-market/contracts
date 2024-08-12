@@ -22,12 +22,12 @@ contract AuctionerTest is Test {
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
-    address private FUNDATION = makeAddr("fundation");
+    address private FOUNDATION = makeAddr("foundation");
 
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(FUNDATION, address(governor));
+        auctioner = new Auctioner(FOUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
         vm.stopPrank();
 
@@ -38,7 +38,7 @@ contract AuctionerTest is Test {
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
-        deal(FUNDATION, STARTING_BALANCE);
+        deal(FOUNDATION, STARTING_BALANCE);
     }
 
     function testCanBuyPieces() public auctionCreated {
@@ -48,7 +48,7 @@ contract AuctionerTest is Test {
 
     modifier auctionCreated() {
         vm.startPrank(OWNER);
-        auctioner = new Auctioner(FUNDATION, address(governor));
+        auctioner = new Auctioner(FOUNDATION, address(governor));
 
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
