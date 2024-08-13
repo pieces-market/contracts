@@ -18,7 +18,15 @@ Use Cases:
 2. Calculation And Check -> Liczenie i przemieszczanie sie po innych chainach zeby porownac dane (laczy sie z time travel) otrzymac je na nowo.
 3. Cryptography -> Dowod kryptograficzny na maila lub inne poswiadczenia.
 
-# Tweed:
+# Pick One:
 
 1. Paytweed contract will be calling our and we must give them permission for minting.
 2. Funds will stay on their contract and NFT will be on user wallet, so we would need to refactor whole code
+
+**Tweed** - missing customizable UI, strange solutions for handling contract calls.
+
+**Web3Auth** - thye are using "Fiat On-Ramp Aggregator", it integrates fiat on-ramp providers that allow users to convert fiat to cryptocurrency. Once the user has cryptocurrency in their wallet, they can use it to purchase NFTs from our contract. They also allow no-modal solution, so we can use their functionality and our design. Pricing: Free for up to 1000 monthly active users then 69$++ per month with additional features. +0.05$ per additional MAU. Minus is that on-ramp solution costs at least 399$ per month.
+
+**Privy** - they do not offer fiat/on-ramp payments for free and their customization of modal is restricted a bit. Pricing: FIRST 1000 monthly active users free then 99$++ per month with additional features 299$ per month with fiat on-ramp and 10k monthly active users.
+
+**Dynamic** - Similar to Privy they do not offer fiat/on-ramp payments directly. They use 3rd party named Banxa. Modals are totally customizable and they allow entirely decouple a frontend from Dynamic and still enable onboarding experiences. Pricing: FIRST 200 monthly active users then 99$ per month up to 2k MAUs 0.05$ per MAU thereafter. On-ramp feature available in free mode and for 99$ per month if we pass MAU limit.
