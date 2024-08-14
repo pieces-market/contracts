@@ -10,6 +10,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 
+/// @dev REFACTOR NEEDED: CLEAR UNUSED FUNCTIONS, TRIM CONTRACT TO MINIMUM.
+
 contract AssetTest is Test {
     Auctioner private auctioner;
     Asset private asset;
