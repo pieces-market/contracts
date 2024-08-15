@@ -39,6 +39,8 @@ unit testy
 -   Chainlink Keepers:
     -   We can perform tests on Sepolia only
 -   Gelato Network:
-    -   Add fuzzed contract function trigger using type script to keep hitting buy with random data
+    -   Use hardhat to create calls with random addresses and arguments etc.
+    -   Use foundry and create script that we can just run from time to time manually.
+    -   Keep calling fn with same args using automation or with random args using same wallet.
 -   OpenZeppelin Defender:
     -   To be checked
