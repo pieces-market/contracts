@@ -9,6 +9,11 @@ import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
 import {IGovernor} from "./interfaces/IGovernor.sol";
 
+/// @dev Check IGovInt vs Governor import costs
+interface IGovInt {
+    function propose(uint id, address asset, string calldata description, bytes calldata encodedFunction) external;
+}
+
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
 /// @notice Allows users to buy pieces, buyout asset, claim revenues and refund
@@ -18,6 +23,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Consider adding fn to change this or if we leave it as immutable -> hardcode it in 'propose' function
     address private immutable s_foundation;
     Governor private immutable i_governor;
+    IGovInt private immutable i_gov;
 
     /// @dev CONSIDER CHANGING BELOW INTO MAPPING !!!
     /// @dev THIS WILL BE NEEDED LATER ON FOR AN AUTOMATION COSTS SHORTAGE
@@ -47,6 +53,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     constructor(address foundation, address governor) Ownable(msg.sender) {
         s_foundation = foundation;
         i_governor = Governor(governor);
+        i_gov = IGovInt(governor);
     }
 
     /// @notice Creates new auction, mints NFT connected to auctioned asset
@@ -309,6 +316,32 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     // ====================================
     //              Automation
     // ====================================
+
+    /// @dev CONSIDER MOVING ALL OF BELOW INTO SEPARATE CONTRACT, SO IT CAN BE DEPLOYED ONCE AND MANAGE ALL AUCTIONER CONTRACT VERSIONS
+    function checker() external returns (bool canExec /*bytes memory execPayload*/) {
+        // uint256 lastExecuted = counter.lastExecuted();
+
+        canExec = block.timestamp > 180;
+        // canExec = (block.timestamp - lastExecuted) > 180;
+
+        exec();
+        //execPayload = exec();
+        // execPayload = abi.encodeCall(ICounter.increaseCount, (1));
+    }
+
+    function exec() internal {
+        // for all s_scheduledAuctions check if time passes, if yes change status on OPENED and remove from s_scheduledAuctions
+
+        s_scheduledAuctions = new uint256[](0);
+    }
+
+    function exec2() internal {
+        // Go thru all existing auctions and check if time passed, if so change status to FAILED
+    }
+
+    function exec3GOVERNOR() internal {
+        // Go thru all proposal's and check if time passed / votes in place -> cancel or execute as desired
+    }
 
     // =========================================
     //              Developer Tools
