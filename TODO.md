@@ -44,3 +44,27 @@ unit testy
     -   Keep calling fn with same args using automation or with random args using same wallet.
 -   OpenZeppelin Defender:
     -   To be checked
+
+# TODO
+
+### 2-3dni
+
+-   Automatyzacja całości aukcji (execute/cancel/rejected po bayout)
+
+-   5-10 aukcji w każdym możliwym statusie, na początek, każdy stan który inaczej wygląda na UI.
+
+-   Testy proces ciągły, ale kilka dni potrzebnych na pierwszą wersję.
+
+### 2dni
+
+-   Obsługa IPFSa, implementacja w API
+
+*   Wyprowadzenie wszystkich endpointów, mocki danych? czy już z bazy z blockchaina?
+
+*   Obsłużenie blockchain eventów, zapis do bazy
+
+### NA WRZESIEŃ:
+
+-   Cross-chain
+
+-   Zabezpieczenie API - Adam
