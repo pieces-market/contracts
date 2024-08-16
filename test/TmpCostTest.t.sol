@@ -55,7 +55,7 @@ contract TmpCostTest is Test {
     function testDeployAuctionerCost() external {
         new Auctioner(FOUNDATION, address(governor));
 
-        // cost snapshot: 4585430 | 4588048
+        // cost snapshot: 4544703 | 4552120
     }
 
     function testDeployAssetCost() external {
@@ -74,7 +74,7 @@ contract TmpCostTest is Test {
         vm.prank(DEVIL);
         auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
-        // cost snapshot: 645444 | 643405
+        // cost snapshot: 641297 | 640991
     }
 
     // test
@@ -87,7 +87,7 @@ contract TmpCostTest is Test {
         vm.prank(FOUNDATION);
         auctioner.propose(0, desc, IAuctioner.ProposalType(1));
 
-        // cost snapshot; 301446 | 301433
+        // cost snapshot; 274785 | 274390
     }
 
     /// @dev TODO
@@ -127,6 +127,20 @@ contract TmpCostTest is Test {
 
         // cost snapshot: 525_906
         // 526_146
+    }
+
+    function testRejectCost() external {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+        auctioner.stateHack(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
+
+        vm.prank(address(governor));
+        auctioner.reject(0, abi.encodeWithSignature("buyout(uint256)", 0));
+
+        // cost snapshot: 525143 | 525153
     }
 
     function testWithdrawOfferCost() external {
