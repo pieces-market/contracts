@@ -25,10 +25,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     Governor private immutable i_governor;
     IGovInt private immutable i_gov;
 
-    /// @dev CONSIDER CHANGING BELOW INTO MAPPING !!!
-    /// @dev THIS WILL BE NEEDED LATER ON FOR AN AUTOMATION COSTS SHORTAGE
+    /// @dev CONSIDER CHANGING BELOW INTO MAPPING IF POSSIBLE !!!
     /// @dev Arrays
     uint256[] private s_scheduledAuctions;
+    //uint256[] private s_openedAuctions;
 
     struct Auction {
         address asset;
@@ -102,6 +102,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             emit Schedule(s_totalAuctions, start);
         } else {
             auction.state = AuctionState.OPENED;
+            s_scheduledAuctions.push(s_totalAuctions);
         }
 
         emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
@@ -283,7 +284,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @inheritdoc IAuctioner
     function claim(uint256 id) external override nonReentrant {
-        if (msg.sender != address(i_governor)) revert Auctioner__UnauthorizedCaller();
+        if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.FINISHED) revert Auctioner__AuctionNotFinished();
 
@@ -318,22 +319,55 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     // ====================================
 
     /// @dev CONSIDER MOVING ALL OF BELOW INTO SEPARATE CONTRACT, SO IT CAN BE DEPLOYED ONCE AND MANAGE ALL AUCTIONER CONTRACT VERSIONS
-    function checker() external returns (bool canExec /*bytes memory execPayload*/) {
+    function checker() external view returns (bool canExec /*bytes memory execPayload*/) {
         // uint256 lastExecuted = counter.lastExecuted();
 
         canExec = block.timestamp > 180;
         // canExec = (block.timestamp - lastExecuted) > 180;
 
-        exec();
+        //exec();
         //execPayload = exec();
         // execPayload = abi.encodeCall(ICounter.increaseCount, (1));
     }
 
-    function exec() internal {
-        // for all s_scheduledAuctions check if time passes, if yes change status on OPENED and remove from s_scheduledAuctions
+    function exec() external {
+        bool hasUnprocessedAuctions = s_scheduledAuctions.length > 0;
 
-        s_scheduledAuctions = new uint256[](0);
+        uint[] memory unprocessedAuctions = s_scheduledAuctions;
+
+        for (uint i; i < unprocessedAuctions.length; ) {
+            uint id = unprocessedAuctions[i];
+            Auction storage auction = s_auctions[id];
+
+            if (auction.state == AuctionState.SCHEDULED && auction.openTs < block.timestamp) {
+                auction.state = AuctionState.OPENED;
+
+                emit StateChange(id, auction.state);
+            }
+
+            if (auction.state == AuctionState.OPENED && auction.closeTs < block.timestamp) {
+                auction.state = AuctionState.FAILED;
+
+                emit StateChange(id, auction.state);
+
+                // Swap current element with the last one to remove it
+                s_scheduledAuctions[id] = s_scheduledAuctions[s_scheduledAuctions.length - 1];
+                s_scheduledAuctions.pop();
+
+                //continue; // Skip incrementing i to re-check the swapped element
+            }
+
+            unchecked {
+                i++;
+            }
+        }
     }
+
+    function getUnprocessedAuctions() external view returns (uint[] memory) {
+        return s_scheduledAuctions;
+    }
+
+    function removeFromUnprocessed(uint id) internal {}
 
     function exec2() internal {
         // Go thru all existing auctions and check if time passed, if so change status to FAILED
