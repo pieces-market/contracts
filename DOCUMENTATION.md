@@ -23,6 +23,8 @@
 -   **`UnauthorizedCaller:`** Error thrown when function called by unauthorized address
 -   **`InvalidProposalType:`** Error thrown when function called with incorrect proposal type
 -   **`IncorrectDescriptionSize:`** Error thrown when proposal description provided is too short or too long
+-   **`IncorrectFundsTransfer:`** Error thrown when funds value sent to contract is too low or too high
+-   **`UpkeepNotNeeded:`** Error thrown when trying to call checker function but there is nothing to check
 
 ### **Auction States**
 
