@@ -46,6 +46,28 @@ contract AuctionerTest is Test {
         auctioner.buy{value: 6 ether}(0, 3);
     }
 
+    function testCanRemoveUnprocessedAuctions() public {
+        vm.startPrank(OWNER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 3, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 8, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 2, BROKER);
+        vm.stopPrank();
+
+        auctioner.getUnprocessedAuctions();
+
+        vm.warp(block.timestamp + 3 days + 1);
+        auctioner.exec();
+
+        auctioner.getUnprocessedAuctions();
+
+        // vm.warp(block.timestamp + 2 days + 1);
+        // auctioner.exec();
+
+        // auctioner.getUnprocessedAuctions();
+    }
+
     modifier auctionCreated() {
         vm.startPrank(OWNER);
         auctioner = new Auctioner(FOUNDATION, address(governor));
