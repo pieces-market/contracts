@@ -48,11 +48,12 @@ contract AuctionerTest is Test {
 
     function testCanRemoveUnprocessedAuctions() public {
         vm.startPrank(OWNER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 3, BROKER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 8, BROKER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 2, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER); // 1
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 3, BROKER); // 2
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, 8, BROKER); // 3
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER); // 4
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 2, BROKER); // 5
         vm.stopPrank();
 
         auctioner.getUnprocessedAuctions();
@@ -62,10 +63,12 @@ contract AuctionerTest is Test {
 
         auctioner.getUnprocessedAuctions();
 
-        // vm.warp(block.timestamp + 2 days + 1);
-        // auctioner.exec();
+        vm.warp(block.timestamp + 3 days + 1);
+        auctioner.exec();
 
-        // auctioner.getUnprocessedAuctions();
+        auctioner.getUnprocessedAuctions();
+
+        // 15474480 | 15470948 | 15474820
     }
 
     modifier auctionCreated() {
