@@ -28,7 +28,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev CONSIDER CHANGING BELOW INTO MAPPING IF POSSIBLE !!!
     /// @dev Arrays
     uint256[] private s_ongoingAuctions;
-    //uint256[] private s_openedAuctions;
 
     struct Auction {
         address asset;
@@ -331,6 +330,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     function exec() external {
+        // Consider adding another checks to prevent running below if not necessary
         if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
 
         for (uint i; i < s_ongoingAuctions.length; ) {
