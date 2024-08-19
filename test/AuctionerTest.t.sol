@@ -47,6 +47,9 @@ contract AuctionerTest is Test {
     }
 
     function testCanRemoveUnprocessedAuctions() public {
+        vm.expectRevert(IAuctioner.Auctioner__UpkeepNotNeeded.selector);
+        auctioner.exec();
+
         vm.startPrank(OWNER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER); // 1
