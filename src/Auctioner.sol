@@ -27,7 +27,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev CONSIDER CHANGING BELOW INTO MAPPING IF POSSIBLE !!!
     /// @dev Arrays
-    uint256[] private s_scheduledAuctions;
+    uint256[] private s_ongoingAuctions;
     //uint256[] private s_openedAuctions;
 
     struct Auction {
@@ -97,13 +97,13 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         if (auction.openTs > block.timestamp) {
             auction.state = AuctionState.SCHEDULED;
-            s_scheduledAuctions.push(s_totalAuctions);
 
             emit Schedule(s_totalAuctions, start);
         } else {
             auction.state = AuctionState.OPENED;
-            s_scheduledAuctions.push(s_totalAuctions);
         }
+
+        s_ongoingAuctions.push(s_totalAuctions);
 
         emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
         emit StateChange(s_totalAuctions, auction.state);
@@ -331,12 +331,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     function exec() external {
-        bool hasUnprocessedAuctions = s_scheduledAuctions.length > 0;
+        if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
 
-        uint[] memory unprocessedAuctions = s_scheduledAuctions;
-
-        for (uint i; i < unprocessedAuctions.length; ) {
-            uint id = unprocessedAuctions[i];
+        for (uint i; i < s_ongoingAuctions.length; ) {
+            uint id = s_ongoingAuctions[i];
             Auction storage auction = s_auctions[id];
 
             if (auction.state == AuctionState.SCHEDULED && auction.openTs < block.timestamp) {
@@ -351,10 +349,11 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
                 emit StateChange(id, auction.state);
 
                 // Swap current element with the last one to remove it
-                s_scheduledAuctions[id] = s_scheduledAuctions[s_scheduledAuctions.length - 1];
-                s_scheduledAuctions.pop();
+                s_ongoingAuctions[i] = s_ongoingAuctions[s_ongoingAuctions.length - 1];
+                s_ongoingAuctions.pop();
 
-                //continue; // Skip incrementing i to re-check the swapped element
+                // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
+                continue;
             }
 
             unchecked {
@@ -364,7 +363,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     function getUnprocessedAuctions() external view returns (uint[] memory) {
-        return s_scheduledAuctions;
+        return s_ongoingAuctions;
     }
 
     function removeFromUnprocessed(uint id) internal {}
@@ -429,6 +428,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 15) revert Auctioner__ProposalInProgress();
         if (errorType == 16) revert Auctioner__InvalidProposalType();
         if (errorType == 17) revert Auctioner__IncorrectFundsTransfer();
+        if (errorType == 18) revert Auctioner__UpkeepNotNeeded();
     }
 
     /// @dev HELPER DEV ONLY
