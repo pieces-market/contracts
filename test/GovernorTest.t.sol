@@ -17,6 +17,7 @@ contract GovernorTest is Test {
     Governor private governor;
 
     bytes encodedFunction;
+    bytes encodedFn;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
@@ -42,6 +43,8 @@ contract GovernorTest is Test {
         asset = Asset(createdAsset);
 
         encodedFunction = abi.encodeWithSignature("buyout(uint256)", 0);
+        encodedFn = abi.encodeWithSignature("descript(uint256,string)", 0, "vamp");
+        // encodedFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
 
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
@@ -303,7 +306,7 @@ contract GovernorTest is Test {
         governor.castVote(0, IGovernor.VoteType.AGAINST);
     }
 
-    function testQuorumCheckWorksAsIntended() public {
+    function testAutomationWorksAsIntended() public {
         vm.prank(BUYER);
         auctioner.buy{value: 6 ether}(0, 3);
 
@@ -314,21 +317,41 @@ contract GovernorTest is Test {
         auctioner.buy{value: 4 ether}(0, 2);
 
         /// @dev Creating proposal on updated votes
-        vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buyout!", encodedFunction);
+        vm.startPrank(address(auctioner));
+        governor.propose(0, address(asset), "buyout!", encodedFunction); // 0
+        governor.propose(0, address(asset), "vna", encodedFn); // 1
+        vm.stopPrank();
 
         vm.warp(block.timestamp + 1);
 
         vm.prank(BUYER);
-        governor.castVote(0, IGovernor.VoteType.AGAINST);
+        governor.castVote(1, IGovernor.VoteType.AGAINST);
 
         vm.prank(DEVIL);
-        governor.castVote(0, IGovernor.VoteType.FOR);
+        governor.castVote(1, IGovernor.VoteType.FOR);
 
         vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.AGAINST);
+        governor.castVote(1, IGovernor.VoteType.AGAINST);
 
-        assertEq(true, governor.quorumReached(0));
+        vm.warp(block.timestamp + 7 days);
+        governor.exec();
+
+        governor.getUnprocessed();
+
+        vm.prank(address(auctioner));
+        governor.propose(0, address(asset), "arc", encodedFn); // 2
+
+        vm.warp(block.timestamp + 1);
+        vm.warp(block.timestamp + 7 days);
+        governor.exec();
+
+        vm.prank(address(auctioner));
+        governor.propose(0, address(asset), "fds", encodedFn); // 3
+
+        vm.prank(address(auctioner));
+        governor.propose(0, address(asset), "buy!", encodedFunction); // 4
+
+        governor.getUnprocessed();
     }
 
     modifier proposalMade() {
