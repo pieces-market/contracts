@@ -46,10 +46,36 @@ contract AuctionerTest is Test {
         auctioner.buy{value: 6 ether}(0, 3);
     }
 
-    function testCanRemoveUnprocessedAuctions() public {
-        vm.expectRevert(IAuctioner.Auctioner__UpkeepNotNeeded.selector);
-        auctioner.exec();
+    function testDeployCost() public {
+        new Auctioner(FOUNDATION, address(governor));
 
+        // 4673886 | 4707174 => 33088
+    }
+
+    function testCanCheck() public {
+        vm.startPrank(OWNER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER); // 1
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 3, BROKER); // 2
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, 8, BROKER); // 3
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER); // 4
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 2, BROKER); // 5
+        vm.stopPrank();
+
+        //vm.warp(block.timestamp + 5 days + 1);
+        (bool upkeep, ) = auctioner.checker();
+        if (upkeep) {
+            auctioner.exec();
+        }
+
+        // Costs if we nothing to process:
+        // 15504506(no checker loop) | 15503142(checker loop) = -1364
+
+        // Costs if we have something to process:
+        // 15462817(no checker loop) | 15463688(checker loop) = 871
+    }
+
+    function testCanRemoveUnprocessedAuctions() public {
         vm.startPrank(OWNER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER); // 1
@@ -62,12 +88,23 @@ contract AuctionerTest is Test {
         auctioner.getUnprocessedAuctions();
 
         vm.warp(block.timestamp + 3 days + 1);
-        auctioner.exec();
+        auctioner.checker();
+        // auctioner.exec();
 
-        auctioner.getUnprocessedAuctions();
+        // auctioner.getUnprocessedAuctions();
 
-        vm.warp(block.timestamp + 3 days + 1);
-        auctioner.exec();
+        // vm.warp(block.timestamp + 3 days + 1);
+        // auctioner.exec();
+
+        // auctioner.getUnprocessedAuctions();
+
+        // vm.prank(OWNER);
+        // auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER); // 4
+
+        // auctioner.getUnprocessedAuctions();
+
+        // vm.warp(block.timestamp + 6 days + 1);
+        // auctioner.exec();
 
         auctioner.getUnprocessedAuctions();
 
