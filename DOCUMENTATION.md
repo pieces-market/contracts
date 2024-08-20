@@ -88,16 +88,13 @@
 
 -   **`INACTIVE:`** Proposal does not exist
 -   **`ACTIVE:`** Proposal is currently open for voting
--   **`PASSED:`** Proposal passed and is ready to be executed
 -   **`SUCCEEDED:`** Proposal successfully executed
 -   **`FAILED:`** Proposal did not pass and awaits cancellation
--   **`CANCELLED:`** Proposal did not pass and has been cancelled
 
 ### **Vote Types**
 
 -   **`FOR:`** Indicates a vote in favor of the proposal
 -   **`AGAINST:`** Indicates a vote against the proposal
--   **`ABSTAIN:`** Indicates an abstention from voting
 
 ### **Proposal Structure**
 
@@ -109,7 +106,6 @@
 -   **`bytes encodedFunction:`** Function to be called on execution expressed in bytes
 -   **`uint256 forVotes:`** Number of votes in favor of the proposal
 -   **`uint256 againstVotes:`** Number of votes against the proposal
--   **`uint256 abstainVotes:`** Number of abstaining votes
 -   **`mapping(address => bool) hasVoted:`** Mapping to track if an address has voted on the proposal
 -   **`ProposalState state:`** Current state of the proposal
 
