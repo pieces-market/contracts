@@ -82,27 +82,10 @@ contract Governor is Ownable, IGovernor {
         proposal.hasVoted[msg.sender] = true;
     }
 
-    // Minimum amount of users that voted for proposal to pass
-    /// @notice Checks if the quorum for a proposal is reached
-    /// @dev This check should be moved into automation part where execute | cancel will be performed based on votes and time
-    /// @param proposalId The id of the proposal
-    function quorumReached(uint256 proposalId) external view returns (bool) {
-        ProposalCore storage proposal = s_proposals[proposalId];
-        /// @dev Add time restriction
-
-        // tydzien na glosowanie, 50% + 1 token wszystkich tokenow total supply
-        // jesli mamy 30% glosow to glosowanie upada
-
-        /// @dev Consider if we should count votes that exist but were unused (we should add those votes to proposal.abstain).
-        /// @dev Consider adding logic that if voting fails we add time, if it fails 3 time proposal fails or if it fails once we cancel proposal.
-        return ((Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
-            (proposal.forVotes > proposal.againstVotes));
-    }
-
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
     /// @notice Calls proper function from Auctioner contract
     /// @param proposalId The id of the proposal
-    function execute(uint proposalId) public {
+    function execute(uint proposalId) internal {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.SUCCEEDED;
@@ -116,7 +99,7 @@ contract Governor is Ownable, IGovernor {
     /// @notice Cancels a proposal by changing it's state and calls 'reject()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
-    function cancel(uint proposalId) public {
+    function cancel(uint proposalId) internal {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
