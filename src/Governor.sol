@@ -10,6 +10,9 @@ import {IGovernor} from "./interfaces/IGovernor.sol";
 /// @title Governor Contract
 /// @notice Allows creation and management of proposals per given asset, executes passed proposals
 contract Governor is Ownable, IGovernor {
+    /// @dev Arrays
+    uint256[] private s_ongoingProposals;
+
     struct ProposalCore {
         uint256 auctionId;
         address asset;
@@ -19,7 +22,6 @@ contract Governor is Ownable, IGovernor {
         bytes encodedFunction;
         uint256 forVotes;
         uint256 againstVotes;
-        uint256 abstainVotes;
         mapping(address => bool) hasVoted;
         ProposalState state;
     }
@@ -54,7 +56,8 @@ contract Governor is Ownable, IGovernor {
         emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, description);
         emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
-        s_totalProposals += 1;
+        s_ongoingProposals.push(s_totalProposals);
+        s_totalProposals++;
 
         /// @dev returns true if everything pass | check gas costs | check if it is even necessary
         return true;
@@ -72,10 +75,8 @@ contract Governor is Ownable, IGovernor {
 
         if (vote == VoteType.FOR) {
             proposal.forVotes += votes;
-        } else if (vote == VoteType.AGAINST) {
+        } else {
             proposal.againstVotes += votes;
-        } else if (vote == VoteType.ABSTAIN) {
-            proposal.abstainVotes += votes;
         }
 
         proposal.hasVoted[msg.sender] = true;
@@ -89,16 +90,26 @@ contract Governor is Ownable, IGovernor {
         ProposalCore storage proposal = s_proposals[proposalId];
         /// @dev Add time restriction
 
+        // tydzien na glosowanie, 50% + 1 token wszystkich tokenow total supply
+        // jesli mamy 30% glosow to glosowanie upada
+
         /// @dev Consider if we should count votes that exist but were unused (we should add those votes to proposal.abstain).
         /// @dev Consider adding logic that if voting fails we add time, if it fails 3 time proposal fails or if it fails once we cancel proposal.
-        return ((Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.abstainVotes) &&
+        return ((Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
             (proposal.forVotes > proposal.againstVotes));
+    }
+
+    /// @dev TMP
+    function moreVoted(uint proposalId) external view returns (bool) {
+        ProposalCore storage proposal = s_proposals[proposalId];
+
+        return (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2) < (proposal.forVotes + proposal.againstVotes);
     }
 
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
     /// @notice Calls proper function from Auctioner contract
     /// @param proposalId The id of the proposal
-    function execute(uint proposalId) external {
+    function execute(uint proposalId) internal {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.SUCCEEDED;
@@ -112,7 +123,7 @@ contract Governor is Ownable, IGovernor {
     /// @notice Cancels a proposal by changing it's state and calls 'reject()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
-    function cancel(uint proposalId) external {
+    function cancel(uint proposalId) internal {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
@@ -120,6 +131,35 @@ contract Governor is Ownable, IGovernor {
         Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
 
         emit StateChange(proposalId, ProposalState.FAILED);
+    }
+
+    function exec() external {
+        // Go thru all proposal's and check if time passed / votes in place -> cancel or execute as desired
+        for (uint i; i < s_ongoingProposals.length; ) {
+            uint id = s_ongoingProposals[i];
+            ProposalCore storage proposal = s_proposals[id];
+
+            if (proposal.voteEnd < block.timestamp) {
+                cancel(proposal.auctionId);
+            }
+
+            if (proposal.voteEnd < block.timestamp) {
+                execute(proposal.auctionId);
+
+                // Swap current element with the last one to remove it
+                s_ongoingProposals[i] = s_ongoingProposals[s_ongoingProposals.length - 1];
+                s_ongoingProposals.pop();
+
+                // Consider adding emit here
+
+                // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
+                continue;
+            }
+
+            unchecked {
+                i++;
+            }
+        }
     }
 
     /// @dev Below functions probably to be removed
@@ -137,16 +177,16 @@ contract Governor is Ownable, IGovernor {
     }
 
     /// @dev Getter
-    function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes, uint256 abstainVotes) {
+    function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes) {
         ProposalCore storage proposal = s_proposals[proposalId];
 
-        return (proposal.forVotes, proposal.againstVotes, proposal.abstainVotes);
+        return (proposal.forVotes, proposal.againstVotes);
     }
 
     /// @dev Getter
     function totalVotes(uint256 proposalId) internal view returns (uint256) {
         ProposalCore storage proposal = s_proposals[proposalId];
 
-        return proposal.forVotes + proposal.againstVotes + proposal.abstainVotes;
+        return proposal.forVotes + proposal.againstVotes;
     }
 }
