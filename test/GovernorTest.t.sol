@@ -43,8 +43,7 @@ contract GovernorTest is Test {
         asset = Asset(createdAsset);
 
         encodedFunction = abi.encodeWithSignature("buyout(uint256)", 0);
-        encodedFn = abi.encodeWithSignature("descript(uint256,string)", 0, "vamp");
-        // encodedFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
+        encodedFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
 
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
