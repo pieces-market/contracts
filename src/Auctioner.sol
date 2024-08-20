@@ -107,7 +107,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
         emit StateChange(s_totalAuctions, auction.state);
 
-        s_totalAuctions += 1;
+        s_totalAuctions++;
     }
 
     /// @inheritdoc IAuctioner
@@ -318,21 +318,29 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     // ====================================
 
     /// @dev CONSIDER MOVING ALL OF BELOW INTO SEPARATE CONTRACT, SO IT CAN BE DEPLOYED ONCE AND MANAGE ALL AUCTIONER CONTRACT VERSIONS
-    function checker() external view returns (bool canExec /*bytes memory execPayload*/) {
-        // uint256 lastExecuted = counter.lastExecuted();
 
-        canExec = block.timestamp > 180;
-        // canExec = (block.timestamp - lastExecuted) > 180;
+    function checker() public view returns (bool canExec, bytes memory execPayload) {
+        //if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
 
-        //exec();
-        //execPayload = exec();
-        // execPayload = abi.encodeCall(ICounter.increaseCount, (1));
+        execPayload = abi.encodeWithSelector(this.exec.selector);
+
+        /// @dev Consider below additional loop here, so we will have 100% confirm that there is something to execute but it is a bit more expensive
+        /// @dev We could implement whole logic and checks here to call fn responsible for updating state and removing id from array like exec(uint id)
+        if (s_ongoingAuctions.length > 0) {
+            for (uint i; i < s_ongoingAuctions.length; i++) {
+                uint id = s_ongoingAuctions[i];
+                Auction storage auction = s_auctions[id];
+
+                if ((auction.state == AuctionState.SCHEDULED && auction.openTs < block.timestamp) || auction.closeTs < block.timestamp) {
+                    return (true, execPayload);
+                }
+            }
+        }
+
+        return (false, execPayload);
     }
 
     function exec() external {
-        // Consider adding another checks to prevent running below if not necessary
-        if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
-
         for (uint i; i < s_ongoingAuctions.length; ) {
             uint id = s_ongoingAuctions[i];
             Auction storage auction = s_auctions[id];
@@ -352,6 +360,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
                 s_ongoingAuctions[i] = s_ongoingAuctions[s_ongoingAuctions.length - 1];
                 s_ongoingAuctions.pop();
 
+                // Consider adding emit here
+
                 // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
                 continue;
             }
@@ -364,16 +374,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     function getUnprocessedAuctions() external view returns (uint[] memory) {
         return s_ongoingAuctions;
-    }
-
-    function removeFromUnprocessed(uint id) internal {}
-
-    function exec2() internal {
-        // Go thru all existing auctions and check if time passed, if so change status to FAILED
-    }
-
-    function exec3GOVERNOR() internal {
-        // Go thru all proposal's and check if time passed / votes in place -> cancel or execute as desired
     }
 
     // =========================================
