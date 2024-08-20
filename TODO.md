@@ -51,6 +51,7 @@ unit testy
 
 -   Automatyzacja całości aukcji (execute/cancel/rejected po bayout)
 -   Costs comparison for internal execute/cancel fns from Governor
+-   Costs comparison of abi.encodeWithSignature vs abi.encodeWithSelector
 -   Deploy new contract version on Aleph
 -   Check if automation works with Gelato
 -   Deploy fixed version of contract if needed
