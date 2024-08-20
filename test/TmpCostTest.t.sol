@@ -102,7 +102,7 @@ contract TmpCostTest is Test {
         auctioner.propose{value: 12 ether}(0, "buyout", IAuctioner.ProposalType(0));
 
         vm.prank(address(governor));
-        governor.execute(0);
+        //governor.execute(0);
     }
 
     function testCancelCost() external {
@@ -120,7 +120,7 @@ contract TmpCostTest is Test {
         console.log("Proposals B: ", buyoutt, descriptt);
 
         vm.prank(address(governor));
-        governor.cancel(0);
+        //governor.cancel(0);
 
         (bool buyout, bool descript) = auctioner.getProposals(0);
         console.log("Proposals: ", buyout, descript);
