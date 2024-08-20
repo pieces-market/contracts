@@ -11,16 +11,13 @@ interface IGovernor {
     enum ProposalState {
         INACTIVE,
         ACTIVE,
-        PASSED,
         SUCCEEDED,
-        FAILED,
-        CANCELLED
+        FAILED
     }
 
     enum VoteType {
         FOR,
-        AGAINST,
-        ABSTAIN
+        AGAINST
     }
 
     /// @notice Emitted when a new proposal is created
@@ -39,6 +36,6 @@ interface IGovernor {
 
     /// @notice Allows users to cast a vote on a proposal
     /// @param proposalId The id of the proposal
-    /// @param vote Type of vote (For, Against, Abstain)
+    /// @param vote Type of vote (For, Against)
     function castVote(uint proposalId, VoteType vote) external;
 }
