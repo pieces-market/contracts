@@ -99,17 +99,10 @@ contract Governor is Ownable, IGovernor {
             (proposal.forVotes > proposal.againstVotes));
     }
 
-    /// @dev TMP
-    function moreVoted(uint proposalId) external view returns (bool) {
-        ProposalCore storage proposal = s_proposals[proposalId];
-
-        return (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2) < (proposal.forVotes + proposal.againstVotes);
-    }
-
     /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
     /// @notice Calls proper function from Auctioner contract
     /// @param proposalId The id of the proposal
-    function execute(uint proposalId) internal {
+    function execute(uint proposalId) public {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.SUCCEEDED;
@@ -123,7 +116,7 @@ contract Governor is Ownable, IGovernor {
     /// @notice Cancels a proposal by changing it's state and calls 'reject()' function from Auctioner contract
     /// @dev Emits StateChange event
     /// @param proposalId The id of the proposal
-    function cancel(uint proposalId) internal {
+    function cancel(uint proposalId) public {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         proposal.state = ProposalState.FAILED;
@@ -135,16 +128,20 @@ contract Governor is Ownable, IGovernor {
 
     function exec() external {
         // Go thru all proposal's and check if time passed / votes in place -> cancel or execute as desired
+
         for (uint i; i < s_ongoingProposals.length; ) {
             uint id = s_ongoingProposals[i];
             ProposalCore storage proposal = s_proposals[id];
 
-            if (proposal.voteEnd < block.timestamp) {
-                cancel(proposal.auctionId);
-            }
+            bool quorumR = (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
+                (proposal.forVotes > proposal.againstVotes);
 
             if (proposal.voteEnd < block.timestamp) {
-                execute(proposal.auctionId);
+                if (quorumR) {
+                    execute(id);
+                } else {
+                    cancel(id);
+                }
 
                 // Swap current element with the last one to remove it
                 s_ongoingProposals[i] = s_ongoingProposals[s_ongoingProposals.length - 1];
@@ -160,6 +157,26 @@ contract Governor is Ownable, IGovernor {
                 i++;
             }
         }
+    }
+
+    function getUnprocessed() external view returns (uint[] memory) {
+        return s_ongoingProposals;
+    }
+
+    function getProposalData(uint256 id) public view returns (uint, address, uint, uint, string memory, bytes memory, uint, uint, ProposalState) {
+        ProposalCore storage proposal = s_proposals[id];
+
+        return (
+            proposal.auctionId,
+            proposal.asset,
+            proposal.voteStart,
+            proposal.voteEnd,
+            proposal.description,
+            proposal.encodedFunction,
+            proposal.forVotes,
+            proposal.againstVotes,
+            proposal.state
+        );
     }
 
     /// @dev Below functions probably to be removed
