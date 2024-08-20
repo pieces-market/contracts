@@ -238,7 +238,7 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(USER);
-        governor.castVote(1, IGovernor.VoteType.ABSTAIN);
+        governor.castVote(1, IGovernor.VoteType.AGAINST);
 
         vm.warp(block.timestamp + 1);
 
@@ -251,17 +251,14 @@ contract GovernorTest is Test {
         /// @dev We can move below vars to global, so it will be reusable for multiple tests
         uint forVotes;
         uint againstVotes;
-        uint abstainVotes;
 
-        (forVotes, againstVotes, abstainVotes) = governor.proposalVotes(0);
+        (forVotes, againstVotes) = governor.proposalVotes(0);
         assertEq(forVotes, 3);
         assertEq(againstVotes, 0);
-        assertEq(abstainVotes, 0);
 
-        (forVotes, againstVotes, abstainVotes) = governor.proposalVotes(1);
+        (forVotes, againstVotes) = governor.proposalVotes(1);
         assertEq(forVotes, 0);
-        assertEq(againstVotes, 0);
-        assertEq(abstainVotes, 3);
+        assertEq(againstVotes, 3);
     }
 
     function testPreviousTokenOwnerCantVote() public {
@@ -300,10 +297,10 @@ contract GovernorTest is Test {
 
         vm.prank(USER);
         vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
-        governor.castVote(0, IGovernor.VoteType.ABSTAIN);
+        governor.castVote(0, IGovernor.VoteType.AGAINST);
 
         vm.prank(DEVIL);
-        governor.castVote(0, IGovernor.VoteType.ABSTAIN);
+        governor.castVote(0, IGovernor.VoteType.AGAINST);
     }
 
     function testQuorumCheckWorksAsIntended() public {
@@ -311,7 +308,7 @@ contract GovernorTest is Test {
         auctioner.buy{value: 6 ether}(0, 3);
 
         vm.prank(DEVIL);
-        auctioner.buy{value: 8 ether}(0, 4);
+        auctioner.buy{value: 12 ether}(0, 6);
 
         vm.prank(USER);
         auctioner.buy{value: 4 ether}(0, 2);
@@ -329,7 +326,7 @@ contract GovernorTest is Test {
         governor.castVote(0, IGovernor.VoteType.FOR);
 
         vm.prank(USER);
-        governor.castVote(0, IGovernor.VoteType.ABSTAIN);
+        governor.castVote(0, IGovernor.VoteType.AGAINST);
 
         assertEq(true, governor.quorumReached(0));
     }
