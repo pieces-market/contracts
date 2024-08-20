@@ -47,6 +47,8 @@ abstract contract Vlayer is ReentrancyGuard, Ownable, IAuctioner {
         i_vlayerAuthorizedAddress = vlayerAddress;
     }
 
+    /// @dev CONSIDER ADDING PROPOSAL TO UNLOCK FUNDS IN EDGE CASE WHERE FUNDS STUCK IN CONTRACT
+
     /// @notice ONLY 'VLAYER' ALLOWED TO TRIGGER THIS FUNCTION BASED ON SOME OFF-CHAIN CONFIRMATION.
     function vlayer(uint256 id, uint value, address fulfiller) external {
         if (msg.sender != i_vlayerAuthorizedAddress) revert Auctioner__UnauthorizedCaller();
@@ -55,7 +57,7 @@ abstract contract Vlayer is ReentrancyGuard, Ownable, IAuctioner {
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
 
         /// @dev VLAYER to update below based on for example mail confirmation:
-        auction.offerer = fulfiller;
+        auction.offerer = fulfiller; /// @dev => Only 'msg.value' will be important here, so consider getting rid of fulfiller
         auction.offer[auction.offerer] = value;
 
         emit UpdateFromVlayer(id, value, fulfiller);
