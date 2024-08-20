@@ -50,6 +50,10 @@ unit testy
 ### 2-3dni
 
 -   Automatyzacja całości aukcji (execute/cancel/rejected po bayout)
+-   Costs comparison for internal execute/cancel fns from Governor
+-   Deploy new contract version on Aleph
+-   Check if automation works with Gelato
+-   Deploy fixed version of contract if needed
 
 -   5-10 aukcji w każdym możliwym statusie, na początek, każdy stan który inaczej wygląda na UI.
 
