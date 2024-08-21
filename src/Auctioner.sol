@@ -324,7 +324,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
                 uint id = s_ongoingAuctions[i];
                 Auction storage auction = s_auctions[id];
 
-                if ((auction.state == AuctionState.SCHEDULED && auction.openTs < block.timestamp) || auction.closeTs < block.timestamp) {
+                if (
+                    (auction.state == AuctionState.SCHEDULED && auction.openTs < block.timestamp) ||
+                    (auction.state == AuctionState.OPENED && auction.closeTs < block.timestamp)
+                ) {
                     return (true, execPayload);
                 }
             }
