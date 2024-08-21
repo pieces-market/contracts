@@ -100,11 +100,11 @@ contract Governor is Ownable, IGovernor {
             uint id = s_ongoingProposals[i];
             ProposalCore storage proposal = s_proposals[id];
 
-            bool quorumR = (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
-                (proposal.forVotes > proposal.againstVotes);
-
             if (proposal.voteEnd < block.timestamp) {
-                if (quorumR) {
+                if (
+                    (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
+                    (proposal.forVotes > proposal.againstVotes)
+                ) {
                     proposal.state = ProposalState.SUCCEEDED;
                     (bool success, ) = owner().call(proposal.encodedFunction);
                     if (!success) revert Governor__ExecuteFailed();
