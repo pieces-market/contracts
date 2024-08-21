@@ -333,6 +333,7 @@ contract GovernorTest is Test {
         governor.castVote(1, IGovernor.VoteType.AGAINST);
 
         vm.warp(block.timestamp + 7 days);
+        governor.checker();
         governor.exec();
 
         governor.getUnprocessed();
@@ -351,6 +352,14 @@ contract GovernorTest is Test {
         governor.propose(0, address(asset), "buy!", encodedFunction); // 4
 
         governor.getUnprocessed();
+
+        // 1831943 | 1831858
+    }
+
+    function testDeployCost() public {
+        new Governor();
+
+        // 1031495 | 1026882
     }
 
     modifier proposalMade() {
