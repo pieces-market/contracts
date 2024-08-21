@@ -319,7 +319,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev CONSIDER MOVING ALL OF BELOW INTO SEPARATE CONTRACT, SO IT CAN BE DEPLOYED ONCE AND MANAGE ALL AUCTIONER CONTRACT VERSIONS
 
-    function checker() public view returns (bool canExec, bytes memory execPayload) {
+    function checker() external view returns (bool canExec, bytes memory execPayload) {
         //if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
 
         execPayload = abi.encodeWithSelector(this.exec.selector);
