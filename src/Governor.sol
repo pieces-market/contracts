@@ -82,36 +82,20 @@ contract Governor is Ownable, IGovernor {
         proposal.hasVoted[msg.sender] = true;
     }
 
-    /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
-    /// @notice Calls proper function from Auctioner contract
-    /// @param proposalId The id of the proposal
-    function execute(uint proposalId) internal {
-        ProposalCore storage proposal = s_proposals[proposalId];
+    function checker() external view returns (bool canExec, bytes memory execPayload) {
+        execPayload = abi.encodeWithSelector(this.exec.selector);
 
-        proposal.state = ProposalState.SUCCEEDED;
-        (bool success, ) = owner().call(proposal.encodedFunction);
-        if (!success) revert Governor__ExecuteFailed();
+        if (s_ongoingProposals.length > 0) {
+            ProposalCore storage proposal = s_proposals[s_ongoingProposals[0]];
+            if (proposal.voteEnd < block.timestamp) {
+                return (true, execPayload);
+            }
+        }
 
-        emit StateChange(proposalId, ProposalState.SUCCEEDED);
-    }
-
-    /// @dev THIS FUNCTION SHOULD BE INTERNAL AND CALLED BY AUTOMATION CONTRACT !!!!!!!!!!
-    /// @notice Cancels a proposal by changing it's state and calls 'reject()' function from Auctioner contract
-    /// @dev Emits StateChange event
-    /// @param proposalId The id of the proposal
-    function cancel(uint proposalId) internal {
-        ProposalCore storage proposal = s_proposals[proposalId];
-
-        proposal.state = ProposalState.FAILED;
-        /// @dev Consider adding return into rejectProposal -> to check if call failed or not
-        Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
-
-        emit StateChange(proposalId, ProposalState.FAILED);
+        return (false, execPayload);
     }
 
     function exec() external {
-        // Go thru all proposal's and check if time passed / votes in place -> cancel or execute as desired
-
         for (uint i; i < s_ongoingProposals.length; ) {
             uint id = s_ongoingProposals[i];
             ProposalCore storage proposal = s_proposals[id];
@@ -121,16 +105,25 @@ contract Governor is Ownable, IGovernor {
 
             if (proposal.voteEnd < block.timestamp) {
                 if (quorumR) {
-                    execute(id);
+                    proposal.state = ProposalState.SUCCEEDED;
+                    (bool success, ) = owner().call(proposal.encodedFunction);
+                    if (!success) revert Governor__ExecuteFailed();
+
+                    emit StateChange(id, ProposalState.SUCCEEDED);
                 } else {
-                    cancel(id);
+                    proposal.state = ProposalState.FAILED;
+                    /// @dev Consider adding return into rejectProposal -> to check if call failed or not
+                    Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
+
+                    emit StateChange(id, ProposalState.FAILED);
                 }
 
                 // Swap current element with the last one to remove it
                 s_ongoingProposals[i] = s_ongoingProposals[s_ongoingProposals.length - 1];
                 s_ongoingProposals.pop();
 
-                // Consider adding emit here
+                /// @dev Check if we indeed need this emit
+                emit ProcessProposal(id);
 
                 // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
                 continue;
