@@ -34,6 +34,10 @@ interface IGovernor {
     /// @param state The new state of the proposal
     event StateChange(uint indexed id, ProposalState indexed state);
 
+    /// @notice Emitted when proposal has been executed or cancelled and removed from ongoing proposals array
+    /// @param id The id of the proposal
+    event ProcessProposal(uint indexed id);
+
     /// @notice Allows users to cast a vote on a proposal
     /// @param proposalId The id of the proposal
     /// @param vote Type of vote (For, Against)
