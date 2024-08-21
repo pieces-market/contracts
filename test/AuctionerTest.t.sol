@@ -46,10 +46,10 @@ contract AuctionerTest is Test {
         auctioner.buy{value: 6 ether}(0, 3);
     }
 
-    function testDeployCost() public {
+    function testDeployAuctionerCost() public {
         new Auctioner(FOUNDATION, address(governor));
 
-        // 4673886 | 4707174 => 33088
+        // 4707128 | 4707128
     }
 
     function testCanCheck() public {

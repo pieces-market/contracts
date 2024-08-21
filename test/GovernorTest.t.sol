@@ -359,7 +359,7 @@ contract GovernorTest is Test {
     function testDeployCost() public {
         new Governor();
 
-        // 1031495 | 1026882
+        // 1025882 | x
     }
 
     modifier proposalMade() {
