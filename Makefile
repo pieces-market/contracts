@@ -87,8 +87,12 @@ endif
 deployAuctionerToSepolia:
 	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
 
+# RUN IN ORDER !!!
+deployGovernorToAleph:
+	@forge create Governor $(NETWORK_ARGS)
+
 deployAuctionerToAleph:
-	@forge create Auctioner $(NETWORK_ARGS)
+	@forge create Auctioner $(NETWORK_ARGS) --constructor-args $(FOUNDATION) $(GOVERNOR_ADDRESS)
 
 verifyAlephContract:
 	@forge verify-contract $(AUCTIONER_ADDRESS) Auctioner --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
