@@ -113,3 +113,4 @@
 
 -   **`Propose:`** Emitted when a new proposal is created
 -   **`StateChange:`** Emitted when the state of a proposal changes
+-   **`ProcessProposal:`** Emitted when proposal has been executed or cancelled and removed from ongoing proposals array
