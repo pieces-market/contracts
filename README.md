@@ -12,8 +12,8 @@ Fractionalized luxury RWA investments!
     -   **Auctioner:** To Be Deployed...
     -   **Governor:** To Be Deployed...
 -   **Sepolia:**
-    -   **Auctioner:** 0x068dbcC909D4A4Fd7924cAe962b16bfc9FF7606D
-    -   **Governor:** 0x03a445ee9B1d9C58c008C7610EA0583A188ddd51
+    -   **Auctioner:** 0x530Ec5617Db81acA931CE9B57a9CF2549f903Ef2
+    -   **Governor:** 0xb30Dfc59152b458036317d3c9848C4Ed21C39003
 
 ## 👷‍♂️ **To Implement**
 
