@@ -9,11 +9,6 @@ import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IAuctioner} from "./interfaces/IAuctioner.sol";
 import {IGovernor} from "./interfaces/IGovernor.sol";
 
-/// @dev Check IGovInt vs Governor import costs
-interface IGovInt {
-    function propose(uint id, address asset, string calldata description, bytes calldata encodedFunction) external;
-}
-
 /// @title Auction Contract
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
 /// @notice Allows users to buy pieces, buyout asset, claim revenues and refund
@@ -23,7 +18,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Consider adding fn to change this or if we leave it as immutable -> hardcode it in 'propose' function
     address private immutable s_foundation;
     Governor private immutable i_governor;
-    IGovInt private immutable i_gov;
 
     /// @dev CONSIDER CHANGING BELOW INTO MAPPING IF POSSIBLE !!!
     /// @dev Arrays
@@ -52,7 +46,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     constructor(address foundation, address governor) Ownable(msg.sender) {
         s_foundation = foundation;
         i_governor = Governor(governor);
-        i_gov = IGovInt(governor);
     }
 
     /// @notice Creates new auction, mints NFT connected to auctioned asset
