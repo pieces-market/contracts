@@ -6,6 +6,8 @@ import {Auctioner} from "../src/Auctioner.sol";
 import {Governor} from "../src/Governor.sol";
 
 contract DeployPiecesMarket is Script {
+    address private foundation = 0x7eAFE197018d6dfFeF84442Ef113A22A4a191CCD;
+
     function run() public {
         uint deployerKey = vm.envUint("PRIVATE_KEY");
 
@@ -14,7 +16,7 @@ contract DeployPiecesMarket is Script {
         console.log("Governor Deployed:", address(governor));
         console.log("Owner: ", governor.owner());
 
-        Auctioner auctioner = new Auctioner(address(0), address(governor));
+        Auctioner auctioner = new Auctioner(foundation, address(governor));
         console.log("Auctioner Deployed:", address(auctioner));
         console.log("Owner: ", auctioner.owner());
 
