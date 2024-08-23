@@ -73,6 +73,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
         if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
+        /// @dev MINIMAL DURATION - MIN SPAN CHECK
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
         if (auction.state != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
@@ -171,6 +172,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         bool success = i_governor.propose(id, auction.asset, description, encodedFunction);
         if (!success) revert Auctioner__FunctionCallFailed();
 
+        // Consider removing this emit -> depends on database
         emit Propose(id, msg.value, msg.sender);
     }
 
