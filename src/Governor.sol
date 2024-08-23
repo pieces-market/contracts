@@ -79,6 +79,8 @@ contract Governor is Ownable, IGovernor {
             proposal.againstVotes += votes;
         }
 
+        emit CastVote(proposalId, vote, votes);
+
         proposal.hasVoted[msg.sender] = true;
     }
 
