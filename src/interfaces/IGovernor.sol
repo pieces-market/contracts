@@ -29,14 +29,20 @@ interface IGovernor {
     /// @param description Function to be called on execution expressed in bytes
     event Propose(uint indexed id, uint indexed auctionId, address indexed asset, uint voteStart, uint voteEnd, string description);
 
+    /// @notice Emitted when proposal has been executed or cancelled and removed from ongoing proposals array
+    /// @param id The id of the proposal
+    event ProcessProposal(uint indexed id);
+
+    /// @notice Emitted when vote has been casted
+    /// @param id The id of the proposal
+    /// @param vote The type of vote cast
+    /// @param votes The number of votes cast
+    event CastVote(uint indexed id, VoteType indexed vote, uint indexed votes);
+
     /// @notice Emitted when the state of a proposal changes
     /// @param id The id of the proposal
     /// @param state The new state of the proposal
     event StateChange(uint indexed id, ProposalState indexed state);
-
-    /// @notice Emitted when proposal has been executed or cancelled and removed from ongoing proposals array
-    /// @param id The id of the proposal
-    event ProcessProposal(uint indexed id);
 
     /// @notice Allows users to cast a vote on a proposal
     /// @param proposalId The id of the proposal
