@@ -95,6 +95,12 @@ interface IAuctioner {
     /// @param offerer The address of the user requesting the withdrawal
     event Withdraw(uint256 indexed id, uint256 indexed amount, address indexed offerer);
 
+    /// @notice Emitted when a fulfill has been executed
+    /// @param id The id of the auction
+    /// @param amount The amount fulfill
+    /// @param fulfiller The address of the user performing the fulfill
+    event Fulfill(uint indexed id, uint indexed amount, address indexed fulfiller);
+
     /// @notice Emitted when revenue is claimed from an auction
     /// @param id The id of the auction
     /// @param amount The amount claimed
