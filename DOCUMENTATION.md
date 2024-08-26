@@ -68,6 +68,7 @@
 -   **`Descript:`** Emitted when voting passes for descript proposal
 -   **`Refund:`** Emitted when a refund has been executed
 -   **`Withdraw:`** Emitted when a withdraw has been executed
+-   **`Fulfill:`** Emitted when a fulfill has been executed
 -   **`Claim:`** Emitted when revenue is claimed from an auction
 -   **`TransferToBroker:`** Emitted when funds are transferred to the broker
 -   **`StateChange:`** Emitted when the state of an auction changes
