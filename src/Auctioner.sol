@@ -273,6 +273,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         auction.offer[address(0)] = msg.value;
         auction.state = AuctionState.FINISHED;
 
+        emit Fulfill(id, msg.value, msg.sender);
         emit StateChange(id, auction.state);
     }
 
