@@ -53,7 +53,10 @@ contract Governor is Ownable, IGovernor {
         proposal.encodedFunction = encodedFunction;
         proposal.state = ProposalState.ACTIVE;
 
-        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, description);
+        uint256 proposalType;
+        if (keccak256(encodedFunction) != keccak256(abi.encodeWithSignature("buyout(uint256)", auctionId))) proposalType = 1;
+
+        emit Propose(s_totalProposals, auctionId, asset, proposal.voteStart, proposal.voteEnd, description, proposalType);
         emit StateChange(s_totalProposals, ProposalState.ACTIVE);
 
         s_ongoingProposals.push(s_totalProposals);
