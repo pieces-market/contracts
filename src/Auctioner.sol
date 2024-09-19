@@ -290,6 +290,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         uint256 amount = (funds / supply) * tokens;
 
+        // CHANGE TO BATCH BURN FROM NEW ERC721A
         if (amount > 0) {
             Asset(auction.asset).batchBurn(msg.sender);
         } else {
