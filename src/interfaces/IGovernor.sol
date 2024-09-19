@@ -26,8 +26,9 @@ interface IGovernor {
     /// @param asset Address of the asset linked to the proposal
     /// @param voteStart The timestamp when the proposal voting starts
     /// @param voteEnd The timestamp when the proposal voting ends
-    /// @param description Function to be called on execution expressed in bytes
-    event Propose(uint indexed id, uint indexed auctionId, address indexed asset, uint voteStart, uint voteEnd, string description);
+    /// @param description Description of the proposal
+    /// @param proposalType Function to be called on execution expressed in bytes
+    event Propose(uint indexed id, uint indexed auctionId, address indexed asset, uint voteStart, uint voteEnd, string description, uint proposalType);
 
     /// @notice Emitted when proposal has been executed or cancelled and removed from ongoing proposals array
     /// @param id The id of the proposal
