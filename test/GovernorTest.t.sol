@@ -36,6 +36,7 @@ contract GovernorTest is Test {
 
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -66,10 +67,27 @@ contract GovernorTest is Test {
     function testCanMakeProposal() public proposalMade {
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 7 days, "buyout!");
+        emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.ACTIVE);
         governor.propose(0, address(asset), "buyout!", encodedFunction);
+
+        vm.prank(address(auctioner));
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.Propose(2, 0, address(asset), block.timestamp, block.timestamp + 1 days, "descript!", 1);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(2, IGovernor.ProposalState.ACTIVE);
+        governor.propose(0, address(asset), "descript!", encodedFn);
+
+        // AuctionId 1
+        encodedFunction = abi.encodeWithSignature("buyout(uint256)", 1);
+
+        vm.prank(address(auctioner));
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.Propose(3, 1, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(3, IGovernor.ProposalState.ACTIVE);
+        governor.propose(1, address(asset), "buyout!", encodedFunction);
     }
 
     function testBuyerCanVote() public proposalMade {
