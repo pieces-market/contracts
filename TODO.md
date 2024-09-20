@@ -1,9 +1,6 @@
 # Todo
 
-0. Search '- > call' for code to discuss on pieces call
-1. Write buyout function and connect it with Governor contract
-2. Consider Auctioner automation by Chainlink or RedStone?
-3. Implement fees on buy and buyout
+1. Consider refactor for 'Propose' events on Auctioner and Governor to keep ProposalType only in one of those and avoid duplication
 
 # Gas Calculation
 
