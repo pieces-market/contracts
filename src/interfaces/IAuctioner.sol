@@ -86,8 +86,8 @@ interface IAuctioner {
     /// @notice Emitted when a refund has been executed
     /// @param id The id of the auction
     /// @param amount The amount refunded
-    /// @param user The address of the user requesting the refund
-    event Refund(uint256 indexed id, uint256 indexed amount, address indexed user);
+    /// @param refunder The address of the user requesting the refund
+    event Refund(uint256 indexed id, uint256 indexed amount, address indexed refunder);
 
     /// @notice Emitted when a withdraw has been executed
     /// @param id The id of the auction
@@ -104,8 +104,8 @@ interface IAuctioner {
     /// @notice Emitted when revenue is claimed from an auction
     /// @param id The id of the auction
     /// @param amount The amount claimed
-    /// @param user The address of the user requesting the claim
-    event Claim(uint256 indexed id, uint256 indexed amount, address indexed user);
+    /// @param claimer The address of the user requesting the claim
+    event Claim(uint256 indexed id, uint256 indexed amount, address indexed claimer);
 
     /// @notice Emitted when all pieces has been sold and funds are transferred to the broker
     /// @param id The id of the auction
