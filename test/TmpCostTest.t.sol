@@ -32,7 +32,7 @@ contract TmpCostTest is Test {
         governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 100, block.timestamp, block.timestamp + 7 days, BROKER);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -47,7 +47,7 @@ contract TmpCostTest is Test {
         deal(BROKER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
-        deal(DEVIL, STARTING_BALANCE);
+        deal(DEVIL, 300 ether);
         deal(FOUNDATION, STARTING_BALANCE);
     }
 
@@ -176,7 +176,21 @@ contract TmpCostTest is Test {
         vm.prank(DEVIL);
         auctioner.refund(0);
 
-        // cost snapshot: 364_945
-        //                366_301
+        // cost snapshot: 365_782
+        //                307_446
+    }
+
+    function testBigRefund() external {
+        vm.prank(DEVIL);
+        // Crashes on 100++ pieces
+        auctioner.buy{value: 198 ether}(0, 99);
+
+        auctioner.stateHack(0, 4);
+
+        vm.prank(DEVIL);
+        auctioner.refund(0);
+
+        // cost snapshot: 3_957_735 * 7
+        //                1_194_936 * 7
     }
 }
