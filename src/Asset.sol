@@ -19,10 +19,14 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         baseURI = uri;
     }
 
-    /// @dev Consider rverriding tokenURI to keep 1 URI for all tokens
     /// @notice Leads to Metadata, which is unique for each token
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
+    }
+
+    /// @dev Prevents tokenURI from adding tokenId to URI as it should be the same for all tokens
+    function tokenURI(uint256 /*tokenId*/) public view virtual override(ERC721A, IERC721A) returns (string memory) {
+        return _baseURI();
     }
 
     /// @notice Returns total minted tokens amount ignoring performed burns
@@ -39,15 +43,18 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         _safeMint(to, quantity);
     }
 
-    /// @dev Very expensive function -> consider refactoring it
     /// @notice Burns all tokens owned by user
     /// @param owner Address of tokens owner
     function batchBurn(address owner) external onlyOwner {
         uint256[] memory tokenIds = this.tokensOfOwner(owner);
 
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            _burn(tokenIds[i]);
-        }
+        super._batchBurn(address(0), tokenIds);
+    }
+
+    /// @notice Safely transfers `tokenIds` in batch from `from` to `to`
+    function safeBatchTransferFrom(address from, address to, uint256[] memory tokenIds) external {
+        super._safeBatchTransferFrom(address(0), from, to, tokenIds, "");
+        // super._batchTransferFrom(from, to, tokenIds); -> consider using this one
     }
 
     /// @dev The following functions are overrides required by Solidity
