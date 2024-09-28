@@ -94,6 +94,10 @@ contract AuctionerTest is Test {
         auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
     }
 
+    function testCanFulfill() public {}
+
+    function testCanClaim() public {}
+
     function testCanCheck() public {
         vm.startPrank(OWNER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
