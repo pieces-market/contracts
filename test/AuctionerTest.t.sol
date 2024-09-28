@@ -15,7 +15,7 @@ contract AuctionerTest is Test {
     Asset private asset;
     Governor private governor;
 
-    uint256 private constant STARTING_BALANCE = 100 ether;
+    uint256 private constant STARTING_BALANCE = 500 ether;
 
     address private OWNER = makeAddr("owner");
     address private BROKER = makeAddr("broker");
@@ -50,6 +50,48 @@ contract AuctionerTest is Test {
         new Auctioner(FOUNDATION, address(governor));
 
         // 4707128 | 4707128
+    }
+
+    function testCanRefund() public auctionCreated auctionFailed {
+        vm.prank(USER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Refund(0, 8 ether, USER);
+        auctioner.refund(0);
+
+        vm.prank(DEVIL);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Refund(0, 10 ether, DEVIL);
+        auctioner.refund(0);
+
+        vm.prank(BUYER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Refund(0, 2 ether, BUYER);
+        auctioner.refund(0);
+    }
+
+    function testCanBuyout() public auctionCreated auctionClosed {
+        console.log("Auctioner: ", address(auctioner));
+        console.log("Governor Owner: ", governor.owner());
+
+        vm.prank(OWNER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Propose(0, 210 ether, OWNER);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+    }
+
+    function testCanWithdraw() public {}
+
+    function testCantDescriptIfNotFoundation() public auctionCreated auctionClosed {
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
+        auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
+    }
+
+    function testCanDescript() public auctionCreated auctionClosed {
+        vm.prank(FOUNDATION);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Propose(0, 0, FOUNDATION);
+        auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
     }
 
     function testCanCheck() public {
@@ -112,18 +154,52 @@ contract AuctionerTest is Test {
     }
 
     modifier auctionCreated() {
-        vm.startPrank(OWNER);
-        auctioner = new Auctioner(FOUNDATION, address(governor));
-
+        vm.prank(OWNER);
         vm.recordLogs();
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
-        vm.stopPrank();
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         address createdAsset = address(uint160(uint256(entries[1].topics[2])));
         asset = Asset(createdAsset);
 
         console.log("Asset: ", address(asset));
+
+        _;
+    }
+
+    modifier auctionFailed() {
+        vm.prank(USER);
+        auctioner.buy{value: 8 ether}(0, 4);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 10 ether}(0, 5);
+
+        vm.prank(BUYER);
+        auctioner.buy{value: 2 ether}(0, 1);
+
+        vm.warp(block.timestamp + 7 days + 1);
+        (bool upkeep, ) = auctioner.checker();
+        if (upkeep) auctioner.exec();
+
+        _;
+    }
+
+    modifier auctionClosed() {
+        vm.prank(USER);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(BUYER);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(FOUNDATION);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.warp(block.timestamp + 7 days + 1);
+        (bool upkeep, ) = auctioner.checker();
+        if (upkeep) auctioner.exec();
 
         _;
     }
