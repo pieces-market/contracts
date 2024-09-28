@@ -25,7 +25,9 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     }
 
     /// @dev Prevents tokenURI from adding tokenId to URI as it should be the same for all tokens
-    function tokenURI(uint256 /*tokenId*/) public view virtual override(ERC721A, IERC721A) returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override(ERC721A, IERC721A) returns (string memory) {
+        if (!_exists(tokenId)) _revert(URIQueryForNonexistentToken.selector);
+
         return _baseURI();
     }
 
