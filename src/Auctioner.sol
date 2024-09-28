@@ -321,7 +321,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         execPayload = abi.encodeWithSelector(this.exec.selector);
 
-        /// @dev Consider below additional loop here, so we will have 100% confirm that there is something to execute but it is a bit more expensive
+        /// @dev Consider below additional loop here, so we have 100% confirm that there is something to execute but it is a bit more expensive
         /// @dev We could implement whole logic and checks here to call fn responsible for updating state and removing id from array like exec(uint id)
         if (s_ongoingAuctions.length > 0) {
             for (uint i; i < s_ongoingAuctions.length; i++) {
