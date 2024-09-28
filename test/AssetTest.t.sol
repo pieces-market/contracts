@@ -55,6 +55,23 @@ contract AssetTest is Test {
         deal(FOUNDATION, STARTING_BALANCE);
     }
 
+    function testCountsTotalMintedTokensAndAssignsCorrectURI() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 8 ether}(0, 4);
+
+        uint totalMinted = asset.totalMinted();
+        assertEq(totalMinted, 7);
+
+        string memory userTokenURI = asset.tokenURI(2);
+        string memory devTokenURI = asset.tokenURI(5);
+
+        assertEq(userTokenURI, "https:");
+        assertEq(devTokenURI, "https:");
+    }
+
     function testCanReceiveVotingPower() public {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
