@@ -94,9 +94,49 @@ contract AuctionerTest is Test {
         auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
     }
 
-    function testCanFulfill() public {}
+    function testCanFulfill() public auctionCreated auctionClosed {
+        deal(address(0), 205 ether);
 
-    function testCanClaim() public {}
+        vm.prank(address(0));
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        auctioner.fulfill{value: 199 ether}(0);
+
+        vm.prank(address(0));
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Fulfill(0, 200 ether, address(0));
+        auctioner.fulfill{value: 200 ether}(0);
+    }
+
+    function testCanClaim() public auctionCreated auctionClosed {
+        deal(address(0), 205 ether);
+
+        vm.prank(address(0));
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.FINISHED);
+        auctioner.fulfill{value: 200 ether}(0);
+
+        vm.prank(USER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Claim(0, 50 ether, USER);
+        auctioner.claim(0);
+
+        vm.prank(DEVIL);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Claim(0, 50 ether, DEVIL);
+        auctioner.claim(0);
+
+        vm.prank(BUYER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Claim(0, 50 ether, BUYER);
+        auctioner.claim(0);
+
+        vm.prank(FOUNDATION);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Claim(0, 50 ether, FOUNDATION);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.ARCHIVED);
+        auctioner.claim(0);
+    }
 
     function testCanCheck() public {
         vm.startPrank(OWNER);
