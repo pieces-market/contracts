@@ -268,6 +268,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.sender != address(0)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
+        if (msg.value < (Asset(auction.asset).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
 
         auction.offerer = address(0);
         auction.offer[address(0)] = msg.value;
@@ -306,7 +307,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (Asset(auction.asset).totalSupply() == 0) {
             auction.state = AuctionState.ARCHIVED;
 
-            emit StateChange(s_totalAuctions, auction.state);
+            emit StateChange(id, auction.state);
         }
     }
 
