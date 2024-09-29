@@ -9,6 +9,7 @@ import {Asset} from "../src/Asset.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
+import {IGovernor} from "../src/interfaces/IGovernor.sol";
 
 contract AuctionerTest is Test {
     Auctioner private auctioner;
@@ -70,16 +71,35 @@ contract AuctionerTest is Test {
     }
 
     function testCanBuyout() public auctionCreated auctionClosed {
-        console.log("Auctioner: ", address(auctioner));
-        console.log("Governor Owner: ", governor.owner());
-
         vm.prank(OWNER);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Propose(0, 210 ether, OWNER);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
     }
 
-    function testCanWithdraw() public {}
+    function testCanWithdraw() public auctionCreated auctionClosed {
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ProposalInProgress.selector);
+        auctioner.withdraw(0);
+
+        vm.prank(OWNER);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        uint[] memory lam = governor.getUnprocessed();
+        console.log("LAAAAAAM", lam[0]);
+
+        vm.warp(block.timestamp + 1 days + 1);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(0, IGovernor.ProposalState.FAILED);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.ProcessProposal(0);
+        governor.exec();
+
+        vm.prank(OWNER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Withdraw(0, 210 ether, OWNER);
+        auctioner.withdraw(0);
+    }
 
     function testCantDescriptIfNotFoundation() public auctionCreated auctionClosed {
         vm.prank(OWNER);
