@@ -159,11 +159,10 @@ contract AssetTest is Test {
         assertEq(currentClock, currentTimestamp);
         assertEq(asset.CLOCK_MODE(), "mode=timestamp&from=default");
 
-        // CorruptedClock corrClock = new CorruptedClock();
+        CorruptedClock corrClock = new CorruptedClock();
 
-        // vm.expectRevert(Votes.ERC6372InconsistentClock.selector);
-        // vm.mockFunction(address(asset), address(corrClock), abi.encodeWithSelector(asset.clock.selector));
-        vm.mockCall(address(this), abi.encodeWithSelector(asset.clock.selector), abi.encode(block.timestamp + 100));
+        vm.expectRevert(Votes.ERC6372InconsistentClock.selector);
+        vm.mockFunction(address(corrClock), address(asset), abi.encodeWithSelector(asset.CLOCK_MODE.selector));
         asset.CLOCK_MODE();
 
         // Step 3: Test the normal behavior when the clock is consistent
