@@ -9,4 +9,11 @@ contract CorruptedClock {
     function clock() public view returns (uint48) {
         return Time.timestamp() + 100;
     }
+
+    function CLOCK_MODE() public view returns (string memory) {
+        // Check that the clock was not modified
+        if (clock() != Time.timestamp()) revert Votes.ERC6372InconsistentClock();
+
+        return "mode=timestamp&from=default";
+    }
 }
