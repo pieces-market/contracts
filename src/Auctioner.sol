@@ -73,7 +73,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
             revert Auctioner__ZeroValueNotAllowed();
-        if (start < block.timestamp || start > span * 1 days || span < 1) revert Auctioner__IncorrectTimestamp();
+        if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
 
         /// @notice Creating new NFT (asset)
@@ -108,14 +108,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
-        //if (pieces < 1) revert Auctioner__ZeroValueNotAllowed(); -> MintZeroQuantity error from minter
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
         /// @dev Implement fee's
         if ((Asset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
-
-        uint256 cost = auction.price * pieces;
-
-        if (msg.value != cost) revert Auctioner__IncorrectFundsTransfer();
+        if (msg.value != auction.price * pieces) revert Auctioner__IncorrectFundsTransfer();
 
         auction.pieces -= pieces;
 
