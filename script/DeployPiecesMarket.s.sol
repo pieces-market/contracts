@@ -6,9 +6,9 @@ import {Auctioner} from "../src/Auctioner.sol";
 import {Governor} from "../src/Governor.sol";
 
 contract DeployPiecesMarket is Script {
-    address private foundation = 0x7eAFE197018d6dfFeF84442Ef113A22A4a191CCD;
+    address private foundation = vm.addr(vm.envUint("FOUNDATION_KEY"));
 
-    function run() public {
+    function run() external returns (Auctioner, Governor) {
         uint deployerKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerKey);
@@ -23,5 +23,7 @@ contract DeployPiecesMarket is Script {
         governor.transferOwnership(address(auctioner));
         console.log("Governor New Owner:", address(auctioner));
         vm.stopBroadcast();
+
+        return (auctioner, governor);
     }
 }
