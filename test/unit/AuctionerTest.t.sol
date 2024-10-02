@@ -39,15 +39,64 @@ contract AuctionerTest is Test {
         deal(FOUNDATION, STARTING_BALANCE);
     }
 
+    function testCantCreateAuctionIfNotOwnerOrIfPassingIncorrectParameters() public {
+        vm.prank(DEVIL);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
+        auctioner.create("Asset", "AST", "https:", 0, 100, 25, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 0, 25, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 0, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
+        auctioner.create("", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
+        auctioner.create("Asset", "", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
+        auctioner.create("Asset", "AST", "", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, 0, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp + 8 days, 7, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 0, BROKER);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__ZeroAddressNotAllowed.selector);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, address(0));
+    }
+
+    function testCanCreateAuctionAndEmitCreate() public {
+        vm.prank(OWNER);
+        vm.expectEmit(false, false, false, false, address(auctioner));
+        emit IAuctioner.Create(0, address(asset), 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.OPENED);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+    }
+
     function testCanBuyPieces() public auctionCreated {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
-    }
-
-    function testDeployAuctionerCost() public {
-        new Auctioner(FOUNDATION, address(governor));
-
-        // 4707128 | 4707128
     }
 
     function testCanRefund() public auctionCreated auctionFailed {
