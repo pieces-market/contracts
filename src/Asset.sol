@@ -94,6 +94,6 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         // Check that the clock was not modified
         if (clock() != Time.timestamp()) revert ERC6372InconsistentClock();
 
-        return "mode=timestamp&from=default";
+        return "mode=timestamp";
     }
 }
