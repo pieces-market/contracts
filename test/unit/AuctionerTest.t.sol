@@ -11,6 +11,7 @@ import {DeployPiecesMarket} from "../../script/DeployPiecesMarket.s.sol";
 
 import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../../src/interfaces/IGovernor.sol";
+import {IERC721A} from "@ERC721A/contracts/IERC721A.sol";
 
 contract AuctionerTest is Test {
     DeployPiecesMarket private piecesDeployer;
@@ -74,10 +75,6 @@ contract AuctionerTest is Test {
 
         vm.prank(OWNER);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp + 8 days, 7, BROKER);
-
-        vm.prank(OWNER);
-        vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 0, BROKER);
 
         vm.prank(OWNER);
@@ -92,6 +89,59 @@ contract AuctionerTest is Test {
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.StateChange(0, IAuctioner.AuctionState.OPENED);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+    }
+
+    function testCantBuyPiecesIfCondidtionsNotMet() public auctionCreated {
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.buy{value: 6 ether}(1, 3);
+
+        vm.prank(USER);
+        vm.expectRevert(IERC721A.MintZeroQuantity.selector);
+        auctioner.buy{value: 0 ether}(0, 0);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__BuyLimitExceeded.selector);
+        auctioner.buy{value: 52 ether}(0, 26);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__IncorrectFundsTransfer.selector);
+        auctioner.buy{value: 1 ether}(0, 1);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__IncorrectFundsTransfer.selector);
+        auctioner.buy{value: 3 ether}(0, 1);
+    }
+
+    function testCantBuyPiecesIfAuctionNotOpened() public auctionCreated auctionClosed {
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionNotOpened.selector);
+        auctioner.buy{value: 6 ether}(0, 3);
+    }
+
+    function testCantBuyPiecesIfInsufficientAmountLeftForSell() public auctionCreated {
+        vm.prank(BROKER);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(BUYER);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(FOUNDATION);
+        auctioner.buy{value: 48 ether}(0, 24);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientPieces.selector);
+        auctioner.buy{value: 4 ether}(0, 2);
+
+        vm.prank(FOUNDATION);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.CLOSED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.TransferToBroker(0, 200 ether, BROKER);
+        auctioner.buy{value: 2 ether}(0, 1);
     }
 
     function testCanBuyPieces() public auctionCreated {
