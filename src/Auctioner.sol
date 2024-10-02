@@ -71,11 +71,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         address recipient
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
-        if (price == 0 || pieces == 0 || max == 0) revert Auctioner__ZeroValueNotAllowed();
-        if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
-        /// @dev MINIMAL DURATION - MIN SPAN CHECK
+        if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
+            revert Auctioner__ZeroValueNotAllowed();
+        if (start < block.timestamp || start > span * 1 days || span < 1) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
-        if (auction.state != AuctionState.UNINITIALIZED) revert Auctioner__AuctionAlreadyInitialized();
 
         /// @notice Creating new NFT (asset)
         Asset asset = new Asset(name, symbol, uri, address(this));
@@ -419,17 +418,16 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 5) revert Auctioner__InsufficientPieces();
         if (errorType == 6) revert Auctioner__InsufficientFunds();
         if (errorType == 7) revert Auctioner__TransferFailed();
-        if (errorType == 8) revert Auctioner__AuctionAlreadyInitialized();
-        if (errorType == 9) revert Auctioner__ZeroValueNotAllowed();
-        if (errorType == 10) revert Auctioner__IncorrectTimestamp();
-        if (errorType == 11) revert Auctioner__ZeroAddressNotAllowed();
-        if (errorType == 12) revert Auctioner__Overpayment();
-        if (errorType == 13) revert Auctioner__BuyLimitExceeded();
-        if (errorType == 14) revert Auctioner__FunctionCallFailed();
-        if (errorType == 15) revert Auctioner__ProposalInProgress();
-        if (errorType == 16) revert Auctioner__InvalidProposalType();
-        if (errorType == 17) revert Auctioner__IncorrectFundsTransfer();
-        if (errorType == 18) revert Auctioner__UpkeepNotNeeded();
+        if (errorType == 8) revert Auctioner__ZeroValueNotAllowed();
+        if (errorType == 9) revert Auctioner__IncorrectTimestamp();
+        if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
+        if (errorType == 11) revert Auctioner__Overpayment();
+        if (errorType == 12) revert Auctioner__BuyLimitExceeded();
+        if (errorType == 13) revert Auctioner__FunctionCallFailed();
+        if (errorType == 14) revert Auctioner__ProposalInProgress();
+        if (errorType == 15) revert Auctioner__InvalidProposalType();
+        if (errorType == 16) revert Auctioner__IncorrectFundsTransfer();
+        if (errorType == 17) revert Auctioner__UpkeepNotNeeded();
     }
 
     /// @dev HELPER DEV ONLY
