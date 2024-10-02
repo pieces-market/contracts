@@ -146,6 +146,8 @@ contract AuctionerTest is Test {
 
     function testCanBuyPieces() public auctionCreated {
         vm.prank(USER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Purchase(0, 3, USER);
         auctioner.buy{value: 6 ether}(0, 3);
     }
 
