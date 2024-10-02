@@ -7,32 +7,29 @@ import {Auctioner} from "../../src/Auctioner.sol";
 import {Governor} from "../../src/Governor.sol";
 import {Asset} from "../../src/Asset.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {DeployPiecesMarket} from "../../script/DeployPiecesMarket.s.sol";
 
 import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../../src/interfaces/IGovernor.sol";
 
 contract AuctionerTest is Test {
+    DeployPiecesMarket private piecesDeployer;
     Auctioner private auctioner;
     Asset private asset;
     Governor private governor;
 
     uint256 private constant STARTING_BALANCE = 500 ether;
 
-    address private OWNER = makeAddr("owner");
+    address private OWNER = vm.addr(vm.envUint("PRIVATE_KEY"));
+    address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
     address private BROKER = makeAddr("broker");
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
-    address private FOUNDATION = makeAddr("foundation");
 
     function setUp() public {
-        vm.startPrank(OWNER);
-        governor = new Governor();
-        auctioner = new Auctioner(FOUNDATION, address(governor));
-        governor.transferOwnership(address(auctioner));
-        vm.stopPrank();
-
-        console.log("Auctioner: ", address(auctioner));
+        piecesDeployer = new DeployPiecesMarket();
+        (auctioner, governor) = piecesDeployer.run();
 
         deal(OWNER, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
