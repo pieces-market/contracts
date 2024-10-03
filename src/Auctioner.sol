@@ -151,6 +151,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             if (msg.value < (Asset(auction.asset).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
 
             auction.buyoutProposalActive = true;
+            auction.withdrawAllowed[msg.sender] = false;
             auction.offerer = msg.sender;
             auction.offer[msg.sender] += msg.value;
             encodedFunction = abi.encodeWithSignature("buyout(uint256)", id);
