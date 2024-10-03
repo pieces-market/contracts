@@ -141,7 +141,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (id >= s_totalAuctions) revert Auctioner__AuctionDoesNotExist();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
-        /// @dev BELOW ERROR IS USELESS AS WE ARE UNABLE TO PASS OUT OF SCOPE INDEX FOR TYPE
+        /// @dev BELOW ERROR IS POINTLESS AS WE ARE UNABLE TO PASS OUT OF SCOPE INDEX FOR TYPE
         // if (uint(proposal) > 1) revert Auctioner__InvalidProposalType();
 
         bytes memory encodedFunction;
