@@ -6,6 +6,9 @@ import {Auctioner} from "../src/Auctioner.sol";
 import {Governor} from "../src/Governor.sol";
 
 contract MakeContractsAlive is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
     Auctioner auctioner = Auctioner(0x530Ec5617Db81acA931CE9B57a9CF2549f903Ef2);
     Governor governor = Governor(0xb30Dfc59152b458036317d3c9848C4Ed21C39003);
 
