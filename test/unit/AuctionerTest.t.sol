@@ -224,13 +224,6 @@ contract AuctionerTest is Test {
         auctioner.propose(0, "Description", IAuctioner.ProposalType.DESCRIPT);
     }
 
-    function testCanBuyout() public auctionCreated auctionClosed {
-        vm.prank(OWNER);
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Propose(0, 210 ether, OWNER);
-        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
-    }
-
     function testCantDescriptIfNotFoundationOrNoDescriptionOrAnyTransferValue() public auctionCreated auctionClosed {
         vm.prank(OWNER);
         vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
@@ -274,31 +267,145 @@ contract AuctionerTest is Test {
         corruptedAuctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
     }
 
+    function testCantExecuteBuyoutDescriptOrRejectIfNotGovernor() public auctionCreated {
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
+        auctioner.buyout(0);
+
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
+        auctioner.descript(0, "Description");
+
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
+        auctioner.reject(0, bytes(""));
+    }
+
+    function testCanBuyout() public auctionCreated auctionClosed {
+        vm.prank(BROKER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Propose(0, 210 ether, BROKER);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType(0));
+
+        vm.prank(BUYER);
+        governor.castVote(0, IGovernor.VoteType(0));
+
+        vm.warp(block.timestamp + 1 days);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Buyout(0, 210 ether, BROKER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.FINISHED);
+        governor.exec();
+    }
+
     function testCanDescript() public auctionCreated auctionClosed {
         vm.prank(FOUNDATION);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Propose(0, 0, FOUNDATION);
         auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType(0));
+
+        vm.prank(BUYER);
+        governor.castVote(0, IGovernor.VoteType(0));
+
+        vm.warp(block.timestamp + 1 days);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Descript(0, "I propose to pass dark forest kingom to Astaroth");
+        governor.exec();
     }
 
-    // buyout
-    // descript
-    // reject
+    function testCanRejectBuyout() public auctionCreated auctionClosed {
+        vm.prank(BROKER);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+
+        vm.warp(block.timestamp + 1 days);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Reject(0);
+        governor.exec();
+    }
+
+    function testCanRejectDescript() public auctionCreated auctionClosed {
+        vm.prank(FOUNDATION);
+        auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+
+        vm.warp(block.timestamp + 1 days);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Reject(0);
+        governor.exec();
+    }
 
     ///////////////////////////////////////////////////////
     //              Withdraw Function Tests              //
     ///////////////////////////////////////////////////////
 
-    function testCanWithdraw() public auctionCreated auctionClosed {
+    function testCantWithdrawForNonExistentAuction() public auctionCreated auctionClosed {
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.withdraw(6);
+
         vm.prank(OWNER);
         vm.expectRevert(IAuctioner.Auctioner__ProposalInProgress.selector);
         auctioner.withdraw(0);
+    }
 
+    function testCantWithdrawZeroAmount() public auctionCreated auctionClosed {
         vm.prank(OWNER);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
-        uint[] memory lam = governor.getUnprocessed();
-        console.log("LAAAAAAM", lam[0]);
+        vm.warp(block.timestamp + 1 days + 1);
+        governor.exec();
+
+        vm.prank(OWNER);
+        auctioner.withdraw(0);
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        auctioner.withdraw(0);
+    }
+
+    function testWithdrawTransferFail() public auctionCreated auctionClosed {
+        InvalidRecipient invalidWithdrawer = new InvalidRecipient();
+        deal(address(invalidWithdrawer), 300 ether);
+
+        vm.prank(address(invalidWithdrawer));
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.warp(block.timestamp + 1 days + 1);
+        governor.exec();
+
+        vm.prank(address(invalidWithdrawer));
+        vm.expectRevert(IAuctioner.Auctioner__TransferFailed.selector);
+        auctioner.withdraw(0);
+    }
+
+    function testCanWithdraw() public auctionCreated auctionClosed {
+        vm.prank(OWNER);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
         vm.warp(block.timestamp + 1 days + 1);
         vm.expectEmit(true, true, true, true, address(governor));
