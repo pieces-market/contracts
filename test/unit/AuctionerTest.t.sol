@@ -184,7 +184,7 @@ contract AuctionerTest is Test {
     //              Propose Function Tests              //
     //////////////////////////////////////////////////////
 
-    function testCantProposeWhenAuctonNotClosed() public auctionCreated {
+    function testCantProposeWhenAuctionNotClosed() public auctionCreated {
         vm.prank(DEVIL);
         vm.expectRevert(IAuctioner.Auctioner__AuctionNotClosed.selector);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
@@ -194,7 +194,7 @@ contract AuctionerTest is Test {
         auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
     }
 
-    function testCantProposeIfCondidtionsNotMet() public auctionCreated auctionClosed {
+    function testCantProposeForNonExistentAuctionIndex() public auctionCreated auctionClosed {
         vm.prank(DEVIL);
         vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
         auctioner.propose{value: 210 ether}(1, "", IAuctioner.ProposalType.BUYOUT);
@@ -204,6 +204,26 @@ contract AuctionerTest is Test {
         auctioner.propose(1, "", IAuctioner.ProposalType.DESCRIPT);
     }
 
+    function testCantProposeIfOfferTooLowOrProposalAlreadyExist() public auctionCreated auctionClosed {
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        auctioner.propose{value: 150 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.prank(OWNER);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__ProposalInProgress.selector);
+        auctioner.propose{value: 230 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.prank(FOUNDATION);
+        auctioner.propose(0, "Description", IAuctioner.ProposalType.DESCRIPT);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__ProposalInProgress.selector);
+        auctioner.propose(0, "Description", IAuctioner.ProposalType.DESCRIPT);
+    }
+
     function testCanBuyout() public auctionCreated auctionClosed {
         vm.prank(OWNER);
         vm.expectEmit(true, true, true, true, address(auctioner));
@@ -211,10 +231,47 @@ contract AuctionerTest is Test {
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
     }
 
-    function testCantDescriptIfNotFoundation() public auctionCreated auctionClosed {
+    function testCantDescriptIfNotFoundationOrNoDescriptionOrAnyTransferValue() public auctionCreated auctionClosed {
         vm.prank(OWNER);
         vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
         auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__Overpayment.selector);
+        auctioner.propose{value: 1 ether}(0, "", IAuctioner.ProposalType.DESCRIPT);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__IncorrectDescriptionSize.selector);
+        auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
+    }
+
+    function testFunctionCallFailWhenProposing() public {
+        vm.startPrank(OWNER);
+        InvalidRecipient newGovernor = new InvalidRecipient();
+        Auctioner corruptedAuctioner = new Auctioner(FOUNDATION, address(newGovernor));
+        newGovernor.transferOwnership(address(corruptedAuctioner));
+        corruptedAuctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
+        vm.stopPrank();
+
+        vm.prank(USER);
+        corruptedAuctioner.buy{value: 50 ether}(0, 25);
+        vm.prank(DEVIL);
+        corruptedAuctioner.buy{value: 50 ether}(0, 25);
+        vm.prank(BUYER);
+        corruptedAuctioner.buy{value: 50 ether}(0, 25);
+        vm.prank(FOUNDATION);
+        corruptedAuctioner.buy{value: 50 ether}(0, 25);
+        vm.warp(block.timestamp + 7 days + 1);
+        (bool upkeep, ) = auctioner.checker();
+        if (upkeep) corruptedAuctioner.exec();
+
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__FunctionCallFailed.selector);
+        corruptedAuctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__FunctionCallFailed.selector);
+        corruptedAuctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
     }
 
     function testCanDescript() public auctionCreated auctionClosed {
@@ -419,7 +476,7 @@ contract AuctionerTest is Test {
         _;
     }
 
-    modifier auctionClosed()  {
+    modifier auctionClosed() {
         vm.prank(USER);
         auctioner.buy{value: 50 ether}(0, 25);
 
