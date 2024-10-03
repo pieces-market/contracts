@@ -8,6 +8,7 @@ import {Governor} from "../../src/Governor.sol";
 import {Asset} from "../../src/Asset.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {DeployPiecesMarket} from "../../script/DeployPiecesMarket.s.sol";
+import {InvalidRecipient} from "../mocks/InvalidRecipient.sol";
 
 import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../../src/interfaces/IGovernor.sol";
@@ -39,6 +40,10 @@ contract AuctionerTest is Test {
         deal(DEVIL, STARTING_BALANCE);
         deal(FOUNDATION, STARTING_BALANCE);
     }
+
+    /////////////////////////////////////////////////////
+    //              Create Function Tests              //
+    /////////////////////////////////////////////////////
 
     function testCantCreateAuctionIfNotOwnerOrIfPassingIncorrectParameters() public {
         vm.prank(DEVIL);
@@ -90,6 +95,10 @@ contract AuctionerTest is Test {
         emit IAuctioner.StateChange(0, IAuctioner.AuctionState.OPENED);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, BROKER);
     }
+
+    //////////////////////////////////////////////////
+    //              Buy Function Tests              //
+    //////////////////////////////////////////////////
 
     function testCantBuyPiecesIfCondidtionsNotMet() public auctionCreated {
         vm.prank(USER);
@@ -151,21 +160,48 @@ contract AuctionerTest is Test {
         auctioner.buy{value: 6 ether}(0, 3);
     }
 
-    function testCanRefund() public auctionCreated auctionFailed {
-        vm.prank(USER);
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Refund(0, 8 ether, USER);
-        auctioner.refund(0);
+    function testBuyPiecesTransferFail() public {
+        InvalidRecipient recipient = new InvalidRecipient();
+
+        vm.prank(OWNER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 7, address(recipient));
+
+        vm.prank(BROKER);
+        auctioner.buy{value: 50 ether}(0, 25);
 
         vm.prank(DEVIL);
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Refund(0, 10 ether, DEVIL);
-        auctioner.refund(0);
+        auctioner.buy{value: 50 ether}(0, 25);
 
         vm.prank(BUYER);
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Refund(0, 2 ether, BUYER);
-        auctioner.refund(0);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__TransferFailed.selector);
+        auctioner.buy{value: 50 ether}(0, 25);
+    }
+
+    //////////////////////////////////////////////////////
+    //              Propose Function Tests              //
+    //////////////////////////////////////////////////////
+
+    function testCantProposeWhenAuctonNotClosed() public auctionCreated {
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionNotClosed.selector);
+        auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionNotClosed.selector);
+        auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
+    }
+
+    function testCantProposeIfCondidtionsNotMet() public auctionCreated auctionClosed {
+        vm.prank(DEVIL);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.propose{value: 210 ether}(1, "", IAuctioner.ProposalType.BUYOUT);
+
+        vm.prank(FOUNDATION);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.propose(1, "", IAuctioner.ProposalType.DESCRIPT);
     }
 
     function testCanBuyout() public auctionCreated auctionClosed {
@@ -174,6 +210,27 @@ contract AuctionerTest is Test {
         emit IAuctioner.Propose(0, 210 ether, OWNER);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
     }
+
+    function testCantDescriptIfNotFoundation() public auctionCreated auctionClosed {
+        vm.prank(OWNER);
+        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
+        auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
+    }
+
+    function testCanDescript() public auctionCreated auctionClosed {
+        vm.prank(FOUNDATION);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Propose(0, 0, FOUNDATION);
+        auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
+    }
+
+    // buyout
+    // descript
+    // reject
+
+    ///////////////////////////////////////////////////////
+    //              Withdraw Function Tests              //
+    ///////////////////////////////////////////////////////
 
     function testCanWithdraw() public auctionCreated auctionClosed {
         vm.prank(OWNER);
@@ -199,18 +256,30 @@ contract AuctionerTest is Test {
         auctioner.withdraw(0);
     }
 
-    function testCantDescriptIfNotFoundation() public auctionCreated auctionClosed {
-        vm.prank(OWNER);
-        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
-        auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
+    /////////////////////////////////////////////////////
+    //              Refund Function Tests              //
+    /////////////////////////////////////////////////////
+
+    function testCanRefund() public auctionCreated auctionFailed {
+        vm.prank(USER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Refund(0, 8 ether, USER);
+        auctioner.refund(0);
+
+        vm.prank(DEVIL);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Refund(0, 10 ether, DEVIL);
+        auctioner.refund(0);
+
+        vm.prank(BUYER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Refund(0, 2 ether, BUYER);
+        auctioner.refund(0);
     }
 
-    function testCanDescript() public auctionCreated auctionClosed {
-        vm.prank(FOUNDATION);
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Propose(0, 0, FOUNDATION);
-        auctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
-    }
+    //////////////////////////////////////////////////////
+    //              Fulfill Function Tests              //
+    //////////////////////////////////////////////////////
 
     function testCanFulfill() public auctionCreated auctionClosed {
         deal(address(0), 205 ether);
@@ -224,6 +293,10 @@ contract AuctionerTest is Test {
         emit IAuctioner.Fulfill(0, 200 ether, address(0));
         auctioner.fulfill{value: 200 ether}(0);
     }
+
+    ////////////////////////////////////////////////////
+    //              Claim Function Tests              //
+    ////////////////////////////////////////////////////
 
     function testCanClaim() public auctionCreated auctionClosed {
         deal(address(0), 205 ether);
@@ -346,7 +419,7 @@ contract AuctionerTest is Test {
         _;
     }
 
-    modifier auctionClosed() {
+    modifier auctionClosed()  {
         vm.prank(USER);
         auctioner.buy{value: 50 ether}(0, 25);
 
