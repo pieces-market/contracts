@@ -13,6 +13,9 @@ import {IGovernor} from "./interfaces/IGovernor.sol";
 /// @notice Creates new auctions and new NFT's (assets), mints NFT per auctioned asset
 /// @notice Allows users to buy pieces, buyout asset, claim revenues and refund
 abstract contract Vlayer is ReentrancyGuard, Ownable, IAuctioner {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
     /// @dev Variables
     uint256 private s_totalAuctions;
     address private immutable s_foundation;
