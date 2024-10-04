@@ -247,7 +247,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         }
 
         (bool success, ) = msg.sender.call{value: amount}("");
-        /// @dev IF THIS REVERT WILL TAKE PLACE CHECK IF TOKENS WERE NOT BURNT
         if (!success) revert Auctioner__TransferFailed();
 
         emit Refund(id, amount, msg.sender);
@@ -282,12 +281,11 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         uint256 funds = auction.offer[auction.offerer];
         uint256 supply = Asset(auction.asset).totalMinted();
-        if (supply == 0) revert Auctioner__ZeroValueNotAllowed();
         uint256 tokens = Asset(auction.asset).balanceOf(msg.sender);
 
+        /// @dev Supply will not be 0 here ever as to get auction finished there will be always some supply (totalMinted() from asset)
         uint256 amount = (funds / supply) * tokens;
 
-        // CHANGE TO BATCH BURN FROM NEW ERC721A
         if (amount > 0) {
             Asset(auction.asset).batchBurn(msg.sender);
         } else {
@@ -295,7 +293,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         }
 
         (bool success, ) = msg.sender.call{value: amount}("");
-        /// @dev IF THIS REVERT WILL TAKE PLACE CHECK IF TOKENS WERE NOT BURNT
         if (!success) revert Auctioner__TransferFailed();
 
         emit Claim(id, amount, msg.sender);
