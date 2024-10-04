@@ -3,7 +3,7 @@ pragma solidity ^0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
-import {AuctionerDev} from "../../src/AuctionerDev.sol";
+import {AuctionerDev} from "../../src/helpers/AuctionerDev.sol";
 import {Asset} from "../../src/Asset.sol";
 import {Governor} from "../../src/Governor.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
