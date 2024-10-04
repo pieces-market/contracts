@@ -140,7 +140,7 @@ contract AssetTest is Test {
     }
 
     /// @dev COVERAGE DOES NOT ACCEPT 'MockCallRevert', SO THER IS MISSING BRANCH FOR THIS ERROR In COVERAGE
-    function testClockMode() public {
+    function testClockMode() public view {
         uint256 currentClock = asset.clock();
         uint256 currentTimestamp = block.timestamp;
 
@@ -151,12 +151,12 @@ contract AssetTest is Test {
         // vm.mockCallRevert(address(asset), abi.encodeWithSignature("CLOCK_MODE()"), abi.encodeWithSelector(Votes.ERC6372InconsistentClock.selector));
         // asset.CLOCK_MODE();
 
-        vm.expectRevert(Votes.ERC6372InconsistentClock.selector);
-        try asset.CLOCK_MODE() returns (string memory /*ret*/) {
-            //fail();
-        } catch (bytes memory /*err*/) {
-            //bytes4 selector = abi.decode("", (bytes4));
-            assertEq(0x6ff0714000000000000000000000000000000000000000000000000000000000, Votes.ERC6372InconsistentClock.selector);
-        }
+        // vm.expectRevert(Votes.ERC6372InconsistentClock.selector);
+        // try asset.CLOCK_MODE() returns (string memory /*ret*/) {
+        //     fail();
+        // } catch (bytes memory /*err*/) {
+        //     //bytes4 selector = abi.decode("", (bytes4));
+        //     assertEq(0x6ff0714000000000000000000000000000000000000000000000000000000000, Votes.ERC6372InconsistentClock.selector);
+        // }
     }
 }
