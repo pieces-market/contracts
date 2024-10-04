@@ -18,7 +18,6 @@ Fractionalized luxury RWA investments!
 ## 👷‍♂️ **To Implement**
 
 -   Implement fee's into Auctioner
--   Contracts functions calling automation
 -   Starting price 100 USD
 
 ## 🔑 **License**
