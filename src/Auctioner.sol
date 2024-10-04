@@ -57,7 +57,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
     /// @param start Timestamp when the auction should open
-    /// @param span Duration of auction expressed in days. Smallest possible value is 1 (1 day auction duration)
+    /// @param end Timestamp when the auction should end
     /// @param recipient Wallet address where funds from asset sale will be transferred
     function create(
         string memory name,
@@ -67,13 +67,13 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 pieces,
         uint256 max,
         uint256 start,
-        uint256 span,
+        uint256 end,
         address recipient
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
             revert Auctioner__ZeroValueNotAllowed();
-        if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
+        if (start < block.timestamp || (end < start + 1 days)) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
 
         /// @notice Creating new NFT (asset)
@@ -84,7 +84,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         auction.pieces = pieces;
         auction.max = max;
         auction.openTs = start;
-        auction.closeTs = start + (span * 1 days);
+        auction.closeTs = end;
         auction.recipient = recipient;
 
         if (auction.openTs > block.timestamp) {
@@ -97,7 +97,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         s_ongoingAuctions.push(s_totalAuctions);
 
-        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
+        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient);
         emit StateChange(s_totalAuctions, auction.state);
 
         s_totalAuctions++;
