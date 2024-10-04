@@ -33,7 +33,6 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
 
     /// @notice Returns total minted tokens amount ignoring performed burns
     /// @dev Call 'totalSupply()' function for amount corrected by burned tokens amount
-    /// @dev OVERRIDE'totalSupply()' IF WE WOULD NOT NEED CORRECTED BY BURN TOKENS AMOUNT EVER !!! (it will allow us to lower cost)
     function totalMinted() external view returns (uint256) {
         return super._totalMinted();
     }
