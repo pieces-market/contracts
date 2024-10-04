@@ -165,8 +165,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             encodedFunction = abi.encodeWithSignature("descript(uint256,string)", id, description);
         }
 
-        bool success = i_governor.propose(id, auction.asset, description, encodedFunction);
-        if (!success) revert Auctioner__FunctionCallFailed();
+        i_governor.propose(id, auction.asset, description, encodedFunction);
 
         // Consider removing this emit -> depends on database
         emit Propose(id, msg.value, msg.sender);
@@ -364,97 +363,5 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
                 i++;
             }
         }
-    }
-
-    function getUnprocessedAuctions() external view returns (uint[] memory) {
-        return s_ongoingAuctions;
-    }
-
-    // =========================================
-    //              Developer Tools
-    // =========================================
-
-    /// @dev Tokens Owned By Address Getter -> to be removed
-    function getTokens(uint id, address owner) public view returns (uint) {
-        Auction storage auction = s_auctions[id];
-
-        return Asset(auction.asset).balanceOf(owner);
-    }
-
-    /// @dev Auction Data Getter -> to be removed
-    function getData(uint256 id) public view returns (address, uint, uint, uint, uint, uint, address, AuctionState) {
-        Auction storage auction = s_auctions[id];
-
-        return (auction.asset, auction.price, auction.pieces, auction.max, auction.openTs, auction.closeTs, auction.recipient, auction.state);
-    }
-
-    function getProposals(uint id) public view returns (bool, bool) {
-        Auction storage auction = s_auctions[id];
-
-        return (auction.buyoutProposalActive, auction.descriptProposalActive);
-    }
-
-    /// @dev HELPER DEV ONLY
-    function errorHack(uint256 errorType) public pure {
-        // 0 - Auctioner__AuctionDoesNotExist
-        // 1 - Auctioner__AuctionNotOpened
-        // 2 - Auctioner__AuctionNotClosed
-        // 3 - Auctioner__AuctionNotFailed
-        // 4 - Auctioner__InsufficientPieces
-        // 5 - Auctioner__InsufficientFunds
-        // ...
-
-        if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
-        if (errorType == 1) revert Auctioner__AuctionNotOpened();
-        if (errorType == 2) revert Auctioner__AuctionNotClosed();
-        if (errorType == 3) revert Auctioner__AuctionNotFailed();
-        if (errorType == 4) revert Auctioner__AuctionNotFinished();
-        if (errorType == 5) revert Auctioner__InsufficientPieces();
-        if (errorType == 6) revert Auctioner__InsufficientFunds();
-        if (errorType == 7) revert Auctioner__TransferFailed();
-        if (errorType == 8) revert Auctioner__ZeroValueNotAllowed();
-        if (errorType == 9) revert Auctioner__IncorrectTimestamp();
-        if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
-        if (errorType == 11) revert Auctioner__Overpayment();
-        if (errorType == 12) revert Auctioner__BuyLimitExceeded();
-        if (errorType == 13) revert Auctioner__FunctionCallFailed();
-        if (errorType == 14) revert Auctioner__ProposalInProgress();
-        if (errorType == 15) revert Auctioner__InvalidProposalType();
-        if (errorType == 16) revert Auctioner__IncorrectFundsTransfer();
-        if (errorType == 17) revert Auctioner__UpkeepNotNeeded();
-    }
-
-    /// @dev HELPER DEV ONLY
-    function stateHack(uint256 id, uint256 state) public {
-        Auction storage auction = s_auctions[id];
-
-        // 0 - UNINITIALIZED
-        // 1 - SCHEDULED
-        // 2 - OPENED
-        // 3 - CLOSED
-        // 4 - FAILED
-        // 5 - FINISHED
-        // 6 - ARCHIVED
-
-        auction.state = AuctionState(state);
-    }
-
-    /// @dev HELPER DEV ONLY
-    function eventHack(uint256 eventId) public {
-        // 0 - Create event
-        // 1 - Schedule event
-        // 2 - Purchase event
-        // ...
-
-        if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
-        if (eventId == 1) emit Schedule(0, 0);
-        if (eventId == 2) emit Purchase(0, 0, address(0));
-        if (eventId == 3) emit Buyout(0, 0, address(0));
-        if (eventId == 4) emit Claim(0, 0, address(0));
-        if (eventId == 5) emit Refund(0, 0, address(0));
-        if (eventId == 6) emit Withdraw(0, 0, address(0));
-        if (eventId == 7) emit Propose(0, 0, address(0));
-        if (eventId == 8) emit TransferToBroker(0, 0, address(0));
-        if (eventId == 9) emit StateChange(0, AuctionState.UNINITIALIZED);
     }
 }
