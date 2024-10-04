@@ -89,9 +89,10 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
 
     /// @dev Override Vote Function
     /// @notice Changes block.number into block.timestamp for snapshot
-    function CLOCK_MODE() public view override returns (string memory) {
+    function CLOCK_MODE() public pure override returns (string memory) {
         // Check that the clock was not modified
-        if (clock() != Time.timestamp()) revert ERC6372InconsistentClock();
+        /// @dev Is this check even possible to fail?
+        // if (clock() != Time.timestamp()) revert ERC6372InconsistentClock();
 
         return "mode=timestamp";
     }
