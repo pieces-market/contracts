@@ -621,6 +621,11 @@ contract AuctionerTest is Test {
     }
 
     function testCanCheck() public {
+        bool upkeep;
+
+        (upkeep, ) = auctioner.checker();
+        assertEq(upkeep, false);
+
         vm.startPrank(OWNER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER); // 1
@@ -630,53 +635,55 @@ contract AuctionerTest is Test {
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 2, BROKER); // 5
         vm.stopPrank();
 
-        //vm.warp(block.timestamp + 5 days + 1);
-        (bool upkeep, ) = auctioner.checker();
-        if (upkeep) {
-            auctioner.exec();
-        }
-
-        // Costs if we nothing to process:
-        // 15504506(no checker loop) | 15503142(checker loop) = -1364
-
-        // Costs if we have something to process:
-        // 15462817(no checker loop) | 15463688(checker loop) = 871
+        vm.warp(block.timestamp + 3 days + 1);
+        (upkeep, ) = auctioner.checker();
+        assertEq(upkeep, true);
     }
 
     function testCanRemoveUnprocessedAuctions() public {
+        bool upkeep;
+
         vm.startPrank(OWNER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, 2, BROKER); // 0
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 7, BROKER); // 1
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 3, BROKER); // 2
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, 8, BROKER); // 3
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, 9, BROKER); // 3
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER); // 4
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, 2, BROKER); // 5
         vm.stopPrank();
 
-        auctioner.getUnprocessedAuctions();
+        vm.warp(block.timestamp + 3 days + 1);
+        (upkeep, ) = auctioner.checker();
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.OPENED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.FAILED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(5, IAuctioner.AuctionState.FAILED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(4, IAuctioner.AuctionState.OPENED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(2, IAuctioner.AuctionState.FAILED);
+        if (upkeep) auctioner.exec();
 
         vm.warp(block.timestamp + 3 days + 1);
-        auctioner.checker();
-        // auctioner.exec();
+        (upkeep, ) = auctioner.checker();
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(4, IAuctioner.AuctionState.FAILED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(3, IAuctioner.AuctionState.OPENED);
+        if (upkeep) auctioner.exec();
 
-        // auctioner.getUnprocessedAuctions();
+        vm.prank(OWNER);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 6 days, 10, BROKER); // 6
 
-        // vm.warp(block.timestamp + 3 days + 1);
-        // auctioner.exec();
-
-        // auctioner.getUnprocessedAuctions();
-
-        // vm.prank(OWNER);
-        // auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, 2, BROKER); // 4
-
-        // auctioner.getUnprocessedAuctions();
-
-        // vm.warp(block.timestamp + 6 days + 1);
-        // auctioner.exec();
-
-        auctioner.getUnprocessedAuctions();
-
-        // 15474480 | 15470948 | 15474820
+        vm.warp(block.timestamp + 6 days + 1);
+        (upkeep, ) = auctioner.checker();
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(1, IAuctioner.AuctionState.FAILED);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(6, IAuctioner.AuctionState.OPENED);
+        if (upkeep) auctioner.exec();
     }
 
     modifier auctionCreated() {
