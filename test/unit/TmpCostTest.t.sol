@@ -3,7 +3,7 @@ pragma solidity ^0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
-import {Auctioner} from "../../src/Auctioner.sol";
+import {AuctionerDev} from "../../src/AuctionerDev.sol";
 import {Asset} from "../../src/Asset.sol";
 import {Governor} from "../../src/Governor.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -12,7 +12,7 @@ import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../../src/interfaces/IGovernor.sol";
 
 contract TmpCostTest is Test {
-    Auctioner private auctioner;
+    AuctionerDev private auctioner;
     Asset private asset;
     Governor private governor;
 
@@ -28,7 +28,7 @@ contract TmpCostTest is Test {
     function setUp() public {
         vm.startPrank(OWNER);
         governor = new Governor();
-        auctioner = new Auctioner(FOUNDATION, address(governor));
+        auctioner = new AuctionerDev(FOUNDATION, address(governor));
         governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
@@ -53,7 +53,7 @@ contract TmpCostTest is Test {
 
     // test
     function testDeployAuctionerCost() external {
-        new Auctioner(FOUNDATION, address(governor));
+        new AuctionerDev(FOUNDATION, address(governor));
 
         // cost snapshot: 4544703 | 4552120
     }
