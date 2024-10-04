@@ -153,13 +153,6 @@ contract AuctionerTest is Test {
         auctioner.buy{value: 2 ether}(0, 1);
     }
 
-    function testCanBuyPieces() public auctionCreated {
-        vm.prank(USER);
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Purchase(0, 3, USER);
-        auctioner.buy{value: 6 ether}(0, 3);
-    }
-
     function testBuyPiecesTransferFail() public {
         InvalidRecipient recipient = new InvalidRecipient();
 
@@ -178,6 +171,17 @@ contract AuctionerTest is Test {
         vm.prank(FOUNDATION);
         vm.expectRevert(IAuctioner.Auctioner__TransferFailed.selector);
         auctioner.buy{value: 50 ether}(0, 25);
+    }
+
+    function testCanBuyPieces() public auctionCreated {
+        uint balance = USER.balance;
+
+        vm.prank(USER);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.Purchase(0, 3, USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        assertEq(USER.balance, balance - 6 ether);
     }
 
     //////////////////////////////////////////////////////
@@ -282,10 +286,14 @@ contract AuctionerTest is Test {
     }
 
     function testCanBuyout() public auctionCreated auctionClosed {
+        uint balance = BROKER.balance;
+
         vm.prank(BROKER);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Propose(0, 210 ether, BROKER);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
+
+        assertEq(BROKER.balance, balance - 210 ether);
 
         vm.warp(block.timestamp + 1);
 
@@ -414,21 +422,67 @@ contract AuctionerTest is Test {
         emit IGovernor.ProcessProposal(0);
         governor.exec();
 
+        uint balance = OWNER.balance;
+
         vm.prank(OWNER);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Withdraw(0, 210 ether, OWNER);
         auctioner.withdraw(0);
+
+        assertEq(OWNER.balance, balance + 210 ether);
     }
 
     /////////////////////////////////////////////////////
     //              Refund Function Tests              //
     /////////////////////////////////////////////////////
 
+    function testCantRefundFromNonExistentOrNotFailedAuction() public auctionCreated {
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.refund(6);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionNotFailed.selector);
+        auctioner.refund(0);
+    }
+
+    function testCantRefundZeroAmount() public auctionCreated auctionFailed {
+        vm.prank(USER);
+        auctioner.refund(0);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        auctioner.refund(0);
+    }
+
+    function testRefundTransferFail() public auctionCreated {
+        InvalidRecipient invalidRefunder = new InvalidRecipient();
+        deal(address(invalidRefunder), 100 ether);
+
+        vm.prank(address(invalidRefunder));
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.warp(block.timestamp + 7 days + 1);
+        (bool upkeep, ) = auctioner.checker();
+        if (upkeep) auctioner.exec();
+
+        vm.prank(address(invalidRefunder));
+        vm.expectRevert(IAuctioner.Auctioner__TransferFailed.selector);
+        auctioner.refund(0);
+
+        assertEq(asset.balanceOf(address(invalidRefunder)), 25);
+        assertEq(asset.getPastVotes(address(invalidRefunder), asset.clock() - 1), 25);
+    }
+
     function testCanRefund() public auctionCreated auctionFailed {
+        uint userBalance = USER.balance;
+
         vm.prank(USER);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Refund(0, 8 ether, USER);
         auctioner.refund(0);
+
+        assertEq(USER.balance, userBalance + 8 ether);
 
         vm.prank(DEVIL);
         vm.expectEmit(true, true, true, true, address(auctioner));
@@ -445,6 +499,28 @@ contract AuctionerTest is Test {
     //              Fulfill Function Tests              //
     //////////////////////////////////////////////////////
 
+    function testCantFulfillIfRequirementsNotMet() public auctionCreated {
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
+        auctioner.fulfill(0);
+
+        vm.prank(address(0));
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.fulfill(6);
+
+        vm.prank(address(0));
+        vm.expectRevert(IAuctioner.Auctioner__AuctionNotClosed.selector);
+        auctioner.fulfill(0);
+    }
+
+    function testCantFulfillIfSentInsufficientFunds() public auctionCreated auctionClosed {
+        deal(address(0), 205 ether);
+
+        vm.prank(address(0));
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        auctioner.fulfill{value: 199 ether}(0);
+    }
+
     function testCanFulfill() public auctionCreated auctionClosed {
         deal(address(0), 205 ether);
 
@@ -455,6 +531,8 @@ contract AuctionerTest is Test {
         vm.prank(address(0));
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Fulfill(0, 200 ether, address(0));
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.FINISHED);
         auctioner.fulfill{value: 200 ether}(0);
     }
 
@@ -462,18 +540,67 @@ contract AuctionerTest is Test {
     //              Claim Function Tests              //
     ////////////////////////////////////////////////////
 
-    function testCanClaim() public auctionCreated auctionClosed {
+    function testCantClaimIfRequirementsNotMet() public auctionCreated {
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
+        auctioner.claim(6);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__AuctionNotFinished.selector);
+        auctioner.claim(0);
+    }
+
+    function testCantClaimZeroAmount() public auctionCreated auctionClosed auctionFinished {
+        vm.prank(USER);
+        auctioner.claim(0);
+
+        vm.prank(USER);
+        vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
+        auctioner.claim(0);
+    }
+
+    function testClaimTransferFail() public auctionCreated {
+        InvalidRecipient invalidRefunder = new InvalidRecipient();
+        deal(address(invalidRefunder), 100 ether);
+
+        vm.prank(address(invalidRefunder));
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(USER);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.prank(BUYER);
+        auctioner.buy{value: 50 ether}(0, 25);
+
+        vm.warp(block.timestamp + 1);
+
         deal(address(0), 205 ether);
 
         vm.prank(address(0));
-        vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.FINISHED);
         auctioner.fulfill{value: 200 ether}(0);
+
+        vm.prank(address(invalidRefunder));
+        vm.expectRevert(IAuctioner.Auctioner__TransferFailed.selector);
+        auctioner.claim(0);
+
+        assertEq(asset.balanceOf(address(invalidRefunder)), 25);
+        assertEq(asset.getPastVotes(address(invalidRefunder), asset.clock() - 1), 25);
+    }
+
+    function testCanClaim() public auctionCreated auctionClosed auctionFinished {
+        uint balance = USER.balance;
+        assertEq(asset.balanceOf(USER), 25);
 
         vm.prank(USER);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Claim(0, 50 ether, USER);
         auctioner.claim(0);
+
+        assertEq(USER.balance, balance + 50 ether);
+        assertEq(asset.balanceOf(USER), 0);
 
         vm.prank(DEVIL);
         vm.expectEmit(true, true, true, true, address(auctioner));
@@ -599,6 +726,17 @@ contract AuctionerTest is Test {
         vm.warp(block.timestamp + 7 days + 1);
         (bool upkeep, ) = auctioner.checker();
         if (upkeep) auctioner.exec();
+
+        _;
+    }
+
+    modifier auctionFinished() {
+        deal(address(0), 205 ether);
+
+        vm.prank(address(0));
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.StateChange(0, IAuctioner.AuctionState.FINISHED);
+        auctioner.fulfill{value: 200 ether}(0);
 
         _;
     }
