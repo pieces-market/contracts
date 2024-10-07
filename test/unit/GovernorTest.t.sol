@@ -7,33 +7,34 @@ import {Auctioner} from "../../src/Auctioner.sol";
 import {Asset} from "../../src/Asset.sol";
 import {Governor} from "../../src/Governor.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {DeployPiecesMarket} from "../../script/DeployPiecesMarket.s.sol";
 
 import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../../src/interfaces/IGovernor.sol";
 
 contract GovernorTest is Test {
+    DeployPiecesMarket private piecesDeployer;
     Auctioner private auctioner;
     Asset private asset;
     Governor private governor;
 
-    bytes encodedFunction;
-    bytes encodedFn;
+    bytes encodedBuyoutFn;
+    bytes encodedDescriptFn;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
-    address private OWNER = makeAddr("owner");
+    address private OWNER = vm.addr(vm.envUint("PRIVATE_KEY"));
+    address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
     address private BROKER = makeAddr("broker");
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
-    address private FOUNDATION = makeAddr("foundation");
 
     function setUp() public {
-        vm.startPrank(OWNER);
-        governor = new Governor();
-        auctioner = new Auctioner(FOUNDATION, address(governor));
-        governor.transferOwnership(address(auctioner));
+        piecesDeployer = new DeployPiecesMarket();
+        (auctioner, governor) = piecesDeployer.run();
 
+        vm.startPrank(OWNER);
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
@@ -43,8 +44,8 @@ contract GovernorTest is Test {
         address createdAsset = address(uint160(uint256(entries[1].topics[2])));
         asset = Asset(createdAsset);
 
-        encodedFunction = abi.encodeWithSignature("buyout(uint256)", 0);
-        encodedFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
+        encodedBuyoutFn = abi.encodeWithSignature("buyout(uint256)", 0);
+        encodedDescriptFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
 
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
@@ -61,7 +62,7 @@ contract GovernorTest is Test {
     function testCantMakeProposalIfNotOwner() public {
         vm.prank(DEVIL);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
-        governor.propose(0, address(asset), "buyout", encodedFunction);
+        governor.propose(0, address(asset), "buyout", encodedBuyoutFn);
     }
 
     function testCanMakeProposal() public proposalMade {
@@ -70,24 +71,24 @@ contract GovernorTest is Test {
         emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.ACTIVE);
-        governor.propose(0, address(asset), "buyout!", encodedFunction);
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn);
 
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.Propose(2, 0, address(asset), block.timestamp, block.timestamp + 1 days, "descript!", 1);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(2, IGovernor.ProposalState.ACTIVE);
-        governor.propose(0, address(asset), "descript!", encodedFn);
+        governor.propose(0, address(asset), "descript!", encodedDescriptFn);
 
         // AuctionId 1
-        encodedFunction = abi.encodeWithSignature("buyout(uint256)", 1);
+        encodedBuyoutFn = abi.encodeWithSignature("buyout(uint256)", 1);
 
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.Propose(3, 1, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(3, IGovernor.ProposalState.ACTIVE);
-        governor.propose(1, address(asset), "buyout!", encodedFunction);
+        governor.propose(1, address(asset), "buyout!", encodedBuyoutFn);
     }
 
     function testBuyerCanVote() public proposalMade {
@@ -142,7 +143,7 @@ contract GovernorTest is Test {
 
         /// @dev We create proposal when both DEVIL and USER got voting power, so they can vote
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buyout!", encodedFunction);
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn);
 
         vm.warp(block.timestamp + 1);
 
@@ -239,7 +240,7 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buyout!", encodedFunction);
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn);
 
         vm.warp(block.timestamp + 1);
 
@@ -311,7 +312,7 @@ contract GovernorTest is Test {
 
         /// @dev Creating proposal on updated votes
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buyout!", encodedFunction);
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn);
 
         vm.warp(block.timestamp + 1);
 
@@ -335,8 +336,8 @@ contract GovernorTest is Test {
 
         /// @dev Creating proposal on updated votes
         vm.startPrank(address(auctioner));
-        governor.propose(0, address(asset), "buyout!", encodedFunction); // 0
-        governor.propose(0, address(asset), "vna", encodedFn); // 1
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn); // 0
+        governor.propose(0, address(asset), "vna", encodedDescriptFn); // 1
         vm.stopPrank();
 
         vm.warp(block.timestamp + 1);
@@ -357,17 +358,17 @@ contract GovernorTest is Test {
         governor.getUnprocessed();
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "arc", encodedFn); // 2
+        governor.propose(0, address(asset), "arc", encodedDescriptFn); // 2
 
         vm.warp(block.timestamp + 1);
         vm.warp(block.timestamp + 7 days);
         governor.exec();
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "fds", encodedFn); // 3
+        governor.propose(0, address(asset), "fds", encodedDescriptFn); // 3
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buy!", encodedFunction); // 4
+        governor.propose(0, address(asset), "buy!", encodedBuyoutFn); // 4
 
         governor.getUnprocessed();
 
@@ -382,7 +383,7 @@ contract GovernorTest is Test {
 
     modifier proposalMade() {
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buyout!", encodedFunction);
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn);
 
         _;
     }
