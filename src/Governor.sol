@@ -84,7 +84,14 @@ contract Governor is Ownable, IGovernor {
         proposal.hasVoted[msg.sender] = true;
     }
 
+    /// @notice Execution API called by Gelato, determines if the exec function should be executed
+    /// @dev This function is called by Gelato to decide whether executing the `exec()` function is necessary
+    /// @return canExec Boolean that indicates whether the execution is necessary
+    /// @return execPayload Encoded function selector for `exec()`
     function checker() external view returns (bool canExec, bytes memory execPayload) {
+        /// @dev Consider adding below restriction
+        // if(tx.gasprice > 80 gwei) return (false, bytes("Gas price too high"));
+
         execPayload = abi.encodeWithSelector(this.exec.selector);
 
         if (s_ongoingProposals.length > 0) {
@@ -97,6 +104,8 @@ contract Governor is Ownable, IGovernor {
         return (false, execPayload);
     }
 
+    /// @notice Execution API called by Gelato. Processes ongoing proposals once the voting period has ended
+    /// @dev This function is triggered by Gelato when the `checker()` function indicates execution is necessary
     function exec() external {
         for (uint i; i < s_ongoingProposals.length; ) {
             uint id = s_ongoingProposals[i];
