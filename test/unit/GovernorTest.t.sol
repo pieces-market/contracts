@@ -47,10 +47,6 @@ contract GovernorTest is Test {
         encodedBuyoutFn = abi.encodeWithSignature("buyout(uint256)", 0);
         encodedDescriptFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
 
-        console.log("Auctioner: ", address(auctioner));
-        console.log("Asset: ", address(asset));
-        console.log("Governor: ", address(governor));
-
         deal(OWNER, STARTING_BALANCE);
         deal(FOUNDATION, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
@@ -58,6 +54,10 @@ contract GovernorTest is Test {
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
     }
+
+    //////////////////////////////////////////////////////
+    //              Propose Function Tests              //
+    //////////////////////////////////////////////////////
 
     function testCantMakeProposalIfNotAuctioner() public {
         vm.prank(DEVIL);
@@ -89,6 +89,41 @@ contract GovernorTest is Test {
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(3, IGovernor.ProposalState.ACTIVE);
         governor.propose(1, address(asset), "buyout!", encodedBuyoutFn);
+    }
+
+    /////////////////////////////////////////////////////////
+    //              Cast Votes Function Tests              //
+    /////////////////////////////////////////////////////////
+
+    function testCantVoteForNonExistentProposal() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.prank(USER);
+        vm.expectRevert(IGovernor.Governor__ProposalDoesNotExist.selector);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+    }
+
+    function testCantVoteForNotActiveProposal() public proposalMade {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.warp(block.timestamp + 8 days);
+
+        (bool isExecNeeded, ) = governor.checker();
+        if (isExecNeeded) governor.exec();
+
+        vm.prank(USER);
+        vm.expectRevert(IGovernor.Governor__ProposalNotActive.selector);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+    }
+
+    function testCantVoteWithoutVotingPower() public proposalMade {
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(USER);
+        vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
+        governor.castVote(0, IGovernor.VoteType.FOR);
     }
 
     function testBuyerCanVote() public proposalMade {
@@ -326,6 +361,10 @@ contract GovernorTest is Test {
         governor.castVote(0, IGovernor.VoteType.AGAINST);
     }
 
+    /////////////////////////////////////////////////////////////////
+    //              Gelato Automation Functions Tests              //
+    /////////////////////////////////////////////////////////////////
+
     function testAutomationWorksAsIntended() public {
         vm.prank(BUYER);
         auctioner.buy{value: 6 ether}(0, 3);
@@ -354,16 +393,21 @@ contract GovernorTest is Test {
         governor.castVote(1, IGovernor.VoteType.AGAINST);
 
         vm.warp(block.timestamp + 7 days);
-        governor.checker();
-        governor.exec();
+        (bool isExecNeeded, ) = governor.checker();
 
-        governor.getUnprocessed();
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(0, IGovernor.ProposalState.FAILED);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(1, IGovernor.ProposalState.SUCCEEDED);
+        if (isExecNeeded) governor.exec();
 
         vm.prank(address(auctioner));
         governor.propose(0, address(asset), "arc", encodedDescriptFn); // 2
 
         vm.warp(block.timestamp + 1);
         vm.warp(block.timestamp + 7 days);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(2, IGovernor.ProposalState.FAILED);
         governor.exec();
 
         vm.prank(address(auctioner));
@@ -371,16 +415,6 @@ contract GovernorTest is Test {
 
         vm.prank(address(auctioner));
         governor.propose(0, address(asset), "buy!", encodedBuyoutFn); // 4
-
-        governor.getUnprocessed();
-
-        // 1835038 | 1834999
-    }
-
-    function testDeployCost() public {
-        new Governor();
-
-        // 1025882 | x
     }
 
     modifier proposalMade() {
