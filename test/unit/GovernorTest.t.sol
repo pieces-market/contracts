@@ -52,20 +52,20 @@ contract GovernorTest is Test {
         console.log("Governor: ", address(governor));
 
         deal(OWNER, STARTING_BALANCE);
+        deal(FOUNDATION, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
-        deal(FOUNDATION, STARTING_BALANCE);
     }
 
-    function testCantMakeProposalIfNotOwner() public {
+    function testCantMakeProposalIfNotAuctioner() public {
         vm.prank(DEVIL);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
         governor.propose(0, address(asset), "buyout", encodedBuyoutFn);
     }
 
-    function testCanMakeProposal() public proposalMade {
+    function testCanMakeBothTypesOfProposal() public proposalMade {
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
@@ -92,7 +92,6 @@ contract GovernorTest is Test {
     }
 
     function testBuyerCanVote() public proposalMade {
-        /// @dev Buy mints and delegates votes in same timestamp as proposal is made, so votes are valid for voting
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
 
@@ -121,9 +120,12 @@ contract GovernorTest is Test {
         assertEq(asset.balanceOf(USER), 3);
         assertEq(asset.getVotes(USER), 3);
 
+        uint256[] memory tokensToTransfer = new uint256[](2);
+        tokensToTransfer[0] = 0;
+        tokensToTransfer[1] = 2;
+
         vm.startPrank(USER);
-        asset.safeTransferFrom(USER, DEVIL, 0);
-        asset.safeTransferFrom(USER, DEVIL, 2);
+        asset.safeBatchTransferFrom(USER, DEVIL, tokensToTransfer);
         vm.stopPrank();
 
         vm.warp(block.timestamp + 1);
