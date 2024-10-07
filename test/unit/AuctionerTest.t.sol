@@ -34,11 +34,11 @@ contract AuctionerTest is Test {
         (auctioner, governor) = piecesDeployer.run();
 
         deal(OWNER, STARTING_BALANCE);
+        deal(FOUNDATION, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
         deal(BUYER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
-        deal(FOUNDATION, STARTING_BALANCE);
     }
 
     /////////////////////////////////////////////////////
