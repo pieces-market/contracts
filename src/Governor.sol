@@ -146,39 +146,19 @@ contract Governor is Ownable, IGovernor {
         }
     }
 
-    function getUnprocessed() external view returns (uint[] memory) {
-        return s_ongoingProposals;
-    }
+    /// @dev Below functions probably to be removed -> to be discussed
 
-    function getProposalData(uint256 id) public view returns (uint, address, uint, uint, string memory, bytes memory, uint, uint, ProposalState) {
-        ProposalCore storage proposal = s_proposals[id];
+    // /// @dev Getter
+    // function getVotes(address asset, address holder) external view returns (uint256) {
+    //     return Asset(asset).getVotes(holder);
+    // }
 
-        return (
-            proposal.auctionId,
-            proposal.asset,
-            proposal.voteStart,
-            proposal.voteEnd,
-            proposal.description,
-            proposal.encodedFunction,
-            proposal.forVotes,
-            proposal.againstVotes,
-            proposal.state
-        );
-    }
+    // /// @dev Getter
+    // function votingPeriod(uint proposalId) external view returns (uint) {
+    //     ProposalCore storage proposal = s_proposals[proposalId];
 
-    /// @dev Below functions probably to be removed
-
-    /// @dev Getter
-    function getVotes(address asset, address holder) external view returns (uint256) {
-        return Asset(asset).getVotes(holder);
-    }
-
-    /// @dev Getter
-    function votingPeriod(uint proposalId) external view returns (uint) {
-        ProposalCore storage proposal = s_proposals[proposalId];
-
-        return (proposal.voteEnd < block.timestamp) ? 0 : (proposal.voteEnd - block.timestamp);
-    }
+    //     return (proposal.voteEnd < block.timestamp) ? 0 : (proposal.voteEnd - block.timestamp);
+    // }
 
     /// @dev Getter
     function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes) {
@@ -187,10 +167,10 @@ contract Governor is Ownable, IGovernor {
         return (proposal.forVotes, proposal.againstVotes);
     }
 
-    /// @dev Getter
-    function totalVotes(uint256 proposalId) internal view returns (uint256) {
-        ProposalCore storage proposal = s_proposals[proposalId];
+    // /// @dev Getter
+    // function totalVotes(uint256 proposalId) internal view returns (uint256) {
+    //     ProposalCore storage proposal = s_proposals[proposalId];
 
-        return proposal.forVotes + proposal.againstVotes;
-    }
+    //     return proposal.forVotes + proposal.againstVotes;
+    // }
 }
