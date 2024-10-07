@@ -309,8 +309,13 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev CONSIDER MOVING ALL OF BELOW INTO SEPARATE CONTRACT, SO IT CAN BE DEPLOYED ONCE AND MANAGE ALL AUCTIONER CONTRACT VERSIONS
 
+    /// @notice Execution API called by Gelato, determines if the exec function should be executed
+    /// @dev This function is called by Gelato to decide whether executing the `exec()` function is necessary
+    /// @return canExec Boolean that indicates whether the execution is necessary
+    /// @return execPayload Encoded function selector for `exec()`
     function checker() external view returns (bool canExec, bytes memory execPayload) {
-        //if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
+        /// @dev Consider adding below restriction
+        // if(tx.gasprice > 80 gwei) return (false, bytes("Gas price too high"));
 
         execPayload = abi.encodeWithSelector(this.exec.selector);
 
@@ -333,6 +338,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         return (false, execPayload);
     }
 
+    /// @notice Execution API called by Gelato. Updates state of auction based on time
+    /// @dev This function is triggered by Gelato when the `checker()` function indicates execution is necessary
     function exec() external {
         for (uint i; i < s_ongoingAuctions.length; ) {
             uint id = s_ongoingAuctions[i];
