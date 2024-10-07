@@ -41,7 +41,7 @@ contract Governor is Ownable, IGovernor {
     /// @param asset Address of the asset linked to the proposal
     /// @param description Proposal description
     /// @param encodedFunction Function to be called on execution expressed in bytes
-    function propose(uint256 auctionId, address asset, string memory description, bytes memory encodedFunction) external onlyOwner returns (bool) {
+    function propose(uint256 auctionId, address asset, string memory description, bytes memory encodedFunction) external onlyOwner {
         ProposalCore storage proposal = s_proposals[s_totalProposals];
 
         /// @dev Here we can take asset from Auctioner by calling getter -> compare costs (same for id)
@@ -61,9 +61,6 @@ contract Governor is Ownable, IGovernor {
 
         s_ongoingProposals.push(s_totalProposals);
         s_totalProposals++;
-
-        /// @dev returns true if everything pass | check gas costs | check if it is even necessary
-        return true;
     }
 
     /// @inheritdoc IGovernor
