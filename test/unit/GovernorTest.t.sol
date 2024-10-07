@@ -190,7 +190,10 @@ contract GovernorTest is Test {
         vm.prank(DEVIL);
         governor.castVote(0, IGovernor.VoteType.FOR);
 
-        governor.proposalVotes(0);
+        (uint forVotes, uint againstVotes) = governor.proposalVotes(0);
+
+        assertEq(forVotes, 3);
+        assertEq(againstVotes, 0);
     }
 
     function testAftermarketBuyerCantVote() public proposalMade {
@@ -267,7 +270,10 @@ contract GovernorTest is Test {
         vm.expectRevert(IGovernor.Governor__ZeroVotingPower.selector);
         governor.castVote(0, IGovernor.VoteType.FOR);
 
-        governor.proposalVotes(0);
+        (uint forVotes, uint againstVotes) = governor.proposalVotes(0);
+
+        assertEq(forVotes, 3);
+        assertEq(againstVotes, 0);
     }
 
     function testCanCountVotesForMultipleProposals() public proposalMade {
@@ -365,7 +371,59 @@ contract GovernorTest is Test {
     //              Gelato Automation Functions Tests              //
     /////////////////////////////////////////////////////////////////
 
+    function testCantCallIncorrectlyEncodedFunction() public {
+        encodedBuyoutFn = abi.encodeWithSignature("buyoutt(uint256)", 0);
+        encodedDescriptFn = abi.encodeWithSignature("descriptt(uint256,string)", 0, "hastur");
+
+        vm.warp(block.timestamp + 7 days);
+        vm.prank(BUYER);
+        auctioner.buy{value: 6 ether}(0, 3);
+        vm.prank(DEVIL);
+        auctioner.buy{value: 12 ether}(0, 6);
+        vm.prank(USER);
+        auctioner.buy{value: 4 ether}(0, 2);
+
+        vm.startPrank(address(auctioner));
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn); // 0
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(BUYER);
+        governor.castVote(0, IGovernor.VoteType.AGAINST);
+        vm.prank(DEVIL);
+        governor.castVote(0, IGovernor.VoteType.FOR);
+        vm.prank(USER);
+        governor.castVote(0, IGovernor.VoteType.AGAINST);
+
+        vm.warp(block.timestamp + 7 days);
+        (bool isExecNeeded, ) = governor.checker();
+        vm.expectRevert(IGovernor.Governor__ExecuteFailed.selector);
+        if (isExecNeeded) governor.exec();
+
+        vm.prank(address(auctioner));
+        governor.propose(0, address(asset), "vna", encodedDescriptFn); // 1
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(BUYER);
+        governor.castVote(1, IGovernor.VoteType.AGAINST);
+        vm.prank(DEVIL);
+        governor.castVote(1, IGovernor.VoteType.FOR);
+        vm.prank(USER);
+        governor.castVote(1, IGovernor.VoteType.AGAINST);
+
+        vm.warp(block.timestamp + 7 days);
+        (bool isExecNecessary, ) = governor.checker();
+        vm.expectRevert(IGovernor.Governor__ExecuteFailed.selector);
+        if (isExecNecessary) governor.exec();
+    }
+
     function testAutomationWorksAsIntended() public {
+        vm.warp(block.timestamp + 7 days);
+        (bool isExecNeeded, ) = governor.checker();
+        assertEq(isExecNeeded, false);
+
         vm.prank(BUYER);
         auctioner.buy{value: 6 ether}(0, 3);
 
@@ -375,7 +433,6 @@ contract GovernorTest is Test {
         vm.prank(USER);
         auctioner.buy{value: 4 ether}(0, 2);
 
-        /// @dev Creating proposal on updated votes
         vm.startPrank(address(auctioner));
         governor.propose(0, address(asset), "buyout!", encodedBuyoutFn); // 0
         governor.propose(0, address(asset), "vna", encodedDescriptFn); // 1
@@ -393,13 +450,20 @@ contract GovernorTest is Test {
         governor.castVote(1, IGovernor.VoteType.AGAINST);
 
         vm.warp(block.timestamp + 7 days);
-        (bool isExecNeeded, ) = governor.checker();
+        (bool isExecNecessary, bytes memory execPayload) = governor.checker();
 
-        vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.StateChange(0, IGovernor.ProposalState.FAILED);
-        vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.StateChange(1, IGovernor.ProposalState.SUCCEEDED);
-        if (isExecNeeded) governor.exec();
+        assertEq(isExecNecessary, true);
+        assertEq(execPayload, abi.encodeWithSignature("exec()"));
+
+        if (isExecNeeded) {
+            vm.expectEmit(true, true, true, true, address(governor));
+            emit IGovernor.StateChange(0, IGovernor.ProposalState.FAILED);
+            vm.expectEmit(true, true, true, true, address(governor));
+            emit IGovernor.StateChange(1, IGovernor.ProposalState.SUCCEEDED);
+            governor.exec();
+        }
+
+        vm.warp(block.timestamp + 1);
 
         vm.prank(address(auctioner));
         governor.propose(0, address(asset), "arc", encodedDescriptFn); // 2
