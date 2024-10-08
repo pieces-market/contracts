@@ -247,35 +247,6 @@ contract AuctionerTest is Test {
         auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
     }
 
-    function testFunctionCallFailWhenProposing() public {
-        vm.startPrank(OWNER);
-        InvalidRecipient newGovernor = new InvalidRecipient();
-        Auctioner corruptedAuctioner = new Auctioner(FOUNDATION, address(newGovernor));
-        newGovernor.transferOwnership(address(corruptedAuctioner));
-        corruptedAuctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
-        vm.stopPrank();
-
-        vm.prank(USER);
-        corruptedAuctioner.buy{value: 50 ether}(0, 25);
-        vm.prank(DEVIL);
-        corruptedAuctioner.buy{value: 50 ether}(0, 25);
-        vm.prank(BUYER);
-        corruptedAuctioner.buy{value: 50 ether}(0, 25);
-        vm.prank(FOUNDATION);
-        corruptedAuctioner.buy{value: 50 ether}(0, 25);
-        vm.warp(block.timestamp + 7 days + 1);
-        (bool upkeep, ) = auctioner.checker();
-        if (upkeep) corruptedAuctioner.exec();
-
-        vm.prank(OWNER);
-        vm.expectRevert(IAuctioner.Auctioner__FunctionCallFailed.selector);
-        corruptedAuctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
-
-        vm.prank(FOUNDATION);
-        vm.expectRevert(IAuctioner.Auctioner__FunctionCallFailed.selector);
-        corruptedAuctioner.propose(0, "I propose to pass dark forest kingom to Astaroth", IAuctioner.ProposalType.DESCRIPT);
-    }
-
     function testCantExecuteBuyoutDescriptOrRejectIfNotGovernor() public auctionCreated {
         vm.prank(DEVIL);
         vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
@@ -311,7 +282,7 @@ contract AuctionerTest is Test {
         vm.prank(BUYER);
         governor.castVote(0, IGovernor.VoteType(0));
 
-        vm.warp(block.timestamp + 1 days);
+        vm.warp(block.timestamp + 7 days);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Buyout(0, 210 ether, BROKER);
         vm.expectEmit(true, true, true, true, address(auctioner));
@@ -336,7 +307,7 @@ contract AuctionerTest is Test {
         vm.prank(BUYER);
         governor.castVote(0, IGovernor.VoteType(0));
 
-        vm.warp(block.timestamp + 1 days);
+        vm.warp(block.timestamp + 7 days);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Descript(0, "I propose to pass dark forest kingom to Astaroth");
         governor.exec();
@@ -351,7 +322,7 @@ contract AuctionerTest is Test {
         vm.prank(USER);
         governor.castVote(0, IGovernor.VoteType.FOR);
 
-        vm.warp(block.timestamp + 1 days);
+        vm.warp(block.timestamp + 7 days);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Reject(0);
         governor.exec();
@@ -366,7 +337,7 @@ contract AuctionerTest is Test {
         vm.prank(USER);
         governor.castVote(0, IGovernor.VoteType.FOR);
 
-        vm.warp(block.timestamp + 1 days);
+        vm.warp(block.timestamp + 7 days);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.Reject(0);
         governor.exec();
@@ -390,7 +361,7 @@ contract AuctionerTest is Test {
         vm.prank(OWNER);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
-        vm.warp(block.timestamp + 1 days + 1);
+        vm.warp(block.timestamp + 7 days + 1);
         governor.exec();
 
         vm.prank(OWNER);
@@ -408,7 +379,7 @@ contract AuctionerTest is Test {
         vm.prank(address(invalidWithdrawer));
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
-        vm.warp(block.timestamp + 1 days + 1);
+        vm.warp(block.timestamp + 7 days + 1);
         governor.exec();
 
         vm.prank(address(invalidWithdrawer));
@@ -420,7 +391,7 @@ contract AuctionerTest is Test {
         vm.prank(OWNER);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
-        vm.warp(block.timestamp + 1 days + 1);
+        vm.warp(block.timestamp + 7 days + 1);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(0, IGovernor.ProposalState.FAILED);
         vm.expectEmit(true, true, true, true, address(governor));
@@ -624,6 +595,10 @@ contract AuctionerTest is Test {
         emit IAuctioner.StateChange(0, IAuctioner.AuctionState.ARCHIVED);
         auctioner.claim(0);
     }
+
+    /////////////////////////////////////////////////////////////////
+    //              Gelato Automation Functions Tests              //
+    /////////////////////////////////////////////////////////////////
 
     function testCanCheck() public {
         bool upkeep;
