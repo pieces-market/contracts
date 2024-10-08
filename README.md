@@ -189,7 +189,7 @@ The Governor contract is responsible for managing proposals, including buyout pr
 
 # 🧪 **Tests**
 
-![Test Coverage](img/coverage.png)
+![Test Coverage](images/coverage.png)
 
 # 🔑 **License**
 
