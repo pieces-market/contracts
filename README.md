@@ -60,7 +60,7 @@ This project is a decentralized auction system that uses smart contracts to mana
 -   **Automation:**
     -   Gelato automation system periodically checks the state of auctions and execute required functions, such as finalizing auctions updating their states etc.
 
-## <u>**Auctioner Contract**</u>
+## **🏛️** <u>**Auctioner Contract**</u>
 
 The Auctioner contract is responsible for managing auctions within the platform. It includes functionality to start new auctions, place orders, and close auctions once a buying period is over. It also tracks the state of each auction and ensures that the auction rules (e.g., minimum bid increments, auction duration) are enforced. This contract interacts with assets and governs their sale or transfer based on auction outcomes.
 
@@ -135,13 +135,13 @@ The Auctioner contract is responsible for managing auctions within the platform.
 -   **`IncorrectDescriptionSize:`** Error thrown when proposal description provided is too short or too long
 -   **`IncorrectFundsTransfer:`** Error thrown when funds value sent to contract is too low or too high
 
-## <u>**Asset Contract**</u>
+## **📜** <u>**Asset Contract**</u>
 
 The Asset contract represents the NFTs minted during auction creation. Each auctioned asset is minted as an NFT, with users able to buy pieces of the asset. These NFTs can be bought, transferred, and burned based on user interactions with the auction system. The Asset contract also manages the creation, storage, and transfer of assets within the auction system. It handles the minting and burning of tokens (pieces) of assets, and ensures that ownership is properly tracked throughout the lifecycle of the asset. It also implements voting system strictly connected with `Governor` contract.
 
 Each asset is linked to IPFS (InterPlanetary File System) via a unique URI, which points to its metadata and visual representation. All assets are based on the ERC721 standard for non-fungible tokens (NFTs) and include standard functions such as mint, transfer, and burn. In this project, we are using the Azuki implementation of ERC721 (ERC721A), which significantly reduces the costs associated with minting, transferring, and burning providing the only such solution in the web3 world where, despite the fractionalization of the asset, the user receives a full-fledged NFT and not a cryptocurrency substitute, i.e. the ERC20 standard.
 
-## <u>**Governor Contract**</u>
+## **⚖️** <u>**Governor Contract**</u>
 
 The Governor contract is responsible for managing proposals, including buyout proposals and descriptive changes to auctions. It oversees the voting process and determines whether a proposal should be accepted or rejected. Functions from this contract can only be called by the `Auctioner` contract itself, with the exception of the `castVote` function, which allows users to cast votes for each proposal if they hold any linked asset tokens.
 
