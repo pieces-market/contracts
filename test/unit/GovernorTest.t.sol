@@ -68,14 +68,14 @@ contract GovernorTest is Test {
     function testCanMakeBothTypesOfProposal() public proposalMade {
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
+        emit IGovernor.Propose(1, 0, address(asset), block.timestamp, block.timestamp + 7 days, "buyout!", 0);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(1, IGovernor.ProposalState.ACTIVE);
         governor.propose(0, address(asset), "buyout!", encodedBuyoutFn);
 
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.Propose(2, 0, address(asset), block.timestamp, block.timestamp + 1 days, "descript!", 1);
+        emit IGovernor.Propose(2, 0, address(asset), block.timestamp, block.timestamp + 7 days, "descript!", 1);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(2, IGovernor.ProposalState.ACTIVE);
         governor.propose(0, address(asset), "descript!", encodedDescriptFn);
@@ -85,7 +85,7 @@ contract GovernorTest is Test {
 
         vm.prank(address(auctioner));
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.Propose(3, 1, address(asset), block.timestamp, block.timestamp + 1 days, "buyout!", 0);
+        emit IGovernor.Propose(3, 1, address(asset), block.timestamp, block.timestamp + 7 days, "buyout!", 0);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(3, IGovernor.ProposalState.ACTIVE);
         governor.propose(1, address(asset), "buyout!", encodedBuyoutFn);
@@ -435,21 +435,35 @@ contract GovernorTest is Test {
 
         vm.startPrank(address(auctioner));
         governor.propose(0, address(asset), "buyout!", encodedBuyoutFn); // 0
-        governor.propose(0, address(asset), "vna", encodedDescriptFn); // 1
+        governor.propose(1, address(asset), "buyout!", encodedBuyoutFn); // 1
+        vm.warp(block.timestamp + 4 days);
+        governor.propose(2, address(asset), "buyout!", encodedBuyoutFn); // 2
+        governor.propose(0, address(asset), "vna", encodedDescriptFn); // 3
+        vm.warp(block.timestamp + 2 days);
+        governor.propose(0, address(asset), "buyout!", encodedBuyoutFn); // 4
+        governor.propose(0, address(asset), "vna", encodedDescriptFn); // 5
         vm.stopPrank();
+
+        // This has no effect, but tests i++ from exec()
+        governor.exec();
 
         vm.warp(block.timestamp + 1);
 
         vm.prank(BUYER);
         governor.castVote(1, IGovernor.VoteType.AGAINST);
-
         vm.prank(DEVIL);
         governor.castVote(1, IGovernor.VoteType.FOR);
-
         vm.prank(USER);
         governor.castVote(1, IGovernor.VoteType.AGAINST);
 
-        vm.warp(block.timestamp + 7 days);
+        vm.prank(BUYER);
+        governor.castVote(2, IGovernor.VoteType.AGAINST);
+        vm.prank(DEVIL);
+        governor.castVote(2, IGovernor.VoteType.FOR);
+        vm.prank(USER);
+        governor.castVote(2, IGovernor.VoteType.AGAINST);
+
+        vm.warp(block.timestamp + 3 days + 1);
         (bool isExecNecessary, bytes memory execPayload) = governor.checker();
 
         assertEq(isExecNecessary, true);
@@ -457,7 +471,11 @@ contract GovernorTest is Test {
 
         if (isExecNeeded) {
             vm.expectEmit(true, true, true, true, address(governor));
+            emit IGovernor.StateChange(3, IGovernor.ProposalState.FAILED);
+            vm.expectEmit(true, true, true, true, address(governor));
             emit IGovernor.StateChange(0, IGovernor.ProposalState.FAILED);
+            vm.expectEmit(true, true, true, true, address(governor));
+            emit IGovernor.StateChange(2, IGovernor.ProposalState.SUCCEEDED);
             vm.expectEmit(true, true, true, true, address(governor));
             emit IGovernor.StateChange(1, IGovernor.ProposalState.SUCCEEDED);
             governor.exec();
@@ -471,7 +489,11 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
         vm.warp(block.timestamp + 7 days);
         vm.expectEmit(true, true, true, true, address(governor));
-        emit IGovernor.StateChange(2, IGovernor.ProposalState.FAILED);
+        emit IGovernor.StateChange(6, IGovernor.ProposalState.FAILED);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(5, IGovernor.ProposalState.FAILED);
+        vm.expectEmit(true, true, true, true, address(governor));
+        emit IGovernor.StateChange(4, IGovernor.ProposalState.FAILED);
         governor.exec();
 
         vm.prank(address(auctioner));
