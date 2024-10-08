@@ -420,11 +420,9 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
         if (errorType == 11) revert Auctioner__Overpayment();
         if (errorType == 12) revert Auctioner__BuyLimitExceeded();
-        if (errorType == 13) revert Auctioner__FunctionCallFailed();
         if (errorType == 14) revert Auctioner__ProposalInProgress();
         if (errorType == 15) revert Auctioner__InvalidProposalType();
         if (errorType == 16) revert Auctioner__IncorrectFundsTransfer();
-        if (errorType == 17) revert Auctioner__UpkeepNotNeeded();
     }
 
     /// @dev HELPER DEV ONLY
