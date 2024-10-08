@@ -11,10 +11,6 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 contract InvalidRecipient is Ownable, IERC721Receiver {
     constructor() Ownable(msg.sender) {}
 
-    function propose(uint, address, string memory, bytes memory) external pure {
-        revert IAuctioner.Auctioner__FunctionCallFailed();
-    }
-
     function onERC721Received(
         address /* operator */,
         address /* from */,
