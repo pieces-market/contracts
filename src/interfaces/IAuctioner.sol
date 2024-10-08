@@ -17,13 +17,11 @@ interface IAuctioner {
     error Auctioner__ZeroAddressNotAllowed();
     error Auctioner__Overpayment();
     error Auctioner__BuyLimitExceeded();
-    error Auctioner__FunctionCallFailed();
     error Auctioner__ProposalInProgress();
     error Auctioner__UnauthorizedCaller();
     error Auctioner__InvalidProposalType();
     error Auctioner__IncorrectDescriptionSize();
     error Auctioner__IncorrectFundsTransfer();
-    error Auctioner__UpkeepNotNeeded();
 
     enum AuctionState {
         UNINITIALIZED,
