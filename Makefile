@@ -92,7 +92,10 @@ deployGovernorToAleph:
 	@forge create Governor $(NETWORK_ARGS)
 
 deployAuctionerToAleph:
-	@forge create Auctioner $(NETWORK_ARGS) --constructor-args $(FOUNDATION) $(GOVERNOR_ADDRESS)
+	@forge create AuctionerDev $(NETWORK_ARGS) --constructor-args $(FOUNDATION) $(GOVERNOR_ADDRESS)
 
-verifyAlephContract:
-	@forge verify-contract $(AUCTIONER_ADDRESS) Auctioner --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
+verifyGovernorContract:
+	@forge verify-contract $(GOVERNOR_ADDRESS) Governor --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
+
+verifyAuctionerContract:
+	@forge verify-contract $(AUCTIONER_ADDRESS) AuctionerDev --chain-id 2039 --verifier-url $(ALEPH_VERIFIER_URL) --verifier blockscout
