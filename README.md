@@ -64,7 +64,7 @@ This project is a decentralized auction system that uses smart contracts to mana
 
     -   If the asset is sold according to the initial investment terms or through a successful buyout proposal, and the funds are deposited into the smart contract, users can claim their share of the revenue by burning the pieces they hold.
 
-## <u>**Automationt**</u>
+## <u>**Automation**</u>
 Gelato automation system periodically checks the state of auctions and execute required functions, such as finalizing auctions updating their states etc.
 
 ## **🏛️** <u>**Auctioner Contract**</u>
