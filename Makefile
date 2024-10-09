@@ -84,21 +84,23 @@ ifeq ($(findstring --network alepht,$(ARGS)),--network alepht)
 	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --verifier blockscout --verifier-url $(ALEPHT_VERIFIER_URL)
 endif
 
+# MANUAL DEPLOY WITHOUT SCRIPT
+# RUN IN ORDER !!!
+deployGovernorAlephT:
+	@forge create Governor $(NETWORK_ARGS)
+
+deployAuctionerAlephT:
+	@forge create AuctionerDev $(NETWORK_ARGS) --constructor-args $(FOUNDATION) $(GOVERNOR_ADDRESS)
+
+verifyGovernor:
+	@forge verify-contract $(GOVERNOR_ADDRESS) Governor --chain-id=2039 --verifier-url=$(ALEPHT_VERIFIER_URL) --verifier blockscout
+
+verifyAuctioner:
+	@forge verify-contract $(AUCTIONER_ADDRESS) AuctionerDev --chain-id 2039 --verifier-url $(ALEPHT_VERIFIER_URL) --verifier blockscout
+
+# AUTOMATED DEPLOYMENT
 deployPiecesMarketSepolia:
 	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
 
 deployPiecesMarketAlephT:
 	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
-
-# RUN IN ORDER !!!
-deployGovernorToAleph:
-	@forge create Governor $(NETWORK_ARGS)
-
-deployAuctionerToAleph:
-	@forge create AuctionerDev $(NETWORK_ARGS) --constructor-args $(FOUNDATION) $(GOVERNOR_ADDRESS)
-
-verifyGovernorContract:
-	@forge verify-contract $(GOVERNOR_ADDRESS) Governor --chain-id=2039 --verifier-url=$(ALEPHT_VERIFIER_URL) --verifier blockscout
-
-verifyAuctionerContract:
-	@forge verify-contract $(AUCTIONER_ADDRESS) AuctionerDev --chain-id 2039 --verifier-url $(ALEPHT_VERIFIER_URL) --verifier blockscout
