@@ -33,32 +33,39 @@ This project is a decentralized auction system that uses smart contracts to mana
 
 ## <u>**Project Workflow**</u>
 
+-   **Auction Preparation:**
+
+    -   The auction preparation is carried out by a broker, who inputs the detailed information about the asset being auctioned and uploads all relevant investment documents associated with the investment.
+
+
 -   **Auction Creation:**
 
-    -   An auction is created by the contract owner. This process involves minting an NFT (asset) associated with the auction, setting a price per piece, determining the available pieces, and defining the auction's time period.
+    -   The Contract Owner (admin of the platform) reviews the details prepared by the broker. If the admin has no objections, the auction is approved on the platform. This approval triggers the creation of the necessary smart contracts and the upload of documents to IPFS, ensuring they are linked to the specific smart contract and enabling immutable and decentralized storage.
 
--   **Purchasing Asset Pieces:**
+-   **Purchasing Pieces:**
 
-    -   Users can buy pieces of an asset by sending the required funds. If they purchase all available pieces, the auction is closed, and funds are transferred to the recipient.
+    -   At a predefined moment, the auction opens, allowing users to purchase pieces by sending the required funds. Once all pieces are sold, the auction is automatically closed, and the funds from the sale are transferred directly to the broker.
 
 -   **Refunds:**
 
-    -   If an auction fails (not all pieces were sold in given time period), users are entitled to refunds based on their contributions.
+    -   If the auction does not succeed (not all pieces are sold within the specified timeframe), users who participated are eligible for a refund. The amount returned to each participant is proportional to their contribution, ensuring that all funds are safely returned if the auction does not reach its goal.
 
 -   **Proposals:**
 
-    -   Users can propose buyouts or descriptive changes to an auction. The proposals are managed and voted on by the `Governor` contract. Buyout proposals involve transferring funds and allows user to propose instant buyout of whole asset that was auctioned. Descriptive proposals allow for updating auction descriptions and only `Foundation` is allowed to make those. Both proposals are possible to make only when all pieces of an auction were successfully sold.
+    -   Users have the ability to propose two types of changes: buyouts or descriptive updates to the auction. These proposals are managed and voted on through the Governor contract.
+        1. Buyout Proposals: Enable users to propose an immediate purchase of the entire asset by transferring the required funds.
+        2. Descriptive Proposals: Allow updates to the auction’s description, but only the Foundation is permitted to make these changes.
 
 -   **Withdrawals:**
 
-    -   If buyout proposal fails, offerer is allowed to withdraw contributed funds.
+    -   If a buyout proposal is rejected, the user who made the offer can withdraw the funds.
 
 -   **Auction Finalization:**
 
-    -   Once all pieces are sold and 3rd party fulfill their commitment or a buyout succeeds, the auction is finalized. Users can claim their share of the revenues based on the amount of pieces they hold.
+    -   If the asset is sold according to the initial investment terms or through a successful buyout proposal, and the funds are deposited into the smart contract, users can claim their share of the revenue by burning the pieces they hold.
 
--   **Automation:**
-    -   Gelato automation system periodically checks the state of auctions and execute required functions, such as finalizing auctions updating their states etc.
+## <u>**Automationt**</u>
+Gelato automation system periodically checks the state of auctions and execute required functions, such as finalizing auctions updating their states etc.
 
 ## **🏛️** <u>**Auctioner Contract**</u>
 
