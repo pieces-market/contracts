@@ -4,7 +4,7 @@ Web3 platform enabling fractional investment in luxury assets, allowing users to
 
 At pieces.market you can find many brokers, such as auction houses, specialized agents or producers, offering a wide selection of luxury assets from all over the world. Each broker is carefully screened and each document related to the broker or the asset is verified by independent legal officers and placed on the blockchain. Thanks to this, you can verify all the most important information about the auction and rules of asset management before purchasing.
 
-![pieces](images/pieces.png)
+![pieces](images/pieces_readme.png)
 
 # 🚀 **Deployments**
 
@@ -32,6 +32,8 @@ At pieces.market you can find many brokers, such as auction houses, specialized 
 This project is a decentralized auction system that uses smart contracts to manage auctions, mint NFTs (assets), and facilitate user interactions such as buying, proposing changes, voting on those changes, claiming revenues, and more. The system comprises several key contracts: `Auctioner`, `Asset`, and `Governor`. Whole blockchain part has been built and fully tested using `Solidity` language and `Foundry` framework. Libraries used to build this project were fully audited and are free and save to use. All contracts has been already optimized gas wise, tested and are protected with solid usage restrictions.
 
 ## <u>**Project Workflow**</u>
+
+![platform](images/platform.png)
 
 -   **Auction Preparation:**
 
