@@ -1,4 +1,3 @@
-
 # 🔬 **What Is pieces.market?**
 
 Web3 platform enabling fractional investment in luxury assets, allowing users to invest in high-value items such as cars, watches, and yachts starting from just $100. Whether you're a web3 degen or a newbie, pieces.market welcomes you to explore fractionalized luxury assets. With intuitive features like traditional login methods and a built-in self-custody wallet, pieces.market extends a welcoming hand to individuals new to the web3 world.
@@ -7,12 +6,11 @@ At pieces.market you can find many brokers, such as auction houses, specialized 
 
 ![pieces](images/pieces.png)
 
-
 # 🚀 **Deployments**
 
 -   **Aleph Zero Testnet:** 0x4b8907e0e9ad03650e6f734d4bbb2ce65a3dc27d
-    -   **Auctioner:** To Be Deployed...
-    -   **Governor:** To Be Deployed...
+    -   **Auctioner:** 0x3293c12a0E0A107f8eed5517558B494c290d949b
+    -   **Governor:** 0xAc8578b94a5c1A70F40ce7270ce840d0ea1AF777
 -   **Sepolia:**
     -   **Auctioner:** 0x530Ec5617Db81acA931CE9B57a9CF2549f903Ef2
     -   **Governor:** 0xb30Dfc59152b458036317d3c9848C4Ed21C39003
@@ -38,7 +36,6 @@ This project is a decentralized auction system that uses smart contracts to mana
 -   **Auction Preparation:**
 
     -   The auction preparation is carried out by a broker, who inputs the detailed information about the asset being auctioned and uploads all relevant investment documents associated with the investment.
-
 
 -   **Auction Creation:**
 
@@ -67,6 +64,7 @@ This project is a decentralized auction system that uses smart contracts to mana
     -   If the asset is sold according to the initial investment terms or through a successful buyout proposal, and the funds are deposited into the smart contract, users can claim their share of the revenue by burning the pieces they hold.
 
 ## <u>**Automation**</u>
+
 Gelato automation system periodically checks the state of auctions and execute required functions, such as finalizing auctions updating their states etc.
 
 ## **🏛️** <u>**Auctioner Contract**</u>
