@@ -1,4 +1,4 @@
-![pieces](images/pieces.png)
+
 # 🔬 **What Is pieces.market?**
 
 Web3 platform enabling fractional investment in luxury assets, allowing users to invest in high-value items such as cars, watches, and yachts starting from just $100. Whether you're a web3 degen or a newbie, pieces.market welcomes you to explore fractionalized luxury assets. With intuitive features like traditional login methods and a built-in self-custody wallet, pieces.market extends a welcoming hand to individuals new to the web3 world.
@@ -6,6 +6,7 @@ Web3 platform enabling fractional investment in luxury assets, allowing users to
 At pieces.market you can find many brokers, such as auction houses, specialized agents or producers, offering a wide selection of luxury assets from all over the world. Each broker is carefully screened and each document related to the broker or the asset is verified by independent legal officers and placed on the blockchain. Thanks to this, you can verify all the most important information about the auction and rules of asset management before purchasing.
 
 Fractionalized luxury RWA investments!
+![pieces](images/pieces.png)
 
 # 🚀 **Deployments**
 
