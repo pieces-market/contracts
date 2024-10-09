@@ -14,11 +14,9 @@ contract DeployPiecesMarket is Script {
         vm.startBroadcast(deployerKey);
         Governor governor = new Governor();
         console.log("Governor Deployed:", address(governor));
-        console.log("Owner: ", governor.owner());
 
         Auctioner auctioner = new Auctioner(foundation, address(governor));
         console.log("Auctioner Deployed:", address(auctioner));
-        console.log("Owner: ", auctioner.owner());
 
         governor.transferOwnership(address(auctioner));
         console.log("Governor New Owner:", address(auctioner));
