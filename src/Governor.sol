@@ -148,29 +148,10 @@ contract Governor is Ownable, IGovernor {
 
     /// @dev Below functions probably to be removed -> to be discussed
 
-    // /// @dev Getter
-    // function getVotes(address asset, address holder) external view returns (uint256) {
-    //     return Asset(asset).getVotes(holder);
-    // }
-
-    // /// @dev Getter
-    // function votingPeriod(uint proposalId) external view returns (uint) {
-    //     ProposalCore storage proposal = s_proposals[proposalId];
-
-    //     return (proposal.voteEnd < block.timestamp) ? 0 : (proposal.voteEnd - block.timestamp);
-    // }
-
     /// @dev Getter
     function proposalVotes(uint256 proposalId) public view returns (uint256 forVotes, uint256 againstVotes) {
         ProposalCore storage proposal = s_proposals[proposalId];
 
         return (proposal.forVotes, proposal.againstVotes);
     }
-
-    // /// @dev Getter
-    // function totalVotes(uint256 proposalId) internal view returns (uint256) {
-    //     ProposalCore storage proposal = s_proposals[proposalId];
-
-    //     return proposal.forVotes + proposal.againstVotes;
-    // }
 }
