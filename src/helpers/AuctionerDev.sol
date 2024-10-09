@@ -61,7 +61,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
     /// @param pieces Amount of asset pieces available for sell
     /// @param max Maximum amount of pieces that one user can buy
     /// @param start Timestamp when the auction should open
-    /// @param span Duration of auction expressed in days. Smallest possible value is 1 (1 day auction duration)
+    /// @param end Timestamp when the auction should end
     /// @param recipient Wallet address where funds from asset sale will be transferred
     function create(
         string memory name,
@@ -71,13 +71,13 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         uint256 pieces,
         uint256 max,
         uint256 start,
-        uint256 span,
+        uint256 end,
         address recipient
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
             revert Auctioner__ZeroValueNotAllowed();
-        if (start < block.timestamp || span < 1) revert Auctioner__IncorrectTimestamp();
+        if (start < block.timestamp || (end < start + 1 days)) revert Auctioner__IncorrectTimestamp();
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
 
         /// @notice Creating new NFT (asset)
@@ -88,7 +88,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         auction.pieces = pieces;
         auction.max = max;
         auction.openTs = start;
-        auction.closeTs = start + (span * 1 days);
+        auction.closeTs = end;
         auction.recipient = recipient;
 
         if (auction.openTs > block.timestamp) {
@@ -101,7 +101,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
 
         s_ongoingAuctions.push(s_totalAuctions);
 
-        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, span, recipient);
+        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient);
         emit StateChange(s_totalAuctions, auction.state);
 
         s_totalAuctions++;
@@ -313,8 +313,13 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev CONSIDER MOVING ALL OF BELOW INTO SEPARATE CONTRACT, SO IT CAN BE DEPLOYED ONCE AND MANAGE ALL AUCTIONER CONTRACT VERSIONS
 
+    /// @notice Execution API called by Gelato, determines if the exec function should be executed
+    /// @dev This function is called by Gelato to decide whether executing the `exec()` function is necessary
+    /// @return canExec Boolean that indicates whether the execution is necessary
+    /// @return execPayload Encoded function selector for `exec()`
     function checker() external view returns (bool canExec, bytes memory execPayload) {
-        //if (s_ongoingAuctions.length <= 0) revert Auctioner__UpkeepNotNeeded();
+        /// @dev Consider adding below restriction
+        // if(tx.gasprice > 80 gwei) return (false, bytes("Gas price too high"));
 
         execPayload = abi.encodeWithSelector(this.exec.selector);
 
@@ -337,6 +342,8 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         return (false, execPayload);
     }
 
+    /// @notice Execution API called by Gelato. Updates state of auction based on time
+    /// @dev This function is triggered by Gelato when the `checker()` function indicates execution is necessary
     function exec() external {
         for (uint i; i < s_ongoingAuctions.length; ) {
             uint id = s_ongoingAuctions[i];
