@@ -35,6 +35,8 @@ This project is a decentralized auction system that uses smart contracts to mana
 
 ## <u>**Project Workflow**</u>
 
+![platform](images/platform.png)
+
 -   **Auction Preparation:**
 
     -   The auction preparation is carried out by a broker, who inputs the detailed information about the asset being auctioned and uploads all relevant investment documents associated with the investment.
