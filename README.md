@@ -5,9 +5,6 @@ Web3 platform enabling fractional investment in luxury assets, allowing users to
 
 At pieces.market you can find many brokers, such as auction houses, specialized agents or producers, offering a wide selection of luxury assets from all over the world. Each broker is carefully screened and each document related to the broker or the asset is verified by independent legal officers and placed on the blockchain. Thanks to this, you can verify all the most important information about the auction and rules of asset management before purchasing.
 
-Fractionalized luxury RWA investments!
-
-
 ![pieces](images/pieces.png)
 
 
