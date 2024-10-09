@@ -1,3 +1,4 @@
+![pieces](images/pieces.png)
 # 🔬 **What Is pieces.market?**
 
 Web3 platform enabling fractional investment in luxury assets, allowing users to invest in high-value items such as cars, watches, and yachts starting from just $100. Whether you're a web3 degen or a newbie, pieces.market welcomes you to explore fractionalized luxury assets. With intuitive features like traditional login methods and a built-in self-custody wallet, pieces.market extends a welcoming hand to individuals new to the web3 world.
