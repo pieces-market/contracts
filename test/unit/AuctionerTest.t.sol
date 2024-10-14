@@ -22,9 +22,9 @@ contract AuctionerTest is Test {
 
     uint256 private constant STARTING_BALANCE = 500 ether;
 
-    address private OWNER = vm.addr(vm.envUint("PRIVATE_KEY"));
+    address private ADMIN = vm.addr(vm.envUint("ADMIN_KEY"));
+    address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
     address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
-    address private BROKER = makeAddr("broker");
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
@@ -33,7 +33,7 @@ contract AuctionerTest is Test {
         piecesDeployer = new DeployPiecesMarket();
         (auctioner, governor) = piecesDeployer.run();
 
-        deal(OWNER, STARTING_BALANCE);
+        deal(ADMIN, STARTING_BALANCE);
         deal(FOUNDATION, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
@@ -45,55 +45,55 @@ contract AuctionerTest is Test {
     //              Create Function Tests              //
     /////////////////////////////////////////////////////
 
-    function testCantCreateAuctionIfNotOwnerOrIfPassingIncorrectParameters() public {
+    function testCantCreateAuctionIfNotADMINOrIfPassingIncorrectParameters() public {
         vm.prank(DEVIL);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
         auctioner.create("Asset", "AST", "https:", 0, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
         auctioner.create("Asset", "AST", "https:", 2 ether, 0, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 0, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
         auctioner.create("", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
         auctioner.create("Asset", "", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
         auctioner.create("Asset", "AST", "", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, 0, block.timestamp + 7 days, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 0, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
         // 345_599 = 4 days without 1 second
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp + 3 days, block.timestamp + 345_599, BROKER);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroAddressNotAllowed.selector);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, address(0));
     }
 
     function testCanCreateAuctionAndEmitCreate() public {
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectEmit(false, false, false, false, address(auctioner));
         emit IAuctioner.Create(0, address(asset), 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
         vm.expectEmit(true, true, true, true, address(auctioner));
@@ -161,7 +161,7 @@ contract AuctionerTest is Test {
     function testBuyPiecesTransferFail() public {
         InvalidRecipient recipient = new InvalidRecipient();
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, address(recipient));
 
         vm.prank(BROKER);
@@ -218,7 +218,7 @@ contract AuctionerTest is Test {
         vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
         auctioner.propose{value: 150 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
         vm.prank(DEVIL);
@@ -234,7 +234,7 @@ contract AuctionerTest is Test {
     }
 
     function testCantDescriptIfNotFoundationOrNoDescriptionOrAnyTransferValue() public auctionCreated auctionClosed {
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__UnauthorizedCaller.selector);
         auctioner.propose(0, "", IAuctioner.ProposalType.DESCRIPT);
 
@@ -348,26 +348,26 @@ contract AuctionerTest is Test {
     ///////////////////////////////////////////////////////
 
     function testCantWithdrawForNonExistentAuction() public auctionCreated auctionClosed {
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__AuctionDoesNotExist.selector);
         auctioner.withdraw(6);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ProposalInProgress.selector);
         auctioner.withdraw(0);
     }
 
     function testCantWithdrawZeroAmount() public auctionCreated auctionClosed {
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
         vm.warp(block.timestamp + 7 days + 1);
         governor.exec();
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         auctioner.withdraw(0);
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__InsufficientFunds.selector);
         auctioner.withdraw(0);
     }
@@ -388,7 +388,7 @@ contract AuctionerTest is Test {
     }
 
     function testCanWithdraw() public auctionCreated auctionClosed {
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         auctioner.propose{value: 210 ether}(0, "", IAuctioner.ProposalType.BUYOUT);
 
         vm.warp(block.timestamp + 7 days + 1);
@@ -398,14 +398,14 @@ contract AuctionerTest is Test {
         emit IGovernor.ProcessProposal(0);
         governor.exec();
 
-        uint balance = OWNER.balance;
+        uint balance = ADMIN.balance;
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Withdraw(0, 210 ether, OWNER);
+        emit IAuctioner.Withdraw(0, 210 ether, ADMIN);
         auctioner.withdraw(0);
 
-        assertEq(OWNER.balance, balance + 210 ether);
+        assertEq(ADMIN.balance, balance + 210 ether);
     }
 
     /////////////////////////////////////////////////////
@@ -606,7 +606,7 @@ contract AuctionerTest is Test {
         (upkeep, ) = auctioner.checker();
         assertEq(upkeep, false);
 
-        vm.startPrank(OWNER);
+        vm.startPrank(ADMIN);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 3 days, BROKER); // 0
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER); // 1
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 3 days, BROKER); // 2
@@ -623,7 +623,7 @@ contract AuctionerTest is Test {
     function testCanRemoveUnprocessedAuctions() public {
         bool upkeep;
 
-        vm.startPrank(OWNER);
+        vm.startPrank(ADMIN);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 3 days, BROKER); // 0
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER); // 1
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 3 days, BROKER); // 2
@@ -654,7 +654,7 @@ contract AuctionerTest is Test {
         emit IAuctioner.StateChange(3, IAuctioner.AuctionState.OPENED);
         if (upkeep) auctioner.exec();
 
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 6 days, block.timestamp + 10 days, BROKER); // 6
 
         vm.warp(block.timestamp + 6 days + 1);
@@ -667,7 +667,7 @@ contract AuctionerTest is Test {
     }
 
     modifier auctionCreated() {
-        vm.prank(OWNER);
+        vm.prank(ADMIN);
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
 
