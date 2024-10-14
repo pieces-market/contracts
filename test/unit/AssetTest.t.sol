@@ -18,14 +18,14 @@ contract AssetTest is Test {
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
-    address private OWNER = makeAddr("owner");
-    address private BROKER = makeAddr("broker");
+    address private ADMIN = vm.addr(vm.envUint("ADMIN_KEY"));
+    address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
     address private USER = makeAddr("user");
     address private DEVIL = makeAddr("devil");
-    address private FOUNDATION = makeAddr("foundation");
 
     function setUp() public {
-        vm.startPrank(OWNER);
+        vm.startPrank(ADMIN);
         auctioner = new Auctioner(FOUNDATION, address(0));
 
         address precomputedAsset = vm.computeCreateAddress(address(auctioner), vm.getNonce(address(auctioner)));
