@@ -15,15 +15,7 @@ contract MakeContractsAlive is Script {
     AuctionerDev auctioner = AuctionerDev(0x7C6130CddFf24A8246240C8c453D036B30cA3584);
     GovernorDev governor = GovernorDev(0x61824F20307Fbe0B8205bD7bE79A4278D2cd1CfD);
 
-    address private ADMIN = vm.addr(vm.envUint("ADMIN_KEY"));
     address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
-    address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
-
-    address private USER1 = vm.addr(vm.envUint("USER1_KEY"));
-    address private USER2 = vm.addr(vm.envUint("USER2_KEY"));
-    address private USER3 = vm.addr(vm.envUint("USER3_KEY"));
-    address private USER4 = vm.addr(vm.envUint("USER4_KEY"));
-    address private USER5 = vm.addr(vm.envUint("USER5_KEY"));
 
     function run() external {
         uint256 adminKey = vm.envUint("ADMIN_KEY");
@@ -283,5 +275,68 @@ contract MakeContractsAlive is Script {
         vm.stopBroadcast();
 
         /// @dev ARCHIVED AUCTION (id: 8)
+        vm.startBroadcast(adminKey);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user1Key);
+        auctioner.buy{value: 0.1 ether}(8, 10);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user3Key);
+        auctioner.buy{value: 0.1 ether}(8, 10);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user4Key);
+        auctioner.buy{value: 0.04 ether}(8, 4);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user5Key);
+        auctioner.buy{value: 0.06 ether}(8, 6);
+        vm.stopBroadcast();
+
+        // Buyout (proposal id: 6)
+        vm.startBroadcast(user2Key);
+        auctioner.propose{value: 0.33 ether}(8, "buyout", IAuctioner.ProposalType.BUYOUT);
+        vm.stopBroadcast();
+
+        // Buyout Votes
+        vm.startBroadcast(user1Key);
+        governor.castVote(6, IGovernor.VoteType.FOR);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user3Key);
+        governor.castVote(6, IGovernor.VoteType.AGAINST);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user4Key);
+        governor.castVote(6, IGovernor.VoteType.AGAINST);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user5Key);
+        governor.castVote(6, IGovernor.VoteType.FOR);
+        vm.stopBroadcast();
+
+        // Processing Buyout
+        vm.startBroadcast(adminKey);
+        governor.exec();
+        vm.stopBroadcast();
+
+        // Claims
+        vm.startBroadcast(user1Key);
+        auctioner.claim(8);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user3Key);
+        auctioner.claim(8);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user4Key);
+        auctioner.claim(8);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(user5Key);
+        auctioner.claim(8);
+        vm.stopBroadcast();
     }
 }
