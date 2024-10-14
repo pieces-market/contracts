@@ -9,7 +9,7 @@ contract DeployPiecesMarket is Script {
     address private foundation = vm.addr(vm.envUint("FOUNDATION_KEY"));
 
     function run() external returns (Auctioner, Governor) {
-        uint deployerKey = vm.envUint("PRIVATE_KEY");
+        uint deployerKey = vm.envUint("ADMIN_KEY");
 
         vm.startBroadcast(deployerKey);
         Governor governor = new Governor();
