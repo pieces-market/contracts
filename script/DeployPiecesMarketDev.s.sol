@@ -12,17 +12,17 @@ contract DeployPiecesMarketDev is Script {
     address private foundation = vm.addr(vm.envUint("FOUNDATION_KEY"));
 
     function run() external returns (AuctionerDev, GovernorDev) {
-        uint deployerKey = vm.envUint("PRIVATE_KEY");
+        uint deployerKey = vm.envUint("ADMIN_KEY");
 
         vm.startBroadcast(deployerKey);
         GovernorDev governor = new GovernorDev();
-        console.log("Governor Deployed:", address(governor));
+        console.log("Governor Dev Deployed:", address(governor));
 
         AuctionerDev auctioner = new AuctionerDev(foundation, address(governor));
-        console.log("Auctioner Deployed:", address(auctioner));
+        console.log("Auctioner Dev Deployed:", address(auctioner));
 
         governor.transferOwnership(address(auctioner));
-        console.log("Governor New Owner:", address(auctioner));
+        console.log("Governor Dev New Owner:", address(auctioner));
         vm.stopBroadcast();
 
         return (auctioner, governor);
