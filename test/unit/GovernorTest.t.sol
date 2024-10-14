@@ -23,9 +23,9 @@ contract GovernorTest is Test {
 
     uint256 private constant STARTING_BALANCE = 100 ether;
 
-    address private OWNER = vm.addr(vm.envUint("PRIVATE_KEY"));
+    address private ADMIN = vm.addr(vm.envUint("ADMIN_KEY"));
+    address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
     address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
-    address private BROKER = makeAddr("broker");
     address private USER = makeAddr("user");
     address private BUYER = makeAddr("buyer");
     address private DEVIL = makeAddr("devil");
@@ -34,7 +34,7 @@ contract GovernorTest is Test {
         piecesDeployer = new DeployPiecesMarket();
         (auctioner, governor) = piecesDeployer.run();
 
-        vm.startPrank(OWNER);
+        vm.startPrank(ADMIN);
         vm.recordLogs();
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
@@ -47,7 +47,7 @@ contract GovernorTest is Test {
         encodedBuyoutFn = abi.encodeWithSignature("buyout(uint256)", 0);
         encodedDescriptFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
 
-        deal(OWNER, STARTING_BALANCE);
+        deal(ADMIN, STARTING_BALANCE);
         deal(FOUNDATION, STARTING_BALANCE);
         deal(BROKER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
@@ -325,7 +325,7 @@ contract GovernorTest is Test {
         assertEq(againstVotes, 3);
     }
 
-    function testPreviousTokenOwnerCantVote() public {
+    function testPreviousTokenADMINCantVote() public {
         vm.prank(USER);
         auctioner.buy{value: 6 ether}(0, 3);
 
