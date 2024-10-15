@@ -104,3 +104,6 @@ deployPiecesMarketSepolia:
 
 deployPiecesMarketAlephT:
 	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
+
+deployPiecesMarketDevAlephT:
+	@forge script script/DeployPiecesMarketDev.s.sol:DeployPiecesMarketDev $(NETWORK_ARGS)
