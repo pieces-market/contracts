@@ -454,15 +454,15 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         // 2 - Purchase event
         // ...
 
-        if (eventId == 0) emit Create(0, address(0), 0, 0, 0, 0, 0, address(0));
-        if (eventId == 1) emit Schedule(0, 0);
-        if (eventId == 2) emit Purchase(0, 0, address(0));
-        if (eventId == 3) emit Buyout(0, 0, address(0));
-        if (eventId == 4) emit Claim(0, 0, address(0));
-        if (eventId == 5) emit Refund(0, 0, address(0));
-        if (eventId == 6) emit Withdraw(0, 0, address(0));
-        if (eventId == 7) emit Propose(0, 0, address(0));
+        if (eventId == 0) emit Create(1, address(666), 0.1 ether, 80, 20, 666, 777, address(6));
+        if (eventId == 1) emit Schedule(1, 0);
+        if (eventId == 2) emit Purchase(1, 0, address(6));
+        if (eventId == 3) emit Buyout(1, 0.1 ether, address(6));
+        if (eventId == 4) emit Claim(1, 0.1 ether, address(6));
+        if (eventId == 5) emit Refund(2, 0.1 ether, address(6));
+        if (eventId == 6) emit Withdraw(1, 0.1 ether, address(6));
+        if (eventId == 7) emit Propose(1, 5, address(0));
         if (eventId == 8) emit TransferToBroker(0, 0, address(0));
-        if (eventId == 9) emit StateChange(0, AuctionState.UNINITIALIZED);
+        if (eventId == 9) emit StateChange(1, AuctionState.UNINITIALIZED);
     }
 }
