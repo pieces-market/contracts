@@ -15,8 +15,13 @@ At pieces.market you can find many brokers, such as auction houses, specialized 
 
 -   **Aleph Zero Testnet Development Contracts**
 
-    -   **Auctioner:** 0xd063ED6f6021A9acc467967444d8Ab2087063659
-    -   **Governor:** 0x17dB6fdF079bE5b2be6E1B5a4e3962A17ee2F756
+    -   **Auctioner:** 0xb15Ca6B9438a0F425a5933B16B8f061dE5ed26a4
+    -   **Governor:** 0x86115882c55b284476d98A97D8dA889a75C10569
+
+-   **Sepolia Testnet Development Contracts**
+
+    -   **Auctioner:** 0xbD1A8dE0d2B979bD45E4F6B65D2f32e93dae51eC
+    -   **Governor:** 0xA6745DD89dCbdAd754A1bBE08Cda003A3B24f2B5
 
 # 👷‍♂️ **To Implement**
 
