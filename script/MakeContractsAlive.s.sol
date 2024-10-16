@@ -12,8 +12,8 @@ contract MakeContractsAlive is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0x7C6130CddFf24A8246240C8c453D036B30cA3584);
-    GovernorDev governor = GovernorDev(0x61824F20307Fbe0B8205bD7bE79A4278D2cd1CfD);
+    AuctionerDev auctioner = AuctionerDev(0xb15Ca6B9438a0F425a5933B16B8f061dE5ed26a4);
+    GovernorDev governor = GovernorDev(0x86115882c55b284476d98A97D8dA889a75C10569);
 
     address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
 
