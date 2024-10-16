@@ -34,12 +34,14 @@ contract MakeContractsAlive is Script {
 
         /// @dev OPENED AUCTION (id: 1)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(1, 2);
         vm.stopBroadcast();
 
         /// @dev OPENED AUCTION WITH BUYERS (id: 2)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 70 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 70 days, BROKER);
+        auctioner.stateHack(2, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -56,7 +58,8 @@ contract MakeContractsAlive is Script {
 
         /// @dev FAILED AUCTION WITH REFUNDS (id: 3)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(3, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -74,6 +77,7 @@ contract MakeContractsAlive is Script {
         // Auction Failed
         vm.startBroadcast(adminKey);
         auctioner.stateHack(3, 4);
+        vm.stopBroadcast();
 
         // Refunds
         vm.startBroadcast(user2Key);
@@ -86,7 +90,8 @@ contract MakeContractsAlive is Script {
 
         /// @dev CLOSED AUCTION (id: 4)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(4, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -107,7 +112,8 @@ contract MakeContractsAlive is Script {
 
         /// @dev CLOSED AUCTION WITH ONGOING BUYOUT AND DESCRIPT (id: 5)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(5, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -156,7 +162,8 @@ contract MakeContractsAlive is Script {
 
         /// @dev FAILED BUYOUT WITH WITHDRAW AND FAILED DESCRIPT (id: 6)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(6, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -197,7 +204,8 @@ contract MakeContractsAlive is Script {
 
         /// @dev AUCTION FINISHED BY BUYOUT WITH CLAIMS (id: 7)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(7, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -276,7 +284,8 @@ contract MakeContractsAlive is Script {
 
         /// @dev ARCHIVED AUCTION (id: 8)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.stateHack(8, 2);
         vm.stopBroadcast();
 
         vm.startBroadcast(user1Key);
@@ -315,6 +324,10 @@ contract MakeContractsAlive is Script {
 
         vm.startBroadcast(user5Key);
         governor.castVote(6, IGovernor.VoteType.FOR);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(adminKey);
+        auctioner.stateHack(7, 3);
         vm.stopBroadcast();
 
         // Processing Buyout
