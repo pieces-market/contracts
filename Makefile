@@ -110,3 +110,7 @@ deployPiecesMarketAlephT:
 
 deployPiecesMarketDevAlephT:
 	@forge script script/DeployPiecesMarketDev.s.sol:DeployPiecesMarketDev $(NETWORK_ARGS)
+
+# MOCK TRANSACTIONS SCRIPT
+mockPiecesMarketTxAlephT:
+	@forge script script/MakeContractsAlive.s.sol:MakeContractsAlive $(NETWORK_ARGS)
