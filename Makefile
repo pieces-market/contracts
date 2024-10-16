@@ -102,6 +102,9 @@ verifyAuctioner:
 deployPiecesMarketSepolia:
 	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
 
+deployPiecesMarketDevSepolia:
+	@forge script script/DeployPiecesMarketDev.s.sol:DeployPiecesMarketDev $(NETWORK_ARGS)
+
 deployPiecesMarketAlephT:
 	@forge script script/DeployPiecesMarket.s.sol:DeployPiecesMarket $(NETWORK_ARGS)
 
