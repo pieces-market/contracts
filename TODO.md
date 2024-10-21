@@ -7,6 +7,7 @@
 5. Implement Cross Chain solution
 6. Consider implementing starting/minimal price for example 100 USD per piece
 7. Consider refactor for 'Propose' events on 'Auctioner' and 'Governor' to keep 'ProposalType' only in one of those and avoid duplication
+8. Fix all unit tests and implement advanced testing (fuzz testing and invariant, differential testing - if needed)
 
 # Vlayer
 
