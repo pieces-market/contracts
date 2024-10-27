@@ -104,6 +104,8 @@ contract Governor is Ownable, IGovernor {
         return (false, execPayload);
     }
 
+    /// @dev Consider implementing Timelock - an optional period that allows users to exit the ecosystem (sell their tokens) before the proposal can be executed
+
     /// @notice Execution API called by Gelato. Processes ongoing proposals once the voting period has ended
     /// @dev This function is triggered by Gelato when the `checker()` function indicates execution is necessary
     function exec() external {
