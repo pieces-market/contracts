@@ -34,7 +34,7 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @notice Returns total minted tokens amount ignoring performed burns
     /// @dev Call 'totalSupply()' function for amount corrected by burned tokens amount
     function totalMinted() external view returns (uint256) {
-        return super._totalMinted();
+        return _totalMinted();
     }
 
     /// @notice Mints multiple tokens at once to a single user and instantly delegates votes to receiver
@@ -49,12 +49,12 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     function batchBurn(address owner) external onlyOwner {
         uint256[] memory tokenIds = this.tokensOfOwner(owner);
 
-        super._batchBurn(address(0), tokenIds);
+        _batchBurn(address(0), tokenIds);
     }
 
     /// @notice Safely transfers `tokenIds` in batch from `from` to `to`
     function safeBatchTransferFrom(address from, address to, uint256[] memory tokenIds) external {
-        super._safeBatchTransferFrom(address(0), from, to, tokenIds, "");
+        _safeBatchTransferFrom(address(0), from, to, tokenIds, "");
     }
 
     /// @dev The following functions are overrides required by Solidity
