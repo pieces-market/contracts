@@ -45,7 +45,7 @@ contract AuctionerTest is Test {
     //              Create Function Tests              //
     /////////////////////////////////////////////////////
 
-    function testCantCreateAuctionIfNotADMINOrIfPassingIncorrectParameters() public {
+    function testCantCreateAuctionIfNotAdminOrIfPassingIncorrectParameters() public {
         vm.prank(DEVIL);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER);
