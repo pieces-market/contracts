@@ -54,7 +54,7 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
 
     /// @notice Safely transfers `tokenIds` in batch from `from` to `to`
     function safeBatchTransferFrom(address from, address to, uint256[] memory tokenIds) external {
-        _safeBatchTransferFrom(address(0), from, to, tokenIds, "");
+        _safeBatchTransferFrom(msg.sender, from, to, tokenIds, "");
     }
 
     /// @dev The following functions are overrides required by Solidity
