@@ -4,7 +4,7 @@ Web3 platform enabling fractional investment in luxury assets, allowing users to
 
 At pieces.market you can find many brokers, such as auction houses, specialized agents or producers, offering a wide selection of luxury assets from all over the world. Each broker is carefully screened and each document related to the broker or the asset is verified by independent legal officers and placed on the blockchain. Thanks to this, you can verify all the most important information about the auction and rules of asset management before purchasing.
 
-![pieces](images/pieces_readme.png)
+![pieces](images/pieces-readme.png)
 
 # 🚀 **Deployments**
 
@@ -207,6 +207,10 @@ The Governor contract is responsible for managing proposals, including buyout pr
 # 🧪 **Tests**
 
 ![Test Coverage](images/coverage.png)
+
+# ⛽ **Gas Usage**
+
+![Gas Usage](images/gas-usage.png)
 
 # 🔑 **License**
 
