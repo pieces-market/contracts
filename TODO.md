@@ -27,5 +27,5 @@ Use Cases:
 
 # Gas Calculation
 
-`forge test - - gas- report`
+`forge test --gas-report`
 transaction cost(Remix) \* https://etherscan.io/gastracker - > GWEI: convert GWEI https://eth- converter.com/ into USD
