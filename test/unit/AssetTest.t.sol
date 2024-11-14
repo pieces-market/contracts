@@ -118,17 +118,29 @@ contract AssetTest is Test {
         snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
         assertEq(snapshotVotes, 3);
 
-        uint256[] memory tokenIds = asset.tokensOfOwner(USER);
+        asset.tokensOfOwner(USER);
+        uint[] memory tokens = new uint[](2);
+        tokens[0] = 0;
+        tokens[1] = 2;
 
         vm.prank(USER);
-        asset.safeBatchTransferFrom(USER, DEVIL, tokenIds);
+        asset.safeBatchTransferFrom(USER, DEVIL, tokens);
 
         vm.warp(block.timestamp + 1);
 
         snapshotVotes = asset.getPastVotes(USER, asset.clock() - 1);
-        assertEq(snapshotVotes, 0);
+        assertEq(snapshotVotes, 1);
         snapshotVotes = asset.getPastVotes(DEVIL, asset.clock() - 1);
-        assertEq(snapshotVotes, 3);
+        assertEq(snapshotVotes, 2);
+    }
+
+    function testCannotDelegateVotesWithoutTokensTransfer() public {
+        vm.startPrank(DEVIL);
+        vm.expectRevert(Asset.VotesDelegationOnlyOnTokensTransfer.selector);
+        asset.delegate(BROKER);
+
+        vm.expectRevert(Asset.VotesDelegationOnlyOnTokensTransfer.selector);
+        asset.delegateBySig(BROKER, 6, 6, 6, "", "");
     }
 
     function testCanSupportInterfaces() public view {
