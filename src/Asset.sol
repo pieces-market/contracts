@@ -11,6 +11,9 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 /// @title Asset Contract
 /// @notice ERC721A representation of Asset with cheap batch minting function
 contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
+    /// @dev Errors
+    error VotesDelegationOnlyOnTokensTransfer();
+
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
 
@@ -57,7 +60,21 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
         _safeBatchTransferFrom(msg.sender, from, to, tokenIds, "");
     }
 
-    /// @dev The following functions are overrides required by Solidity
+    /// @dev ERC721A FUNCTIONS OVERRIDES ADJUSTING TOKENS LOCK RESTRICTION
+
+    /// @dev This function is blocked intentionally to avoid any potential malfunctions within custom Governor contract
+    /// @notice Might be unlocked in further contract versions
+    function delegate(address) public pure override {
+        revert VotesDelegationOnlyOnTokensTransfer();
+    }
+
+    /// @dev This function is blocked intentionally to avoid any potential malfunctions within custom Governor contract
+    /// @notice Might be unlocked in further contract versions
+    function delegateBySig(address, uint256, uint256, uint8, bytes32, bytes32) public pure override {
+        revert VotesDelegationOnlyOnTokensTransfer();
+    }
+
+    /// @dev SOLIDITY REQUIRED FUNCTIONS OVERRIDES
 
     /// @notice Override ERC721A and ERC721AVotes Function
     /// @dev Additionally delegates vote to new token owner
