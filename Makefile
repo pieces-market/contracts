@@ -84,7 +84,7 @@ ifeq ($(findstring --network alepht,$(ARGS)),--network alepht)
 	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --verifier blockscout --verifier-url $(ALEPHT_VERIFIER_URL)
 endif
 
-# Using Foundry Keystore '--account defaultKey --sender 0x000'
+# Using Foundry Keystore '--account defaultKey --sender 0x000' where 0x000 is wallet public key
 ifeq ($(findstring --network test,$(ARGS)),--network test)
 	NETWORK_ARGS:= --rpc-url $(ALEPH_TESTNET_RPC_URL) --account defaultKey --sender 0x000 --broadcast --verify --verifier blockscout --verifier-url $(ALEPHT_VERIFIER_URL)
 endif
