@@ -8,6 +8,67 @@ import {GovernorDev} from "../src/helpers/GovernorDev.sol";
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../src/interfaces/IGovernor.sol";
 
+contract Phase1 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {}
+}
+
+contract Phase2 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {}
+}
+
+contract Phase3 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {}
+}
+
+/// @dev REFACTOR BELOW AND DIVIDE INTO SMALLER CHUNKS
 contract MakeContractsAlive is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
@@ -189,7 +250,7 @@ contract MakeContractsAlive is Script {
 
         // Descript (proposal id: 3)
         vm.startBroadcast(foundationKey);
-        auctioner.propose(6, "Documentation for asset to be provided until 12.12", IAuctioner.ProposalType.DESCRIPT);
+        auctioner.propose(6, "Documentation for asset to be provided until 12.06", IAuctioner.ProposalType.DESCRIPT);
         vm.stopBroadcast();
 
         // Failing Buyout and Descript
