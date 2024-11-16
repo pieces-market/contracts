@@ -15,8 +15,8 @@ contract Phase1 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -87,8 +87,8 @@ contract Phase2 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -166,8 +166,8 @@ contract Phase3 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -201,8 +201,8 @@ contract Phase4 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -263,8 +263,8 @@ contract Phase5 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -321,8 +321,8 @@ contract Phase6 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -364,8 +364,8 @@ contract Phase7 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -443,8 +443,8 @@ contract Phase8 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -484,8 +484,8 @@ contract Phase9 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+    AuctionerDev auctioner = AuctionerDev(0xAbC8caf58e1e3DAA38218dd51EB154Afff3Dd8e7);
+    GovernorDev governor = GovernorDev(0xcDcC9489B8a69d0E5a99FfcA7c4557b44c6703b5);
 
     uint256 adminKey = vm.envUint("ADMIN_KEY");
     address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
