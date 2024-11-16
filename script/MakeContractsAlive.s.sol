@@ -8,6 +8,9 @@ import {GovernorDev} from "../src/helpers/GovernorDev.sol";
 import {IAuctioner} from "../src/interfaces/IAuctioner.sol";
 import {IGovernor} from "../src/interfaces/IGovernor.sol";
 
+/// @dev We need to update timestamp before each 'CastVote()' and 'exec()' sending our own 'write tx' to blockchain,
+/// so make sure timestamp will get updated independently of other users and transactions
+
 contract Phase1 is Script {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
@@ -25,69 +28,7 @@ contract Phase1 is Script {
     uint256 user4Key = vm.envUint("USER4_KEY");
     uint256 user5Key = vm.envUint("USER5_KEY");
 
-    function run() external {}
-}
-
-contract Phase2 is Script {
-    /// @dev EXCLUDE FROM COVERAGE
-    function test() public {}
-
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
-
-    uint256 adminKey = vm.envUint("ADMIN_KEY");
-    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
-    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
-
-    uint256 user1Key = vm.envUint("USER1_KEY");
-    uint256 user2Key = vm.envUint("USER2_KEY");
-    uint256 user3Key = vm.envUint("USER3_KEY");
-    uint256 user4Key = vm.envUint("USER4_KEY");
-    uint256 user5Key = vm.envUint("USER5_KEY");
-
-    function run() external {}
-}
-
-contract Phase3 is Script {
-    /// @dev EXCLUDE FROM COVERAGE
-    function test() public {}
-
-    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
-
-    uint256 adminKey = vm.envUint("ADMIN_KEY");
-    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
-    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
-
-    uint256 user1Key = vm.envUint("USER1_KEY");
-    uint256 user2Key = vm.envUint("USER2_KEY");
-    uint256 user3Key = vm.envUint("USER3_KEY");
-    uint256 user4Key = vm.envUint("USER4_KEY");
-    uint256 user5Key = vm.envUint("USER5_KEY");
-
-    function run() external {}
-}
-
-/// @dev REFACTOR BELOW AND DIVIDE INTO SMALLER CHUNKS
-contract MakeContractsAlive is Script {
-    /// @dev EXCLUDE FROM COVERAGE
-    function test() public {}
-
-    AuctionerDev auctioner = AuctionerDev(0xb15Ca6B9438a0F425a5933B16B8f061dE5ed26a4);
-    GovernorDev governor = GovernorDev(0x86115882c55b284476d98A97D8dA889a75C10569);
-
-    address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
-
     function run() external {
-        uint256 adminKey = vm.envUint("ADMIN_KEY");
-        uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
-
-        uint256 user1Key = vm.envUint("USER1_KEY");
-        uint256 user2Key = vm.envUint("USER2_KEY");
-        uint256 user3Key = vm.envUint("USER3_KEY");
-        uint256 user4Key = vm.envUint("USER4_KEY");
-        uint256 user5Key = vm.envUint("USER5_KEY");
-
         /// @dev SCHEDULED AUCTION (id: 0)
         vm.startBroadcast(adminKey);
         auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 10 days, BROKER);
@@ -139,7 +80,27 @@ contract MakeContractsAlive is Script {
         vm.startBroadcast(adminKey);
         auctioner.stateHack(3, 4);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase2 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Refunds
         vm.startBroadcast(user2Key);
         auctioner.refund(3);
@@ -196,8 +157,29 @@ contract MakeContractsAlive is Script {
         // Buyout (proposal id: 0)
         vm.startBroadcast(user2Key);
         auctioner.propose{value: 0.35 ether}(5, "buyout", IAuctioner.ProposalType.BUYOUT);
+        auctioner.eventHack(10);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase3 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Buyout Votes
         vm.startBroadcast(user1Key);
         governor.castVote(0, IGovernor.VoteType.FOR);
@@ -210,8 +192,29 @@ contract MakeContractsAlive is Script {
         // Descript (proposal id: 1)
         vm.startBroadcast(foundationKey);
         auctioner.propose(5, "Documentation for asset to be provided until 12.12", IAuctioner.ProposalType.DESCRIPT);
+        auctioner.eventHack(10);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase4 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Descript Votes
         vm.startBroadcast(user1Key);
         governor.castVote(1, IGovernor.VoteType.FOR);
@@ -251,8 +254,29 @@ contract MakeContractsAlive is Script {
         // Descript (proposal id: 3)
         vm.startBroadcast(foundationKey);
         auctioner.propose(6, "Documentation for asset to be provided until 12.06", IAuctioner.ProposalType.DESCRIPT);
+        auctioner.eventHack(10);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase5 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Failing Buyout and Descript
         vm.startBroadcast(adminKey);
         governor.exec();
@@ -288,8 +312,29 @@ contract MakeContractsAlive is Script {
         // Buyout (proposal id: 4)
         vm.startBroadcast(user2Key);
         auctioner.propose{value: 0.35 ether}(7, "buyout", IAuctioner.ProposalType.BUYOUT);
+        auctioner.eventHack(10);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase6 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Buyout Votes
         vm.startBroadcast(user1Key);
         governor.castVote(4, IGovernor.VoteType.FOR);
@@ -310,8 +355,29 @@ contract MakeContractsAlive is Script {
         // Descript (proposal id: 5)
         vm.startBroadcast(foundationKey);
         auctioner.propose(7, "Documentation for asset to be provided until 12.12", IAuctioner.ProposalType.DESCRIPT);
+        auctioner.eventHack(10);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase7 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Descript Votes
         vm.startBroadcast(user1Key);
         governor.castVote(5, IGovernor.VoteType.FOR);
@@ -368,8 +434,29 @@ contract MakeContractsAlive is Script {
         // Buyout (proposal id: 6)
         vm.startBroadcast(user2Key);
         auctioner.propose{value: 0.33 ether}(8, "buyout", IAuctioner.ProposalType.BUYOUT);
+        auctioner.eventHack(10);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase8 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Buyout Votes
         vm.startBroadcast(user1Key);
         governor.castVote(6, IGovernor.VoteType.FOR);
@@ -390,7 +477,27 @@ contract MakeContractsAlive is Script {
         vm.startBroadcast(adminKey);
         auctioner.stateHack(7, 3);
         vm.stopBroadcast();
+    }
+}
 
+contract Phase9 is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    GovernorDev governor = GovernorDev(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    uint256 adminKey = vm.envUint("ADMIN_KEY");
+    address BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+    uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+
+    uint256 user1Key = vm.envUint("USER1_KEY");
+    uint256 user2Key = vm.envUint("USER2_KEY");
+    uint256 user3Key = vm.envUint("USER3_KEY");
+    uint256 user4Key = vm.envUint("USER4_KEY");
+    uint256 user5Key = vm.envUint("USER5_KEY");
+
+    function run() external {
         // Processing Buyout
         vm.startBroadcast(adminKey);
         governor.exec();
@@ -412,5 +519,26 @@ contract MakeContractsAlive is Script {
         vm.startBroadcast(user5Key);
         auctioner.claim(8);
         vm.stopBroadcast();
+    }
+}
+
+/// @dev REFACTOR BELOW AND DIVIDE INTO SMALLER CHUNKS
+contract MakeContractsAlive is Script {
+    /// @dev EXCLUDE FROM COVERAGE
+    function test() public {}
+
+    AuctionerDev auctioner = AuctionerDev(0xb15Ca6B9438a0F425a5933B16B8f061dE5ed26a4);
+    GovernorDev governor = GovernorDev(0x86115882c55b284476d98A97D8dA889a75C10569);
+
+    address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
+
+    function run() external {
+        // uint256 adminKey = vm.envUint("ADMIN_KEY");
+        // uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
+        // uint256 user1Key = vm.envUint("USER1_KEY");
+        // uint256 user2Key = vm.envUint("USER2_KEY");
+        // uint256 user3Key = vm.envUint("USER3_KEY");
+        // uint256 user4Key = vm.envUint("USER4_KEY");
+        // uint256 user5Key = vm.envUint("USER5_KEY");
     }
 }
