@@ -521,24 +521,3 @@ contract Phase9 is Script {
         vm.stopBroadcast();
     }
 }
-
-/// @dev REFACTOR BELOW AND DIVIDE INTO SMALLER CHUNKS
-contract MakeContractsAlive is Script {
-    /// @dev EXCLUDE FROM COVERAGE
-    function test() public {}
-
-    AuctionerDev auctioner = AuctionerDev(0xb15Ca6B9438a0F425a5933B16B8f061dE5ed26a4);
-    GovernorDev governor = GovernorDev(0x86115882c55b284476d98A97D8dA889a75C10569);
-
-    address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
-
-    function run() external {
-        // uint256 adminKey = vm.envUint("ADMIN_KEY");
-        // uint256 foundationKey = vm.envUint("FOUNDATION_KEY");
-        // uint256 user1Key = vm.envUint("USER1_KEY");
-        // uint256 user2Key = vm.envUint("USER2_KEY");
-        // uint256 user3Key = vm.envUint("USER3_KEY");
-        // uint256 user4Key = vm.envUint("USER4_KEY");
-        // uint256 user5Key = vm.envUint("USER5_KEY");
-    }
-}
