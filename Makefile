@@ -148,6 +148,3 @@ mockPhase8:
 
 mockPhase9:
 	@forge script script/MakeContractsAlive.s.sol:Phase9 $(NETWORK_ARGS)
-
-mockPhase10:
-	@forge script script/MakeContractsAlive.s.sol:Phase10 $(NETWORK_ARGS)
