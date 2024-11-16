@@ -130,3 +130,24 @@ mockPhase2:
 
 mockPhase3:
 	@forge script script/MakeContractsAlive.s.sol:Phase3 $(NETWORK_ARGS)
+
+mockPhase4:
+	@forge script script/MakeContractsAlive.s.sol:Phase4 $(NETWORK_ARGS)
+
+mockPhase5:
+	@forge script script/MakeContractsAlive.s.sol:Phase5 $(NETWORK_ARGS)
+
+mockPhase6:
+	@forge script script/MakeContractsAlive.s.sol:Phase6 $(NETWORK_ARGS)
+
+mockPhase7:
+	@forge script script/MakeContractsAlive.s.sol:Phase7 $(NETWORK_ARGS)
+
+mockPhase8:
+	@forge script script/MakeContractsAlive.s.sol:Phase8 $(NETWORK_ARGS)
+
+mockPhase9:
+	@forge script script/MakeContractsAlive.s.sol:Phase9 $(NETWORK_ARGS)
+
+mockPhase10:
+	@forge script script/MakeContractsAlive.s.sol:Phase10 $(NETWORK_ARGS)
