@@ -17,6 +17,8 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev EXCLUDE FROM COVERAGE
     function test() public {}
 
+    event UpdateTimestamp(uint time);
+
     /// @dev Variables
     uint256 private s_totalAuctions;
     /// @dev Consider adding fn to change this or if we leave it as immutable -> hardcode it in 'propose' function
@@ -464,5 +466,6 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         if (eventId == 7) emit Propose(1, 5, address(0));
         if (eventId == 8) emit TransferToBroker(0, 0, address(0));
         if (eventId == 9) emit StateChange(1, AuctionState.UNINITIALIZED);
+        if (eventId == 10) emit UpdateTimestamp(block.timestamp);
     }
 }
