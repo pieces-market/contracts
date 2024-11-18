@@ -447,6 +447,8 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         // 6 - ARCHIVED
 
         auction.state = AuctionState(state);
+
+        emit StateChange(id, AuctionState(state));
     }
 
     /// @dev HELPER DEV ONLY
