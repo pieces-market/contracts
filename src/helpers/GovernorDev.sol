@@ -51,7 +51,7 @@ contract GovernorDev is Ownable, IGovernor {
         proposal.auctionId = auctionId;
         proposal.asset = asset;
         proposal.voteStart = block.timestamp;
-        proposal.voteEnd = block.timestamp + 7 days; /// @dev CHANGE IT INTO '7 days'
+        proposal.voteEnd = block.timestamp + 7 days;
         proposal.description = description;
         proposal.encodedFunction = encodedFunction;
         proposal.state = ProposalState.ACTIVE;
@@ -120,7 +120,7 @@ contract GovernorDev is Ownable, IGovernor {
                 if (!success) revert Governor__ExecuteFailed();
 
                 emit StateChange(id, ProposalState.SUCCEEDED);
-            } else {
+            } else if (block.timestamp > proposal.voteEnd) {
                 proposal.state = ProposalState.FAILED;
                 /// @dev Consider adding return into rejectProposal -> to check if call failed or not
                 Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
