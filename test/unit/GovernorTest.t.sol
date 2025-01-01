@@ -444,11 +444,7 @@ contract GovernorTest is Test {
         governor.propose(0, address(asset), "vna", encodedDescriptFn); // 5
         vm.stopPrank();
 
-        // This has no effect, but tests i++ from exec()
-        governor.exec();
-
-        vm.warp(block.timestamp + 1);
-
+        // We dont need to warp here as we do not vote on proposalId 5, previous proposals are minting blocks
         vm.prank(BUYER);
         governor.castVote(1, IGovernor.VoteType.AGAINST);
         vm.prank(DEVIL);
@@ -486,8 +482,7 @@ contract GovernorTest is Test {
         vm.prank(address(auctioner));
         governor.propose(0, address(asset), "arc", encodedDescriptFn); // 2
 
-        vm.warp(block.timestamp + 1);
-        vm.warp(block.timestamp + 7 days);
+        vm.warp(block.timestamp + 7 days + 1);
         vm.expectEmit(true, true, true, true, address(governor));
         emit IGovernor.StateChange(6, IGovernor.ProposalState.FAILED);
         vm.expectEmit(true, true, true, true, address(governor));
