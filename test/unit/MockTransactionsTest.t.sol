@@ -205,7 +205,7 @@ contract MockTransactionsTest is Test {
         auctioner.propose(6, "Documentation for asset to be provided until 12.12", IAuctioner.ProposalType.DESCRIPT);
         vm.stopPrank();
 
-        vm.warp(block.timestamp + 1);
+        vm.warp(block.timestamp + 7 days + 1);
 
         // Failing Buyout and Descript
         vm.startPrank(ADMIN);
