@@ -17,10 +17,27 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
 
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
+    address private immutable i_broker;
+    uint96 private immutable i_royaltyFee; // unused
+    uint96 private immutable i_brokerFee;
 
     /// @dev Constructor
-    constructor(string memory name, string memory symbol, string memory uri, address owner) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        address broker,
+        uint96 royaltyFee,
+        uint96 brokerFee,
+        address owner
+    ) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
         baseURI = uri;
+        i_broker = broker;
+        i_royaltyFee = royaltyFee;
+        i_brokerFee = brokerFee;
+
+        /// @param owner is fee receiver
+        _setDefaultRoyalty(owner, royaltyFee);
     }
 
     /// @notice Leads to Metadata, which is unique for each token
