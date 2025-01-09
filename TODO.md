@@ -20,6 +20,7 @@ Use Cases:
     - ERC2981 is not fully automated -> it requires marketplace to transfer funds accordingly to `royaltyInfo()` fn included in ERC721A
     - User can set royalty info on marketplace directly within his profile, but we cannot demand from him funds, so brokerFee share will not work
     - Last thing is that we can define only 1 receiver not multiple (not sure if there is a way to hack it)
+    - We can for example set royalty fee of x% and assign broker as receiver and let creator set his acc manually on marketplace website
 
 # FIAT payments:
 
