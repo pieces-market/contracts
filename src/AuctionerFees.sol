@@ -23,9 +23,14 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @dev Arrays
     uint256[] private s_ongoingAuctions;
 
-    // platformFee: "2",
-    // royaltyFee: "5",
-    // brokerFee: "50",
+    // fee: 10 -> wartosc
+    // platformFee: "2", -> % -> idzie do sprzedawcy finalnie (broker)
+
+    // royaltyFee: "5", -> % -> rynek wtorny (10.2) -> wystawia za 11 na opensea i ktos kupuje ->
+    // wtedy liczymy 5% z 11 z czego rodzielamy na 50% (brokerFee) i czesc idzie do wlasciciela a czesc do nas
+    // brokerFee: "50", -> % -> ile idzie do nas a ile do sprzedawcy z royalty fee
+
+    // 5 miejsc po przecinku
 
     struct Auction {
         address asset;
