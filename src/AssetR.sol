@@ -14,11 +14,12 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable {
     /// @dev Errors
     error VotesDelegationOnlyOnTokensTransfer();
+    error FeeExceedsHundredPercent();
 
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
     address private immutable i_broker;
-    uint96 private immutable i_royaltyFee; // unused
+    uint96 private immutable i_royaltyFee;
     uint96 private immutable i_brokerFee;
 
     /// @dev Constructor
@@ -31,6 +32,8 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
         uint96 brokerFee,
         address owner
     ) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
+        if (royaltyFee > 10000 || brokerFee > 10000) revert FeeExceedsHundredPercent();
+
         baseURI = uri;
         i_broker = broker;
         i_royaltyFee = royaltyFee;
@@ -78,6 +81,29 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
         _safeBatchTransferFrom(msg.sender, from, to, tokenIds, "");
     }
 
+    /// @dev ROYALTY LOGIC
+
+    /// @dev Override the royaltyInfo function to split the royalty fee
+    /// @dev This fn gives marketplace info where it should transfer funds from sale
+    function royaltyInfo(uint256 /* tokenId */, uint256 salePrice) public view override returns (address receiver, uint256 royaltyAmount) {
+        uint256 totalRoyalty = (salePrice * i_royaltyFee) / _feeDenominator(); // 5% royalty
+        // uint256 brokerShare = (totalRoyalty * i_brokerFee) / 10000;
+        // uint256 creatorShare = totalRoyalty - brokerShare;
+
+        // Transfer broker's share to broker address and creator's share to the owner
+        return (address(this), totalRoyalty);
+    }
+
+    /// @dev Distribute royalties to broker and creator
+    function distributeRoyalty() public {
+        uint256 balance = address(this).balance;
+        uint256 brokerShare = (balance * i_brokerFee) / 10000;
+        uint256 creatorShare = balance - brokerShare;
+
+        payable(i_broker).transfer(brokerShare);
+        payable(owner()).transfer(creatorShare);
+    }
+
     /// @dev ERC721A FUNCTIONS OVERRIDES ADJUSTING TOKENS LOCK RESTRICTION
 
     /// @dev This function is blocked intentionally to avoid any potential malfunctions within custom Governor contract
@@ -110,11 +136,11 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     /// @return True if the contract implements `interfaceId` or if `interfaceId` is the ERC-165 interface
     function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981, IERC721A) returns (bool) {
         return
-            super.supportsInterface(interfaceId) ||
             interfaceId == type(IERC721A).interfaceId ||
             interfaceId == type(ERC721AQueryable).interfaceId ||
             interfaceId == type(IVotes).interfaceId ||
-            interfaceId == type(IERC2981).interfaceId;
+            interfaceId == type(IERC2981).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     ////////////////////////////////////
