@@ -84,14 +84,14 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     /// @dev ROYALTY LOGIC
 
     /// @dev Override the royaltyInfo function to split the royalty fee
-    /// @dev This fn gives marketplace info where it should transfer funds from sale
+    /// @dev This fn gives marketplace info where and how much it should transfer from tokens sale
     function royaltyInfo(uint256 /* tokenId */, uint256 salePrice) public view override returns (address receiver, uint256 royaltyAmount) {
         uint256 totalRoyalty = (salePrice * i_royaltyFee) / _feeDenominator(); // 5% royalty
         // uint256 brokerShare = (totalRoyalty * i_brokerFee) / 10000;
         // uint256 creatorShare = totalRoyalty - brokerShare;
 
-        // Transfer broker's share to broker address and creator's share to the owner
-        return (address(this), totalRoyalty);
+        // Transfer broker's share to broker address and creator's share is up for creator to set on marketplace
+        return (i_broker, totalRoyalty);
     }
 
     /// @dev Distribute royalties to broker and creator
