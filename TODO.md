@@ -16,6 +16,10 @@ Use Cases:
 1. Time travel - > dostep do starych danych, daje mozliwosc przeliczenia ponownie czy cos jest poprawne. Daje dostep do bardzo starych danych, ktorych potrzebujemy.
 2. Calculation And Check - > Liczenie i przemieszczanie sie po innych chainach zeby porownac dane (laczy sie z time travel) otrzymac je na nowo.
 3. Cryptography - > Dowod kryptograficzny na maila lub inne poswiadczenia.
+4. Royalty ERC2981
+    - ERC2981 is not fully automated -> it requires marketplace to transfer funds accordingly to `royaltyInfo()` fn included in ERC721A
+    - User can set royalty info on marketplace directly within his profile, but we cannot demand from him funds, so brokerFee share will not work
+    - Last thing is that we can define only 1 receiver not multiple (not sure if there is a way to hack it)
 
 # FIAT payments:
 
