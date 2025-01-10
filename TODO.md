@@ -10,6 +10,11 @@
 8. Fix all unit tests and implement advanced testing (fuzz testing and invariant, differential testing - if needed)
 9. Implement overwatch over royalty payments in API probably under blockchain listeners
 
+## On updated contracts switch (new Asset.sol)
+
+1. Fix database, API, blockchain listeners
+2. Fix frontend functions
+
 # Vlayer
 
 Use Cases:
