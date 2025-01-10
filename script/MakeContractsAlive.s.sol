@@ -33,18 +33,18 @@ contract Phase1 is Script {
     function run() external {
         /// @dev SCHEDULED AUCTION (id: 0)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 10 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 10 days, BROKER, 500);
         vm.stopBroadcast();
 
         /// @dev OPENED AUCTION (id: 1)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(1, 2);
         vm.stopBroadcast();
 
         /// @dev OPENED AUCTION WITH BUYERS (id: 2)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 70 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 70 days, BROKER, 500);
         auctioner.stateHack(2, 2);
         vm.stopBroadcast();
 
@@ -62,7 +62,7 @@ contract Phase1 is Script {
 
         /// @dev FAILED AUCTION WITH REFUNDS (id: 3)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(3, 2);
         vm.stopBroadcast();
 
@@ -117,7 +117,7 @@ contract Phase2 is Script {
 
         /// @dev CLOSED AUCTION (id: 4)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(4, 2);
         vm.stopBroadcast();
 
@@ -139,7 +139,7 @@ contract Phase2 is Script {
 
         /// @dev CLOSED AUCTION WITH ONGOING BUYOUT AND DESCRIPT (id: 5)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(5, 2);
         vm.stopBroadcast();
 
@@ -231,7 +231,7 @@ contract Phase4 is Script {
 
         /// @dev FAILED BUYOUT WITH WITHDRAW AND FAILED DESCRIPT (id: 6)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(6, 2);
         vm.stopBroadcast();
 
@@ -294,7 +294,7 @@ contract Phase5 is Script {
 
         /// @dev AUCTION FINISHED BY BUYOUT WITH CLAIMS (id: 7)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(7, 2);
         vm.stopBroadcast();
 
@@ -416,7 +416,7 @@ contract Phase7 is Script {
 
         /// @dev ARCHIVED AUCTION (id: 8)
         vm.startBroadcast(adminKey);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp + 1 days, block.timestamp + 7 days, BROKER, 500);
         auctioner.stateHack(8, 2);
         vm.stopBroadcast();
 
