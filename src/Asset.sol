@@ -4,22 +4,37 @@ pragma solidity ^0.8.25;
 import {ERC721A} from "@ERC721A/contracts/ERC721A.sol";
 import {ERC721AQueryable} from "@ERC721A/contracts/extensions/ERC721AQueryable.sol";
 import "./extensions/ERC721AVotes.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 /// @title Asset Contract
 /// @notice ERC721A representation of Asset with cheap batch minting function
-contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
+contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable {
     /// @dev Errors
     error VotesDelegationOnlyOnTokensTransfer();
 
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
+    address private immutable i_broker;
+    uint96 private immutable i_royaltyFee;
 
     /// @dev Constructor
-    constructor(string memory name, string memory symbol, string memory uri, address owner) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        address broker,
+        uint96 royaltyFee,
+        address owner
+    ) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
         baseURI = uri;
+        i_broker = broker;
+        i_royaltyFee = royaltyFee;
+
+        /// @param broker is royalty fee receiver
+        _setDefaultRoyalty(broker, royaltyFee);
     }
 
     /// @notice Leads to Metadata, which is unique for each token
@@ -90,8 +105,13 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, Ownable {
     /// @notice Checks if the contract implements an interface you query for, including ERC721A and Votes interfaces
     /// @param interfaceId The interface identifier, as specified in ERC-165
     /// @return True if the contract implements `interfaceId` or if `interfaceId` is the ERC-165 interface
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, IERC721A) returns (bool) {
-        return interfaceId == type(IVotes).interfaceId || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981, IERC721A) returns (bool) {
+        return
+            interfaceId == type(IERC721A).interfaceId ||
+            interfaceId == type(ERC721AQueryable).interfaceId ||
+            interfaceId == type(IVotes).interfaceId ||
+            interfaceId == type(IERC2981).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     ////////////////////////////////////
