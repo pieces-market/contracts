@@ -45,17 +45,17 @@ contract MockTransactionsTest is Test {
     function testMockedTransactionsFlow() public {
         /// @dev SCHEDULED AUCTION (id: 0)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 10 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 10 days, BROKER, 500);
         vm.stopPrank();
 
         /// @dev OPENED AUCTION (id: 1)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         /// @dev OPENED AUCTION WITH BUYERS (id: 2)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 70 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 70 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
@@ -72,7 +72,7 @@ contract MockTransactionsTest is Test {
 
         /// @dev FAILED AUCTION WITH REFUNDS (id: 3)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
@@ -102,7 +102,7 @@ contract MockTransactionsTest is Test {
 
         /// @dev CLOSED AUCTION (id: 4)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
@@ -123,7 +123,7 @@ contract MockTransactionsTest is Test {
 
         /// @dev CLOSED AUCTION WITH ONGOING BUYOUT AND DESCRIPT (id: 5)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
@@ -176,7 +176,7 @@ contract MockTransactionsTest is Test {
 
         /// @dev FAILED BUYOUT WITH WITHDRAW AND FAILED DESCRIPT (id: 6)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
@@ -219,7 +219,7 @@ contract MockTransactionsTest is Test {
 
         /// @dev AUCTION FINISHED BY BUYOUT WITH CLAIMS (id: 7)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
@@ -304,7 +304,7 @@ contract MockTransactionsTest is Test {
 
         /// @dev ARCHIVED AUCTION (id: 8)
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        auctioner.create("Asset", "AST", "https:", 0.01 ether, 30, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         vm.startPrank(USER1);
