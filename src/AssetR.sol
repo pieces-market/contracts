@@ -11,7 +11,7 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 /// @title Asset Contract
 /// @notice ERC721A representation of Asset with cheap batch minting function
-contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable {
+contract AssetR is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable {
     /// @dev Errors
     error VotesDelegationOnlyOnTokensTransfer();
     error FeeExceedsHundredPercent();
@@ -87,11 +87,8 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     /// @dev Override the royaltyInfo function to split the royalty fee
     /// @dev This fn gives marketplace info where and how much it should transfer from tokens sale
     function royaltyInfo(uint256 /* tokenId */, uint256 salePrice) public view override returns (address receiver, uint256 royaltyAmount) {
-        uint256 totalRoyalty = (salePrice * i_royaltyFee) / _feeDenominator(); // 5% royalty
-        // uint256 brokerShare = (totalRoyalty * i_brokerFee) / 10000;
-        // uint256 creatorShare = totalRoyalty - brokerShare;
+        uint256 totalRoyalty = (salePrice * i_royaltyFee) / _feeDenominator();
 
-        // Transfer broker's share to broker address and creator's share is up for creator to set on marketplace
         return (i_broker, totalRoyalty);
     }
 
