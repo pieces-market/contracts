@@ -20,7 +20,6 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     string private baseURI;
     address private immutable i_broker;
     uint96 private immutable i_royaltyFee;
-    uint96 private immutable i_brokerFee;
 
     /// @dev Constructor
     constructor(
@@ -29,18 +28,16 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
         string memory uri,
         address broker,
         uint96 royaltyFee,
-        uint96 brokerFee,
         address owner
     ) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
-        if (royaltyFee > 10000 || brokerFee > 10000) revert FeeExceedsHundredPercent();
+        if (royaltyFee > 10000) revert FeeExceedsHundredPercent();
 
         baseURI = uri;
         i_broker = broker;
         i_royaltyFee = royaltyFee;
-        i_brokerFee = brokerFee;
 
-        /// @param owner is fee receiver
-        _setDefaultRoyalty(owner, royaltyFee);
+        /// @param broker is royalty fee receiver
+        _setDefaultRoyalty(broker, royaltyFee);
     }
 
     /// @notice Leads to Metadata, which is unique for each token
@@ -66,6 +63,10 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     /// @param quantity Amount of tokens to be minted
     function safeBatchMint(address to, uint256 quantity) external onlyOwner {
         _safeMint(to, quantity);
+
+        /// @dev Check if we do not need to use below:
+        // If we use _setDefaultRoyalty it is probably not needed but this needs to be checked and tested
+        _setTokenRoyalty(0, to, i_royaltyFee);
     }
 
     /// @notice Burns all tokens owned by user
@@ -92,16 +93,6 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
 
         // Transfer broker's share to broker address and creator's share is up for creator to set on marketplace
         return (i_broker, totalRoyalty);
-    }
-
-    /// @dev Distribute royalties to broker and creator
-    function distributeRoyalty() public {
-        uint256 balance = address(this).balance;
-        uint256 brokerShare = (balance * i_brokerFee) / 10000;
-        uint256 creatorShare = balance - brokerShare;
-
-        payable(i_broker).transfer(brokerShare);
-        payable(owner()).transfer(creatorShare);
     }
 
     /// @dev ERC721A FUNCTIONS OVERRIDES ADJUSTING TOKENS LOCK RESTRICTION
