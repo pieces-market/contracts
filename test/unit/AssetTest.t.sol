@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Auctioner} from "../../src/Auctioner.sol";
 import {Asset} from "../../src/Asset.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "../../src/extensions/ERC721AVotes.sol";
 
 import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
@@ -32,8 +33,8 @@ contract AssetTest is Test {
 
         vm.recordLogs();
         vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER);
+        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -170,5 +171,25 @@ contract AssetTest is Test {
         //     //bytes4 selector = abi.decode("", (bytes4));
         //     assertEq(0x6ff0714000000000000000000000000000000000000000000000000000000000, Votes.ERC6372InconsistentClock.selector);
         // }
+    }
+
+    function testCannotCreateAssetWithIncorrectRoyaltyFee() public {
+        vm.prank(ADMIN);
+        vm.expectRevert(abi.encodeWithSelector(ERC2981.ERC2981InvalidDefaultRoyalty.selector, 10001, 10000));
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 10001);
+    }
+
+    function testDefaultRoyaltiesAndRoyaltyValue() public {
+        vm.prank(USER);
+        auctioner.buy{value: 6 ether}(0, 3);
+
+        vm.prank(DEVIL);
+        auctioner.buy{value: 8 ether}(0, 4);
+
+        (address receiver, uint256 royaltyValue) = asset.royaltyInfo(3, 0.0000000017 ether);
+
+        assertEq(receiver, BROKER);
+        /// @dev 5% from 1700000000 WEI
+        assertEq(royaltyValue, 85000000);
     }
 }
