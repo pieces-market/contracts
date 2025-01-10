@@ -65,6 +65,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
     /// @param start Timestamp when the auction should open
     /// @param end Timestamp when the auction should end
     /// @param recipient Wallet address where funds from asset sale will be transferred
+    /// @param royalty The royalty fee (BIPS) to be paid to the @param recipient on each secondary sale, as per the ERC2981 standard
     function create(
         string memory name,
         string memory symbol,
@@ -74,7 +75,8 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         uint256 max,
         uint256 start,
         uint256 end,
-        address recipient
+        address recipient,
+        uint96 royalty
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
@@ -83,7 +85,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
 
         /// @notice Creating new NFT (asset)
-        Asset asset = new Asset(name, symbol, uri, address(this));
+        Asset asset = new Asset(name, symbol, uri, recipient, royalty, address(this));
 
         auction.asset = address(asset);
         auction.price = price;
@@ -103,7 +105,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
 
         s_ongoingAuctions.push(s_totalAuctions);
 
-        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient);
+        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient, royalty);
         emit StateChange(s_totalAuctions, auction.state);
 
         s_totalAuctions++;
@@ -458,7 +460,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         // 2 - Purchase event
         // ...
 
-        if (eventId == 0) emit Create(1, address(666), 0.1 ether, 80, 20, 666, 777, address(6));
+        if (eventId == 0) emit Create(1, address(666), 0.1 ether, 80, 20, 666, 777, address(6), 500);
         if (eventId == 1) emit Schedule(1, 0);
         if (eventId == 2) emit Purchase(1, 0, address(6));
         if (eventId == 3) emit Buyout(1, 0.1 ether, address(6));
