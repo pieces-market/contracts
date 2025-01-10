@@ -1,13 +1,14 @@
 # Todo
 
 1. Mock transactions on Aleph Zero blockchain testnet to reproduce all possible states of auction along with proposals and other possible transactions and branches
-2. Implement fee's into 'Auctioner' 'buy' function
+2. Create and connect splitter contract to `Asset` under `royaltyInfo` function.
 3. Refactor 'Auctioner' functions to check equivalent of USD value instead of native blockchain currency (we will be using Oracles to get proper price feeds here)
 4. Implement Vlayer solution into 'Auctioner' 'fulfill' function to ensure cryptographic proof has been provided via email or other credentials
 5. Implement Cross Chain solution
 6. Consider implementing starting/minimal price for example 100 USD per piece
 7. Consider refactor for 'Propose' events on 'Auctioner' and 'Governor' to keep 'ProposalType' only in one of those and avoid duplication
 8. Fix all unit tests and implement advanced testing (fuzz testing and invariant, differential testing - if needed)
+9. Implement overwatch over royalty payments in API probably under blockchain listeners
 
 # Vlayer
 
@@ -16,11 +17,6 @@ Use Cases:
 1. Time travel - > dostep do starych danych, daje mozliwosc przeliczenia ponownie czy cos jest poprawne. Daje dostep do bardzo starych danych, ktorych potrzebujemy.
 2. Calculation And Check - > Liczenie i przemieszczanie sie po innych chainach zeby porownac dane (laczy sie z time travel) otrzymac je na nowo.
 3. Cryptography - > Dowod kryptograficzny na maila lub inne poswiadczenia.
-4. Royalty ERC2981
-    - ERC2981 is not fully automated -> it requires marketplace to transfer funds accordingly to `royaltyInfo()` fn included in ERC721A
-    - User can set royalty info on marketplace directly within his profile, but we cannot demand from him funds, so brokerFee share will not work
-    - Last thing is that we can define only 1 receiver not multiple (not sure if there is a way to hack it)
-    - We can for example set royalty fee of x% and assign broker as receiver and let creator set his acc manually on marketplace website
 
 # FIAT payments:
 
