@@ -480,7 +480,7 @@ contract GovernorTest is Test {
         vm.warp(block.timestamp + 1);
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "arc", encodedDescriptFn); // 2
+        governor.propose(0, address(asset), "arc", encodedDescriptFn); // 6
 
         vm.warp(block.timestamp + 7 days + 1);
         vm.expectEmit(true, true, true, true, address(governor));
@@ -492,10 +492,14 @@ contract GovernorTest is Test {
         governor.exec();
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "fds", encodedDescriptFn); // 3
+        governor.propose(0, address(asset), "fds", encodedDescriptFn); // 7
 
         vm.prank(address(auctioner));
-        governor.propose(0, address(asset), "buy!", encodedBuyoutFn); // 4
+        governor.propose(0, address(asset), "buy!", encodedBuyoutFn); // 8
+
+        vm.warp(block.timestamp + 1);
+        // Infinite loop check. After below exec 2 proposals should left -> s_ongoingProposals[7, 8]
+        governor.exec();
     }
 
     modifier proposalMade() {
