@@ -111,34 +111,38 @@ contract GovernorDev is Ownable, IGovernor {
             uint id = s_ongoingProposals[i];
             ProposalCore storage proposal = s_proposals[id];
 
-            if (
-                (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
-                (proposal.forVotes > proposal.againstVotes)
-            ) {
-                proposal.state = ProposalState.SUCCEEDED;
-                (bool success, ) = owner().call(proposal.encodedFunction);
-                if (!success) revert Governor__ExecuteFailed();
+            bool isSucceeded = (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
+                (proposal.forVotes > proposal.againstVotes);
 
-                emit StateChange(id, ProposalState.SUCCEEDED);
-            } else if (block.timestamp > proposal.voteEnd) {
-                proposal.state = ProposalState.FAILED;
-                /// @dev Consider adding return into rejectProposal -> to check if call failed or not
-                Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
+            bool isFailed = block.timestamp > proposal.voteEnd;
 
-                emit StateChange(id, ProposalState.FAILED);
+            if (isSucceeded || isFailed) {
+                proposal.state = isSucceeded ? ProposalState.SUCCEEDED : ProposalState.FAILED;
+
+                if (isSucceeded) {
+                    (bool success, ) = owner().call(proposal.encodedFunction);
+                    if (!success) revert Governor__ExecuteFailed();
+                } else {
+                    /// @dev Consider adding return into rejectProposal -> to check if call failed or not
+                    Auctioner(owner()).reject(proposal.auctionId, proposal.encodedFunction);
+                }
+
+                emit StateChange(id, proposal.state);
+
+                // Swap current element with the last one to remove it
+                s_ongoingProposals[i] = s_ongoingProposals[s_ongoingProposals.length - 1];
+                s_ongoingProposals.pop();
+
+                /// @dev Check if we indeed need this emit
+                emit ProcessProposal(id);
+
+                // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
+                continue;
             }
 
-            // Swap current element with the last one to remove it
-            s_ongoingProposals[i] = s_ongoingProposals[s_ongoingProposals.length - 1];
-            s_ongoingProposals.pop();
-
-            /// @dev Check if we indeed need this emit
-            emit ProcessProposal(id);
-
-            if (s_ongoingProposals.length == 0) break;
-
-            // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
-            continue;
+            unchecked {
+                i++;
+            }
         }
     }
 
