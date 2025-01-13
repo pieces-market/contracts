@@ -1,7 +1,7 @@
 # Todo
 
 1. Mock transactions on Aleph Zero blockchain testnet to reproduce all possible states of auction along with proposals and other possible transactions and branches
-2. Create and connect splitter contract to `Asset` under `royaltyInfo` function.
+2. Create and connect splitter contract for `Asset` under `royaltyInfo` function.
 3. Refactor 'Auctioner' functions to check equivalent of USD value instead of native blockchain currency (we will be using Oracles to get proper price feeds here)
 4. Implement Vlayer solution into 'Auctioner' 'fulfill' function to ensure cryptographic proof has been provided via email or other credentials
 5. Implement Cross Chain solution
