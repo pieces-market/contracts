@@ -12,8 +12,8 @@
 
 ## On updated contracts switch (new Asset.sol)
 
-1. Fix database, API, blockchain listeners
-2. Fix frontend functions
+1. ❌ Fix database, API, blockchain listeners
+2. ❌ Fix frontend functions
 
 # Vlayer
 
