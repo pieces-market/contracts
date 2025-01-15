@@ -7,18 +7,17 @@ import "./extensions/ERC721AVotes.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+import {IAsset} from "./interfaces/IAsset.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 /// @title Asset Contract
 /// @notice ERC721A representation of Asset with cheap batch minting function
-contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable {
-    /// @dev Errors
-    error VotesDelegationOnlyOnTokensTransfer();
-
+contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable, IAsset {
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
     address private immutable i_broker;
-    uint96 private immutable i_royaltyFee;
+    uint256 private immutable i_brokerShare; // compare uint8 (0-100)
+    address private constant PIECES_MARKET = 0x7eAFE197018d6dfFeF84442Ef113A22A4a191CCD;
 
     /// @dev Constructor
     constructor(
@@ -27,14 +26,26 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
         string memory uri,
         address broker,
         uint96 royaltyFee,
+        uint256 brokerShare,
         address owner
     ) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
         baseURI = uri;
         i_broker = broker;
-        i_royaltyFee = royaltyFee;
+        i_brokerShare = brokerShare;
 
-        /// @param broker is royalty fee receiver
-        _setDefaultRoyalty(broker, royaltyFee);
+        /// @param asset is royalty fee receiver
+        _setDefaultRoyalty(address(this), royaltyFee);
+    }
+
+    /// @notice Handles incoming royalty payments, splitting the funds between the broker and the pieces market based on the configured broker share
+    receive() external payable {
+        uint256 brokerShare = (msg.value * i_brokerShare) / 10000;
+        uint256 remainingShare = msg.value - brokerShare;
+
+        (bool brokerTransfer, ) = i_broker.call{value: brokerShare}("");
+        (bool piecesTransfer, ) = PIECES_MARKET.call{value: remainingShare}("");
+
+        if (!brokerTransfer || !piecesTransfer) revert RoyaltyTransferFailed();
     }
 
     /// @notice Leads to Metadata, which is unique for each token
