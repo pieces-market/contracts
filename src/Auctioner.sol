@@ -70,7 +70,8 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 start,
         uint256 end,
         address recipient,
-        uint96 royalty
+        uint96 royalty,
+        uint256 brokerShare
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
@@ -79,7 +80,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
 
         /// @notice Creating new NFT (asset)
-        Asset asset = new Asset(name, symbol, uri, recipient, royalty, address(this));
+        Asset asset = new Asset(name, symbol, uri, recipient, royalty, brokerShare, address(this));
 
         auction.asset = address(asset);
         auction.price = price;
@@ -112,13 +113,13 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (auction.state != AuctionState.OPENED) revert Auctioner__AuctionNotOpened();
         if (auction.pieces < pieces) revert Auctioner__InsufficientPieces();
         /// @dev Implement fee's
-        if ((Asset(auction.asset).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
+        if ((Asset(payable(auction.asset)).balanceOf(msg.sender) + pieces) > auction.max) revert Auctioner__BuyLimitExceeded();
         if (msg.value != auction.price * pieces) revert Auctioner__IncorrectFundsTransfer();
 
         auction.pieces -= pieces;
 
         /// @notice Mint pieces and immediately delegate votes to the buyer
-        Asset(auction.asset).safeBatchMint(msg.sender, pieces);
+        Asset(payable(auction.asset)).safeBatchMint(msg.sender, pieces);
 
         emit Purchase(id, pieces, msg.sender);
 
@@ -129,7 +130,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
             emit StateChange(id, auction.state);
 
             /// @notice Transfer funds to the broker
-            uint256 payment = Asset(auction.asset).totalMinted() * auction.price;
+            uint256 payment = Asset(payable(auction.asset)).totalMinted() * auction.price;
 
             (bool success, ) = auction.recipient.call{value: payment}("");
             if (!success) revert Auctioner__TransferFailed();
@@ -150,7 +151,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         if (proposal == ProposalType.BUYOUT) {
             if (auction.buyoutProposalActive) revert Auctioner__ProposalInProgress();
-            if (msg.value < (Asset(auction.asset).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
+            if (msg.value < (Asset(payable(auction.asset)).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
 
             auction.buyoutProposalActive = true;
             auction.withdrawAllowed[msg.sender] = false;
@@ -238,11 +239,11 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.FAILED) revert Auctioner__AuctionNotFailed();
 
-        uint256 tokenBalance = Asset(auction.asset).balanceOf(msg.sender);
+        uint256 tokenBalance = Asset(payable(auction.asset)).balanceOf(msg.sender);
         uint256 amount = tokenBalance * auction.price;
 
         if (amount > 0) {
-            Asset(auction.asset).batchBurn(msg.sender);
+            Asset(payable(auction.asset)).batchBurn(msg.sender);
         } else {
             revert Auctioner__InsufficientFunds();
         }
@@ -264,7 +265,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (msg.sender != address(0)) revert Auctioner__UnauthorizedCaller();
         Auction storage auction = s_auctions[id];
         if (auction.state != AuctionState.CLOSED) revert Auctioner__AuctionNotClosed();
-        if (msg.value < (Asset(auction.asset).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
+        if (msg.value < (Asset(payable(auction.asset)).totalMinted() * auction.price)) revert Auctioner__InsufficientFunds();
 
         auction.offerer = address(0);
         auction.offer[address(0)] = msg.value;
@@ -281,14 +282,14 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (auction.state != AuctionState.FINISHED) revert Auctioner__AuctionNotFinished();
 
         uint256 funds = auction.offer[auction.offerer];
-        uint256 supply = Asset(auction.asset).totalMinted();
-        uint256 tokens = Asset(auction.asset).balanceOf(msg.sender);
+        uint256 supply = Asset(payable(auction.asset)).totalMinted();
+        uint256 tokens = Asset(payable(auction.asset)).balanceOf(msg.sender);
 
         /// @dev Supply will not be 0 here ever as to get auction finished there will be always some supply (totalMinted() from asset)
         uint256 amount = (funds / supply) * tokens;
 
         if (amount > 0) {
-            Asset(auction.asset).batchBurn(msg.sender);
+            Asset(payable(auction.asset)).batchBurn(msg.sender);
         } else {
             revert Auctioner__InsufficientFunds();
         }
@@ -298,7 +299,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         emit Claim(id, amount, msg.sender);
 
-        if (Asset(auction.asset).totalSupply() == 0) {
+        if (Asset(payable(auction.asset)).totalSupply() == 0) {
             auction.state = AuctionState.ARCHIVED;
 
             emit StateChange(id, auction.state);
