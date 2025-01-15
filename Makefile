@@ -118,33 +118,33 @@ deployPiecesMarketDevAlephT:
 
 # MOCK TRANSACTIONS SCRIPTS
 mockPiecesMarketTxAlephT:
-	@forge script script/MakeContractsAlive.s.sol:MakeContractsAlive $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:MockPiecesMarket $(NETWORK_ARGS)
 
 # MOCK TRANSACTIONS SCRIPTS
 
 mockPhase1:
-	@forge script script/MakeContractsAlive.s.sol:Phase1 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase1 $(NETWORK_ARGS)
 
 mockPhase2:
-	@forge script script/MakeContractsAlive.s.sol:Phase2 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase2 $(NETWORK_ARGS)
 
 mockPhase3:
-	@forge script script/MakeContractsAlive.s.sol:Phase3 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase3 $(NETWORK_ARGS)
 
 mockPhase4:
-	@forge script script/MakeContractsAlive.s.sol:Phase4 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase4 $(NETWORK_ARGS)
 
 mockPhase5:
-	@forge script script/MakeContractsAlive.s.sol:Phase5 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase5 $(NETWORK_ARGS)
 
 mockPhase6:
-	@forge script script/MakeContractsAlive.s.sol:Phase6 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase6 $(NETWORK_ARGS)
 
 mockPhase7:
-	@forge script script/MakeContractsAlive.s.sol:Phase7 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase7 $(NETWORK_ARGS)
 
 mockPhase8:
-	@forge script script/MakeContractsAlive.s.sol:Phase8 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase8 $(NETWORK_ARGS)
 
 mockPhase9:
-	@forge script script/MakeContractsAlive.s.sol:Phase9 $(NETWORK_ARGS)
+	@forge script script/MockPiecesMarket.s.sol:Phase9 $(NETWORK_ARGS)
