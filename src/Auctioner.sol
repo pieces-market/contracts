@@ -60,6 +60,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @param end Timestamp when the auction should end
     /// @param recipient Wallet address where funds from asset sale will be transferred
     /// @param royalty The royalty fee (BIPS) to be paid to the @param recipient on each secondary sale, as per the ERC2981 standard
+    /// @param brokerShare The percentage of the royalty fee that will be sent to the broker
     function create(
         string memory name,
         string memory symbol,
