@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 interface IAsset {
     error VotesDelegationOnlyOnTokensTransfer();
     error RoyaltyTransferFailed();
+    error InvalidBrokerFee();
 
     /// @notice Emitted when the royalty fee has been split successfully between the broker and the pieces market
     /// @param sender The address that sent the royalty fee
