@@ -70,7 +70,7 @@ contract Governor is Ownable, IGovernor {
         if (proposal.state != ProposalState.ACTIVE) revert Governor__ProposalNotActive();
         if (proposal.hasVoted[msg.sender] == true) revert Governor__AlreadyVoted();
 
-        uint256 votes = Asset(proposal.asset).getPastVotes(msg.sender, proposal.voteStart);
+        uint256 votes = Asset(payable(proposal.asset)).getPastVotes(msg.sender, proposal.voteStart);
         if (votes == 0) revert Governor__ZeroVotingPower();
 
         if (vote == VoteType.FOR) {
@@ -113,7 +113,7 @@ contract Governor is Ownable, IGovernor {
             uint id = s_ongoingProposals[i];
             ProposalCore storage proposal = s_proposals[id];
 
-            bool isSucceeded = (Asset(proposal.asset).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
+            bool isSucceeded = (Asset(payable(proposal.asset)).getPastTotalSupply(proposal.voteStart) / 2 < proposal.forVotes + proposal.againstVotes) &&
                 (proposal.forVotes > proposal.againstVotes);
 
             bool isFailed = block.timestamp > proposal.voteEnd;
