@@ -16,30 +16,34 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
     address private immutable i_broker;
-    uint256 private immutable i_brokerShare; // compare uint8 (0-100)
+    uint256 private immutable i_brokerFee; //
     address private constant PIECES_MARKET = 0x7eAFE197018d6dfFeF84442Ef113A22A4a191CCD;
 
     /// @dev Constructor
+    /// @param royalty 500 = 5% fee
+    /// @param brokerFee 5000 = 50% broker share
     constructor(
         string memory name,
         string memory symbol,
         string memory uri,
         address broker,
-        uint96 royaltyFee,
-        uint256 brokerShare,
+        uint96 royalty,
+        uint256 brokerFee,
         address owner
     ) ERC721A(name, symbol) EIP712(name, "version 1") Ownable(owner) {
+        if (brokerFee > _feeDenominator()) revert InvalidBrokerFee();
+
         baseURI = uri;
         i_broker = broker;
-        i_brokerShare = brokerShare;
+        i_brokerFee = brokerFee;
 
         /// @param asset is royalty fee receiver
-        _setDefaultRoyalty(address(this), royaltyFee);
+        _setDefaultRoyalty(address(this), royalty);
     }
 
     /// @notice Handles incoming royalty payments, splitting the funds between the broker and the pieces market based on the configured broker share
     receive() external payable {
-        uint256 brokerShare = (msg.value * i_brokerShare) / 10000;
+        uint256 brokerShare = (msg.value * i_brokerFee) / _feeDenominator();
         uint256 remainingShare = msg.value - brokerShare;
 
         (bool brokerTransfer, ) = i_broker.call{value: brokerShare}("");
