@@ -48,57 +48,57 @@ contract AuctionerTest is Test {
     function testCantCreateAuctionIfNotAdminOrIfPassingIncorrectParameters() public {
         vm.prank(DEVIL);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, DEVIL));
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
-        auctioner.create("Asset", "AST", "https:", 0, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 0, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 0, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 0, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 0, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 0, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
-        auctioner.create("", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
-        auctioner.create("Asset", "", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroValueNotAllowed.selector);
-        auctioner.create("Asset", "AST", "", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, 0, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, 0, block.timestamp + 7 days, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 0, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, 0, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__IncorrectTimestamp.selector);
         // 345_599 = 4 days without 1 second
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp + 3 days, block.timestamp + 345_599, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp + 3 days, block.timestamp + 345_599, BROKER, 500, 50);
 
         vm.prank(ADMIN);
         vm.expectRevert(IAuctioner.Auctioner__ZeroAddressNotAllowed.selector);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, address(0), 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, address(0), 500, 50);
     }
 
     function testCanCreateAuctionAndEmitCreate() public {
         vm.prank(ADMIN);
         vm.expectEmit(false, false, false, false, address(auctioner));
-        emit IAuctioner.Create(0, address(asset), 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        emit IAuctioner.Create(0, address(asset), 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
         vm.expectEmit(true, true, true, true, address(auctioner));
         emit IAuctioner.StateChange(0, IAuctioner.AuctionState.OPENED);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
     }
 
     //////////////////////////////////////////////////
@@ -162,7 +162,7 @@ contract AuctionerTest is Test {
         InvalidRecipient recipient = new InvalidRecipient();
 
         vm.prank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, address(recipient), 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, address(recipient), 500, 50);
 
         vm.prank(BROKER);
         auctioner.buy{value: 50 ether}(0, 25);
@@ -607,12 +607,12 @@ contract AuctionerTest is Test {
         assertEq(upkeep, false);
 
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 3 days, BROKER, 500); // 0
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500); // 1
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 3 days, BROKER, 500); // 2
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, block.timestamp + 12 days, BROKER, 500); // 3
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 5 days, BROKER, 500); // 4
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 2 days, BROKER, 500); // 5
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 3 days, BROKER, 500, 50); // 0
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50); // 1
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 3 days, BROKER, 500, 50); // 2
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, block.timestamp + 12 days, BROKER, 500, 50); // 3
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 5 days, BROKER, 500, 50); // 4
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 2 days, BROKER, 500, 50); // 5
         vm.stopPrank();
 
         vm.warp(block.timestamp + 3 days + 1);
@@ -624,12 +624,12 @@ contract AuctionerTest is Test {
         bool upkeep;
 
         vm.startPrank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 3 days, BROKER, 500); // 0
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500); // 1
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 3 days, BROKER, 500); // 2
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, block.timestamp + 13 days, BROKER, 500); // 3
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 5 days, BROKER, 500); // 4
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 2 days, BROKER, 500); // 5
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 1 days, block.timestamp + 3 days, BROKER, 500, 50); // 0
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50); // 1
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 3 days, BROKER, 500, 50); // 2
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 4 days, block.timestamp + 13 days, BROKER, 500, 50); // 3
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 3 days, block.timestamp + 5 days, BROKER, 500, 50); // 4
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 2 days, BROKER, 500, 50); // 5
         vm.stopPrank();
 
         vm.warp(block.timestamp + 3 days + 1);
@@ -655,7 +655,7 @@ contract AuctionerTest is Test {
         if (upkeep) auctioner.exec();
 
         vm.prank(ADMIN);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 6 days, block.timestamp + 10 days, BROKER, 500); // 6
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp + 6 days, block.timestamp + 10 days, BROKER, 500, 50); // 6
 
         vm.warp(block.timestamp + 6 days + 1);
         (upkeep, ) = auctioner.checker();
@@ -669,11 +669,11 @@ contract AuctionerTest is Test {
     modifier auctionCreated() {
         vm.prank(ADMIN);
         vm.recordLogs();
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 25, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         address createdAsset = address(uint160(uint256(entries[1].topics[2])));
-        asset = Asset(createdAsset);
+        asset = Asset(payable(createdAsset));
 
         console.log("Asset: ", address(asset));
 
