@@ -36,13 +36,13 @@ contract GovernorTest is Test {
 
         vm.startPrank(ADMIN);
         vm.recordLogs();
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         address createdAsset = address(uint160(uint256(entries[1].topics[2])));
-        asset = Asset(createdAsset);
+        asset = Asset(payable(createdAsset));
 
         encodedBuyoutFn = abi.encodeWithSignature("buyout(uint256)", 0);
         encodedDescriptFn = abi.encodeWithSelector(auctioner.descript.selector, 0, "vamp");
