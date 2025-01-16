@@ -9,6 +9,7 @@ import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "../../src/extensions/ERC721AVotes.sol";
 
 import {IAuctioner} from "../../src/interfaces/IAuctioner.sol";
+import {IAsset} from "../../src/interfaces/IAsset.sol";
 import {IERC721A} from "@ERC721A/contracts/IERC721A.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -24,6 +25,7 @@ contract AssetTest is Test {
     address private FOUNDATION = vm.addr(vm.envUint("FOUNDATION_KEY"));
     address private USER = makeAddr("user");
     address private DEVIL = makeAddr("devil");
+    address private MARKETPLACE = makeAddr("marketplace");
 
     function setUp() public {
         vm.startPrank(ADMIN);
@@ -33,19 +35,20 @@ contract AssetTest is Test {
 
         vm.recordLogs();
         vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 5000);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 5000);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         address createdAsset = address(uint160(uint256(entries[2].topics[2])));
-        asset = Asset(createdAsset);
+        asset = Asset(payable(createdAsset));
 
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
 
         deal(USER, STARTING_BALANCE);
         deal(DEVIL, STARTING_BALANCE);
+        deal(MARKETPLACE, STARTING_BALANCE);
     }
 
     function testCountsTotalMintedTokensAndAssignsCorrectURIAndRevertsForNonExistenToken() public {
@@ -137,10 +140,10 @@ contract AssetTest is Test {
 
     function testCannotDelegateVotesWithoutTokensTransfer() public {
         vm.startPrank(DEVIL);
-        vm.expectRevert(Asset.VotesDelegationOnlyOnTokensTransfer.selector);
+        vm.expectRevert(IAsset.VotesDelegationOnlyOnTokensTransfer.selector);
         asset.delegate(BROKER);
 
-        vm.expectRevert(Asset.VotesDelegationOnlyOnTokensTransfer.selector);
+        vm.expectRevert(IAsset.VotesDelegationOnlyOnTokensTransfer.selector);
         asset.delegateBySig(BROKER, 6, 6, 6, "", "");
     }
 
@@ -176,7 +179,7 @@ contract AssetTest is Test {
     function testCannotCreateAssetWithIncorrectRoyaltyFee() public {
         vm.prank(ADMIN);
         vm.expectRevert(abi.encodeWithSelector(ERC2981.ERC2981InvalidDefaultRoyalty.selector, 10001, 10000));
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 10001);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 10001, 50);
     }
 
     function testDefaultRoyaltiesAndRoyaltyValue() public {
@@ -188,8 +191,43 @@ contract AssetTest is Test {
 
         (address receiver, uint256 royaltyValue) = asset.royaltyInfo(3, 0.0000000017 ether);
 
-        assertEq(receiver, BROKER);
+        assertEq(receiver, address(asset));
         /// @dev 5% from 1700000000 WEI
         assertEq(royaltyValue, 85000000);
+    }
+
+    function testAssetCost() public {
+        new Asset("Asset", "AST", "https:", BROKER, 500, 50, address(auctioner));
+
+        // cost snapshot: 2_352_889
+        // 2_470_799 uint256
+        // 2_470_882
+    }
+
+    function testMarketplacePayment() public {
+        console.log("Testing Marketplace Transfer...");
+        console.log("Asset: ", address(asset));
+        console.log("BROKER: ", BROKER);
+        console.log("Pieces: ", FOUNDATION);
+
+        (, uint256 royaltyValue) = asset.royaltyInfo(3, 10 ether);
+
+        vm.prank(MARKETPLACE);
+        (bool marketplaceRoyaltyTransfer, ) = address(asset).call{value: royaltyValue}("");
+        assertEq(true, marketplaceRoyaltyTransfer);
+
+        // Royalty: 5% - 5
+        // Broker Fee: 50% - 2.5
+
+        assertEq(address(asset).balance, 0);
+        assertEq(MARKETPLACE.balance, 90 ether);
+        assertEq(BROKER.balance, 5 ether);
+        assertEq(FOUNDATION.balance, 5 ether);
+
+        assertEq(BROKER.code.length, 0);
+        assertEq(FOUNDATION.code.length, 0);
+
+        // 83874 uint256
+        // 83874 uint8
     }
 }
