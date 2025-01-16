@@ -48,6 +48,7 @@ interface IAuctioner {
     /// @param end The timestamp when the auction ends
     /// @param recipient The wallet address where funds from asset sale will be transferred
     /// @param royalty The royalty fee (BIPS) to be paid to the @param recipient on each secondary sale, as per the ERC2981 standard
+    /// @param brokerFee The broker share (BIPS) of the royalty fee
     event Create(
         uint256 indexed id,
         address indexed asset,
@@ -57,7 +58,8 @@ interface IAuctioner {
         uint256 start,
         uint256 end,
         address indexed recipient,
-        uint96 royalty
+        uint96 royalty,
+        uint96 brokerFee
     );
 
     /// @notice Emitted when an auction is created for timestamp in future
