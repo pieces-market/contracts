@@ -59,7 +59,7 @@ interface IAuctioner {
         uint256 end,
         address indexed recipient,
         uint96 royalty,
-        uint96 brokerFee
+        uint256 brokerFee
     );
 
     /// @notice Emitted when an auction is created for timestamp in future

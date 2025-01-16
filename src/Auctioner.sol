@@ -72,7 +72,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 end,
         address recipient,
         uint96 royalty,
-        uint96 brokerFee
+        uint256 brokerFee
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
