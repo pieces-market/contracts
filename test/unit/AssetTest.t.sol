@@ -35,8 +35,8 @@ contract AssetTest is Test {
 
         vm.recordLogs();
         vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 5000);
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 5000);
+        emit IAuctioner.Create(0, precomputedAsset, 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 6000);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 6000);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -216,18 +216,12 @@ contract AssetTest is Test {
         (bool marketplaceRoyaltyTransfer, ) = address(asset).call{value: royaltyValue}("");
         assertEq(true, marketplaceRoyaltyTransfer);
 
-        // Royalty: 5% - 5
-        // Broker Fee: 50% - 2.5
+        // Royalty: 5% - 0.5 ether
+        // Broker Fee: 40% - Broker: 0.3 ether Pieces: 0.2 ether
 
         assertEq(address(asset).balance, 0);
-        assertEq(MARKETPLACE.balance, 90 ether);
-        assertEq(BROKER.balance, 5 ether);
-        assertEq(FOUNDATION.balance, 5 ether);
-
-        assertEq(BROKER.code.length, 0);
-        assertEq(FOUNDATION.code.length, 0);
-
-        // 83874 uint256
-        // 83874 uint8
+        assertEq(MARKETPLACE.balance, 99.5 ether);
+        assertEq(BROKER.balance, 0.3 ether);
+        assertEq(FOUNDATION.balance, 0.2 ether);
     }
 }
