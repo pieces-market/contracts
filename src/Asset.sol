@@ -16,7 +16,7 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
     /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
     address private immutable i_broker;
-    uint256 private immutable i_brokerFee; //
+    uint256 private immutable i_brokerFee;
     address private constant PIECES_MARKET = 0x7eAFE197018d6dfFeF84442Ef113A22A4a191CCD;
 
     /// @dev Constructor
