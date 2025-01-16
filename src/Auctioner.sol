@@ -60,7 +60,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     /// @param end Timestamp when the auction should end
     /// @param recipient Wallet address where funds from asset sale will be transferred
     /// @param royalty The royalty fee (BIPS) to be paid to the @param recipient on each secondary sale, as per the ERC2981 standard
-    /// @param brokerShare The percentage of the royalty fee that will be sent to the broker
+    /// @param brokerFee The broker share (BIPS) of the royalty fee
     function create(
         string memory name,
         string memory symbol,
@@ -72,7 +72,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         uint256 end,
         address recipient,
         uint96 royalty,
-        uint256 brokerShare
+        uint96 brokerFee
     ) external onlyOwner {
         Auction storage auction = s_auctions[s_totalAuctions];
         if (price == 0 || pieces == 0 || max == 0 || bytes(name).length == 0 || bytes(symbol).length == 0 || bytes(uri).length == 0)
@@ -81,7 +81,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         if (recipient == address(0)) revert Auctioner__ZeroAddressNotAllowed();
 
         /// @notice Creating new NFT (asset)
-        Asset asset = new Asset(name, symbol, uri, recipient, royalty, brokerShare, address(this));
+        Asset asset = new Asset(name, symbol, uri, recipient, royalty, brokerFee, address(this));
 
         auction.asset = address(asset);
         auction.price = price;
@@ -101,7 +101,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
         s_ongoingAuctions.push(s_totalAuctions);
 
-        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient, royalty);
+        emit Create(s_totalAuctions, address(asset), price, pieces, max, start, end, recipient, royalty, brokerFee);
         emit StateChange(s_totalAuctions, auction.state);
 
         s_totalAuctions++;
