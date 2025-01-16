@@ -32,12 +32,12 @@ contract TmpCostsTest is Test {
         governor.transferOwnership(address(auctioner));
 
         vm.recordLogs();
-        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 100, block.timestamp, block.timestamp + 7 days, BROKER, 500);
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 100, block.timestamp, block.timestamp + 7 days, BROKER, 500, 50);
         vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         address createdAsset = address(uint160(uint256(entries[1].topics[2])));
-        asset = Asset(createdAsset);
+        asset = Asset(payable(createdAsset));
 
         console.log("Auctioner: ", address(auctioner));
         console.log("Asset: ", address(asset));
@@ -59,7 +59,7 @@ contract TmpCostsTest is Test {
     }
 
     function testDeployAssetCost() external {
-        new Asset("Asset", "AST", "https:", BROKER, 500, address(auctioner));
+        new Asset("Asset", "AST", "https:", BROKER, 500, 50, address(auctioner));
 
         // cost snapshot: 2_352_889
     }
