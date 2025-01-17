@@ -116,6 +116,10 @@ deployPiecesMarketAlephT:
 deployPiecesMarketDevAlephT:
 	@forge script script/DeployPiecesMarketDev.s.sol:DeployPiecesMarketDev $(NETWORK_ARGS)
 
+# INTERACTIONS
+create:
+	@forge script script/Interactions.s.sol:Create $(NETWORK_ARGS) --sig "run()"
+
 # MOCK TRANSACTIONS SCRIPTS
 mockPiecesMarketTxAlephT:
 	@forge script script/MockPiecesMarket.s.sol:MockPiecesMarket $(NETWORK_ARGS)
