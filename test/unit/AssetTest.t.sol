@@ -176,10 +176,16 @@ contract AssetTest is Test {
         // }
     }
 
-    function testCannotCreateAssetWithIncorrectRoyaltyFee() public {
+    function testCannotCreateAssetWithIncorrectRoyaltyFeeNominator() public {
         vm.prank(ADMIN);
         vm.expectRevert(abi.encodeWithSelector(ERC2981.ERC2981InvalidDefaultRoyalty.selector, 10001, 10000));
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 10001, 50);
+    }
+
+    function testCantCreateAssetWithIncorrectBrokerFeeNominator() public {
+        vm.prank(ADMIN);
+        vm.expectRevert(abi.encodeWithSelector(IAsset.InvalidBrokerFee.selector));
+        auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 500, 10001);
     }
 
     function testDefaultRoyaltiesAndRoyaltyValue() public {
@@ -194,14 +200,6 @@ contract AssetTest is Test {
         assertEq(receiver, address(asset));
         /// @dev 5% from 1700000000 WEI
         assertEq(royaltyValue, 85000000);
-    }
-
-    function testAssetCost() public {
-        new Asset("Asset", "AST", "https:", BROKER, 500, 50, address(auctioner));
-
-        // cost snapshot: 2_352_889
-        // 2_470_799 uint256
-        // 2_470_882
     }
 
     function testMarketplacePayment() public {
