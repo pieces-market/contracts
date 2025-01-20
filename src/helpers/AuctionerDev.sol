@@ -47,6 +47,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev Mappings
     mapping(uint256 id => Auction) private s_auctions;
+    mapping(address asset => bool eligible) private s_eligibleAssets;
 
     /// @dev Constructor
     constructor(address foundation, address governor) Ownable(msg.sender) {
@@ -89,6 +90,10 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         /// @notice Creating new NFT (asset)
         Asset asset = new Asset(name, symbol, uri, recipient, royalty, brokerFee, address(this));
 
+        // Update assets eligible list
+        s_eligibleAssets[address(asset)] = true;
+
+        // Update Auction struct
         auction.asset = address(asset);
         auction.price = price;
         auction.pieces = pieces;
@@ -314,6 +319,16 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     // ====================================
+    //              Royalty
+    // ====================================
+
+    function emitRoyaltySplit(address payer, address broker, uint256 brokerShare, address piecesMarket, uint256 piecesShare, uint256 totalValue) external {
+        if (!s_eligibleAssets[msg.sender]) revert Auctioner__NotEligibleCaller();
+
+        emit RoyaltySplitExecuted(payer, broker, brokerShare, piecesMarket, piecesShare, totalValue);
+    }
+
+    // ====================================
     //              Automation
     // ====================================
 
@@ -412,14 +427,6 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev HELPER DEV ONLY
     function errorHack(uint256 errorType) public pure {
-        // 0 - Auctioner__AuctionDoesNotExist
-        // 1 - Auctioner__AuctionNotOpened
-        // 2 - Auctioner__AuctionNotClosed
-        // 3 - Auctioner__AuctionNotFailed
-        // 4 - Auctioner__InsufficientPieces
-        // 5 - Auctioner__InsufficientFunds
-        // ...
-
         if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
         if (errorType == 1) revert Auctioner__AuctionNotOpened();
         if (errorType == 2) revert Auctioner__AuctionNotClosed();
@@ -436,6 +443,7 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         if (errorType == 14) revert Auctioner__ProposalInProgress();
         if (errorType == 15) revert Auctioner__InvalidProposalType();
         if (errorType == 16) revert Auctioner__IncorrectFundsTransfer();
+        if (errorType == 17) revert Auctioner__NotEligibleCaller();
     }
 
     /// @dev HELPER DEV ONLY
@@ -457,11 +465,6 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev HELPER DEV ONLY
     function eventHack(uint256 eventId) public {
-        // 0 - Create event
-        // 1 - Schedule event
-        // 2 - Purchase event
-        // ...
-
         if (eventId == 0) emit Create(1, address(666), 0.1 ether, 80, 20, 666, 777, address(6), 500, 50);
         if (eventId == 1) emit Schedule(1, 0);
         if (eventId == 2) emit Purchase(1, 0, address(6));
@@ -473,5 +476,6 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         if (eventId == 8) emit TransferToBroker(0, 0, address(0));
         if (eventId == 9) emit StateChange(1, AuctionState.UNINITIALIZED);
         if (eventId == 10) emit UpdateTimestamp(block.timestamp);
+        if (eventId == 11) emit RoyaltySplitExecuted(address(555), address(666), 0.3 ether, address(777), 0.2 ether, 0.5 ether);
     }
 }
