@@ -117,8 +117,12 @@ deployPiecesMarketDevAlephT:
 	@forge script script/DeployPiecesMarketDev.s.sol:DeployPiecesMarketDev $(NETWORK_ARGS)
 
 # INTERACTIONS
+
+# Update Params To Make Proper Calls
+AUCTIONER:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+
 create:
-	@forge script script/Interactions.s.sol:Create $(NETWORK_ARGS) --sig "run()"
+	@forge script script/Interactions.s.sol:Create $(NETWORK_ARGS) --sig "run(address)" $(AUCTIONER)
 
 # MOCK TRANSACTIONS SCRIPTS
 mockPiecesMarketTxAlephT:
