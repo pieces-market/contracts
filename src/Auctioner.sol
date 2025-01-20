@@ -41,6 +41,7 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
     /// @dev Mappings
     mapping(uint256 id => Auction) private s_auctions;
+    mapping(address asset => bool eligible) private s_eligibleAssets;
 
     /// @dev Constructor
     constructor(address foundation, address governor) Ownable(msg.sender) {
@@ -83,6 +84,10 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
         /// @notice Creating new NFT (asset)
         Asset asset = new Asset(name, symbol, uri, recipient, royalty, brokerFee, address(this));
 
+        // Update assets eligible list
+        s_eligibleAssets[address(asset)] = true;
+
+        // Update Auction struct
         auction.asset = address(asset);
         auction.price = price;
         auction.pieces = pieces;
@@ -305,6 +310,16 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
 
             emit StateChange(id, auction.state);
         }
+    }
+
+    // ====================================
+    //              Royalty
+    // ====================================
+
+    function emitRoyaltySplit(address payer, address broker, uint256 brokerShare, address piecesMarket, uint256 piecesShare, uint256 totalValue) external {
+        if (!s_eligibleAssets[msg.sender]) revert Auctioner__NotEligibleCaller();
+
+        emit RoyaltySplitExecuted(payer, broker, brokerShare, piecesMarket, piecesShare, totalValue);
     }
 
     // ====================================
