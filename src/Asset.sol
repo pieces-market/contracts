@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.25;
 
+import {Auctioner} from "./Auctioner.sol";
 import {ERC721A} from "@ERC721A/contracts/ERC721A.sol";
 import {ERC721AQueryable} from "@ERC721A/contracts/extensions/ERC721AQueryable.sol";
 import "./extensions/ERC721AVotes.sol";
@@ -50,6 +51,9 @@ contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Owna
         (bool piecesTransfer, ) = PIECES_MARKET.call{value: remainingShare}("");
 
         if (!brokerTransfer || !piecesTransfer) revert RoyaltyTransferFailed();
+
+        // Notify Auctioner of royalty payment split
+        Auctioner(owner()).emitRoyaltySplit(msg.sender, i_broker, brokerShare, PIECES_MARKET, remainingShare, msg.value);
     }
 
     /// @notice Leads to Metadata, which is unique for each token
