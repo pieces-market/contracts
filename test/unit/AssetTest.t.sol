@@ -19,6 +19,7 @@ contract AssetTest is Test {
     Asset private asset;
 
     uint256 private constant STARTING_BALANCE = 100 ether;
+    address private constant PIECES_MARKET = 0x7eAFE197018d6dfFeF84442Ef113A22A4a191CCD;
 
     address private ADMIN = vm.addr(vm.envUint("ADMIN_KEY"));
     address private BROKER = vm.addr(vm.envUint("BROKER_KEY"));
@@ -176,7 +177,7 @@ contract AssetTest is Test {
         // }
     }
 
-    function testCannotCreateAssetWithIncorrectRoyaltyFeeNominator() public {
+    function testCantCreateAssetWithIncorrectRoyaltyFeeNominator() public {
         vm.prank(ADMIN);
         vm.expectRevert(abi.encodeWithSelector(ERC2981.ERC2981InvalidDefaultRoyalty.selector, 10001, 10000));
         auctioner.create("Asset", "AST", "https:", 2 ether, 100, 10, block.timestamp, block.timestamp + 7 days, BROKER, 10001, 50);
@@ -202,6 +203,12 @@ contract AssetTest is Test {
         assertEq(royaltyValue, 85000000);
     }
 
+    function testCantExecuteEmitRoyaltyEventIfNotAsset() public {
+        vm.prank(DEVIL);
+        vm.expectRevert(abi.encodeWithSelector(IAuctioner.Auctioner__NotEligibleCaller.selector));
+        auctioner.emitRoyaltySplit(MARKETPLACE, BROKER, 0.3 ether, PIECES_MARKET, 0.2 ether, 0.5 ether);
+    }
+
     function testMarketplacePayment() public {
         console.log("Testing Marketplace Transfer...");
         console.log("Asset: ", address(asset));
@@ -211,6 +218,8 @@ contract AssetTest is Test {
         (, uint256 royaltyValue) = asset.royaltyInfo(3, 10 ether);
 
         vm.prank(MARKETPLACE);
+        vm.expectEmit(true, true, true, true, address(auctioner));
+        emit IAuctioner.RoyaltySplitExecuted(MARKETPLACE, BROKER, 0.3 ether, PIECES_MARKET, 0.2 ether, 0.5 ether);
         (bool marketplaceRoyaltyTransfer, ) = address(asset).call{value: royaltyValue}("");
         assertEq(true, marketplaceRoyaltyTransfer);
 
