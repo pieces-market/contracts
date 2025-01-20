@@ -6,11 +6,11 @@ import {Auctioner} from "../src/Auctioner.sol";
 import {Governor} from "../src/Governor.sol";
 
 contract Create is Script {
-    function run() external {
+    function run(address auctioner) external {
         uint deployerKey = vm.envUint("ADMIN_KEY");
 
         vm.startBroadcast(deployerKey);
-        Auctioner(0x49fb395f72243Bb82e53f0E50A57C0B878AD0AcB).create(
+        Auctioner(auctioner).create(
             "Asset",
             "AST",
             "https:",
