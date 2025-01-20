@@ -22,6 +22,7 @@ interface IAuctioner {
     error Auctioner__InvalidProposalType();
     error Auctioner__IncorrectDescriptionSize();
     error Auctioner__IncorrectFundsTransfer();
+    error Auctioner__NotEligibleCaller();
 
     enum AuctionState {
         UNINITIALIZED,
@@ -128,6 +129,22 @@ interface IAuctioner {
     /// @param id The id of the auction
     /// @param state The new state of the auction
     event StateChange(uint256 indexed id, AuctionState indexed state);
+
+    /// @notice Emitted when the royalty fee has been split successfully between the broker and the pieces market
+    /// @param sender The address that sent the royalty fee
+    /// @param broker The address that receives broker share of royalty payment
+    /// @param brokerShare The portion of the royalty fee sent to the broker
+    /// @param piecesMarket The address of the pieces market wallet that receives share of royalty payment
+    /// @param piecesMarketShare The portion of the royalty fee sent to the pieces market
+    /// @param value The total value of the royalty fee
+    event RoyaltySplitExecuted(
+        address sender,
+        address indexed broker,
+        uint256 indexed brokerShare,
+        address piecesMarket,
+        uint256 indexed piecesMarketShare,
+        uint256 value
+    );
 
     /// @notice Allows buying pieces of asset auctioned by broker
     /// @param id Auction id that we want to interact with
