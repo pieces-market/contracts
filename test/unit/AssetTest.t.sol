@@ -219,7 +219,7 @@ contract AssetTest is Test {
 
         vm.prank(MARKETPLACE);
         vm.expectEmit(true, true, true, true, address(auctioner));
-        emit IAuctioner.RoyaltySplitExecuted(MARKETPLACE, BROKER, 0.3 ether, PIECES_MARKET, 0.2 ether, 0.5 ether);
+        emit IAuctioner.RoyaltySplitExecuted(address(asset), MARKETPLACE, BROKER, 0.3 ether, PIECES_MARKET, 0.2 ether, 0.5 ether);
         (bool marketplaceRoyaltyTransfer, ) = address(asset).call{value: royaltyValue}("");
         assertEq(true, marketplaceRoyaltyTransfer);
 
