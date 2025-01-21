@@ -316,10 +316,17 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     //              Royalty
     // ====================================
 
-    function emitRoyaltySplit(address payer, address broker, uint256 brokerShare, address piecesMarket, uint256 piecesShare, uint256 totalValue) external {
+    function emitRoyaltySplit(
+        address payer,
+        address broker,
+        uint256 brokerShare,
+        address piecesMarket,
+        uint256 piecesMarketShare,
+        uint256 totalValue
+    ) external {
         if (!s_eligibleAssets[msg.sender]) revert Auctioner__NotEligibleCaller();
 
-        emit RoyaltySplitExecuted(payer, broker, brokerShare, piecesMarket, piecesShare, totalValue);
+        emit RoyaltySplitExecuted(msg.sender, payer, broker, brokerShare, piecesMarket, piecesMarketShare, totalValue);
     }
 
     // ====================================
