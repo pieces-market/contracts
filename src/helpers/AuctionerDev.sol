@@ -322,10 +322,17 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
     //              Royalty
     // ====================================
 
-    function emitRoyaltySplit(address payer, address broker, uint256 brokerShare, address piecesMarket, uint256 piecesShare, uint256 totalValue) external {
+    function emitRoyaltySplit(
+        address payer,
+        address broker,
+        uint256 brokerShare,
+        address piecesMarket,
+        uint256 piecesMarketShare,
+        uint256 totalValue
+    ) external {
         if (!s_eligibleAssets[msg.sender]) revert Auctioner__NotEligibleCaller();
 
-        emit RoyaltySplitExecuted(payer, broker, brokerShare, piecesMarket, piecesShare, totalValue);
+        emit RoyaltySplitExecuted(msg.sender, payer, broker, brokerShare, piecesMarket, piecesMarketShare, totalValue);
     }
 
     // ====================================
@@ -476,6 +483,6 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
         if (eventId == 8) emit TransferToBroker(0, 0, address(0));
         if (eventId == 9) emit StateChange(1, AuctionState.UNINITIALIZED);
         if (eventId == 10) emit UpdateTimestamp(block.timestamp);
-        if (eventId == 11) emit RoyaltySplitExecuted(address(555), address(666), 0.3 ether, address(777), 0.2 ether, 0.5 ether);
+        if (eventId == 11) emit RoyaltySplitExecuted(address(333), address(555), address(666), 0.3 ether, address(777), 0.2 ether, 0.5 ether);
     }
 }
