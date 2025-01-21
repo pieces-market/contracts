@@ -131,6 +131,7 @@ interface IAuctioner {
     event StateChange(uint256 indexed id, AuctionState indexed state);
 
     /// @notice Emitted when the royalty fee has been split successfully between the broker and the pieces market
+    /// @param asset The address of the NFT that received royalty payment
     /// @param sender The address that sent the royalty fee
     /// @param broker The address that receives broker share of royalty payment
     /// @param brokerShare The portion of the royalty fee sent to the broker
@@ -138,6 +139,7 @@ interface IAuctioner {
     /// @param piecesMarketShare The portion of the royalty fee sent to the pieces market
     /// @param value The total value of the royalty fee
     event RoyaltySplitExecuted(
+        address asset,
         address sender,
         address indexed broker,
         uint256 indexed brokerShare,
