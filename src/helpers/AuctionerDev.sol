@@ -433,25 +433,25 @@ contract AuctionerDev is ReentrancyGuard, Ownable, IAuctioner {
     }
 
     /// @dev HELPER DEV ONLY
-    function errorHack(uint256 errorType) public pure {
-        if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
-        if (errorType == 1) revert Auctioner__AuctionNotOpened();
-        if (errorType == 2) revert Auctioner__AuctionNotClosed();
-        if (errorType == 3) revert Auctioner__AuctionNotFailed();
-        if (errorType == 4) revert Auctioner__AuctionNotFinished();
-        if (errorType == 5) revert Auctioner__InsufficientPieces();
-        if (errorType == 6) revert Auctioner__InsufficientFunds();
-        if (errorType == 7) revert Auctioner__TransferFailed();
-        if (errorType == 8) revert Auctioner__ZeroValueNotAllowed();
-        if (errorType == 9) revert Auctioner__IncorrectTimestamp();
-        if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
-        if (errorType == 11) revert Auctioner__Overpayment();
-        if (errorType == 12) revert Auctioner__BuyLimitExceeded();
-        if (errorType == 14) revert Auctioner__ProposalInProgress();
-        if (errorType == 15) revert Auctioner__InvalidProposalType();
-        if (errorType == 16) revert Auctioner__IncorrectFundsTransfer();
-        if (errorType == 17) revert Auctioner__NotEligibleCaller();
-    }
+    // function errorHack(uint256 errorType) public pure {
+    //     if (errorType == 0) revert Auctioner__AuctionDoesNotExist();
+    //     if (errorType == 1) revert Auctioner__AuctionNotOpened();
+    //     if (errorType == 2) revert Auctioner__AuctionNotClosed();
+    //     if (errorType == 3) revert Auctioner__AuctionNotFailed();
+    //     if (errorType == 4) revert Auctioner__AuctionNotFinished();
+    //     if (errorType == 5) revert Auctioner__InsufficientPieces();
+    //     if (errorType == 6) revert Auctioner__InsufficientFunds();
+    //     if (errorType == 7) revert Auctioner__TransferFailed();
+    //     if (errorType == 8) revert Auctioner__ZeroValueNotAllowed();
+    //     if (errorType == 9) revert Auctioner__IncorrectTimestamp();
+    //     if (errorType == 10) revert Auctioner__ZeroAddressNotAllowed();
+    //     if (errorType == 11) revert Auctioner__Overpayment();
+    //     if (errorType == 12) revert Auctioner__BuyLimitExceeded();
+    //     if (errorType == 14) revert Auctioner__ProposalInProgress();
+    //     if (errorType == 15) revert Auctioner__InvalidProposalType();
+    //     if (errorType == 16) revert Auctioner__IncorrectFundsTransfer();
+    //     if (errorType == 17) revert Auctioner__NotEligibleCaller();
+    // }
 
     /// @dev HELPER DEV ONLY
     function stateHack(uint256 id, uint256 state) public {
