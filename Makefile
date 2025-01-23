@@ -119,10 +119,13 @@ deployPiecesMarketDevAlephT:
 # INTERACTIONS
 
 # Update Params To Make Proper Calls
-AUCTIONER:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+AUCTIONER:= 0x40b9bDd36c5eFC0ad49A1e17d46DD54Ca404b20e
 
 create:
 	@forge script script/Interactions.s.sol:Create $(NETWORK_ARGS) --sig "run(address)" $(AUCTIONER)
+
+hack:
+	@forge script script/Interactions.s.sol:HackRoyalty $(NETWORK_ARGS) --sig "run(address)" $(AUCTIONER)
 
 # MOCK TRANSACTIONS SCRIPTS
 mockPiecesMarketTxAlephT:
