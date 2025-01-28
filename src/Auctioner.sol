@@ -19,7 +19,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
     address private immutable s_foundation;
     Governor private immutable i_governor;
 
-    /// @dev CONSIDER CHANGING BELOW INTO MAPPING IF POSSIBLE !!!
     /// @dev Arrays
     uint256[] private s_ongoingAuctions;
 
@@ -385,8 +384,6 @@ contract Auctioner is ReentrancyGuard, Ownable, IAuctioner {
                 // Swap current element with the last one to remove it
                 s_ongoingAuctions[i] = s_ongoingAuctions[s_ongoingAuctions.length - 1];
                 s_ongoingAuctions.pop();
-
-                // Consider adding emit here
 
                 // Do not increment 'i', recheck the element at index 'i' (since it was swapped)
                 continue;
