@@ -1,19 +1,14 @@
 # Todo
 
-1. ✅ Mock transactions on Aleph Zero blockchain testnet to reproduce all possible states of auction along with proposals and other possible transactions and branches
-2. ❌ Create and connect splitter contract for `Asset` under `royaltyInfo` function.
-3. ❌ Refactor 'Auctioner' functions to check equivalent of USD value instead of native blockchain currency (we will be using Oracles to get proper price feeds here)
-4. ❌ Implement Vlayer solution into 'Auctioner' 'fulfill' function to ensure cryptographic proof has been provided via email or other credentials
-5. ❌ Implement Cross Chain solution
-6. ❌ Consider implementing starting/minimal price for example 100 USD per piece
-7. ❌ Consider refactor for 'Propose' events on 'Auctioner' and 'Governor' to keep 'ProposalType' only in one of those and avoid duplication
-8. ❌ Fix all unit tests and implement advanced testing (fuzz testing and invariant, differential testing - if needed)
-9. ❌ Implement overwatch over royalty payments in API probably under blockchain listeners
-
-## On updated contracts switch (new Asset.sol)
-
-1. ❌ Fix database, API, blockchain listeners
-2. ❌ Fix frontend functions
+1. ❌ Refactor 'Auctioner' functions to check equivalent of USD value instead of native blockchain currency (we will be using Oracles to get proper price feeds here)
+2. ❌ Implement Vlayer solution into 'Auctioner' 'fulfill' function to ensure cryptographic proof has been provided via email or other credentials
+3. ❌ Implement Cross Chain solution
+4. ❌ Implement advanced testing (fuzz testing and invariant, differential testing - if needed)
+5. ✅ Mock transactions on Aleph Zero blockchain testnet to reproduce all possible states of auction along with proposals and other possible transactions and branches
+6. ✅ Create and connect splitter contract for `Asset` under `royaltyInfo` function.
+7. ✅ Consider refactor for 'Propose' events on 'Auctioner' and 'Governor' to keep 'ProposalType' only in one of those and avoid duplication
+8. ✅ Fix all unit tests
+9. ✅ Implement overwatch over royalty payments in API probably under blockchain listeners
 
 # Vlayer
 
