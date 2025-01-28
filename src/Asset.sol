@@ -14,7 +14,6 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 /// @title Asset Contract
 /// @notice ERC721A representation of Asset with cheap batch minting function
 contract Asset is ERC721A, ERC721AQueryable, EIP712, ERC721AVotes, ERC2981, Ownable, IAsset {
-    /// @dev Consider changing it into 'bytes32 private immutable'
     string private baseURI;
     address private immutable i_broker;
     uint256 private immutable i_brokerFee;
