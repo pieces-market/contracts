@@ -48,7 +48,7 @@ contract Governor is Ownable, IGovernor {
         proposal.auctionId = auctionId;
         proposal.asset = asset;
         proposal.voteStart = block.timestamp;
-        proposal.voteEnd = block.timestamp + 7 days; /// @dev CHANGE IT INTO '7 days'
+        proposal.voteEnd = block.timestamp + 7 days;
         proposal.description = description;
         proposal.encodedFunction = encodedFunction;
         proposal.state = ProposalState.ACTIVE;
